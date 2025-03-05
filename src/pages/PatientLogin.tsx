@@ -8,14 +8,14 @@ import GlassCard from "@/components/ui/GlassCard";
 import AnimatedButton from "@/components/ui/AnimatedButton";
 
 const PatientLogin = () => {
-  const [email, setEmail] = useState("");
+  const [id, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Authentication logic would go here
-    console.log("Patient login attempt with:", { email, password });
+    console.log("Patient login attempt with:", { id, password });
   };
 
   return (
@@ -42,15 +42,15 @@ const PatientLogin = () => {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <label htmlFor="email" className="text-sm font-medium">
-              Email
+            <label htmlFor="id" className="text-sm font-medium">
+              User ID
             </label>
             <div className="relative">
               <Input
                 id="email"
-                type="email"
-                placeholder="patient@example.com"
-                value={email}
+                type="id"
+                placeholder="HOS1234456"
+                value={id}
                 onChange={(e) => setEmail(e.target.value)}
                 className="pl-10"
                 required
