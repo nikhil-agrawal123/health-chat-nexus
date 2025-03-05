@@ -1,13 +1,16 @@
+
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Globe, Menu, X } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import AnimatedButton from "./ui/AnimatedButton";
+import { useNavigate } from "react-router-dom";
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -17,6 +20,18 @@ const Navbar = () => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  const handleNavigation = (sectionId: string) => {
+    setIsMenuOpen(false);
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  const handleGetStarted = () => {
+    navigate("/patient-login");
+  };
 
   return (
     <nav
@@ -36,10 +51,34 @@ const Navbar = () => {
 
         {!isMobile && (
           <div className="flex items-center space-x-8">
-            <Button variant="ghost" className="text-base font-medium">Home</Button>
-            <Button variant="ghost" className="text-base font-medium">Features</Button>
-            <Button variant="ghost" className="text-base font-medium">For Doctors</Button>
-            <Button variant="ghost" className="text-base font-medium">Contact</Button>
+            <Button 
+              variant="ghost" 
+              className="text-base font-medium"
+              onClick={() => handleNavigation("hero")}
+            >
+              Home
+            </Button>
+            <Button 
+              variant="ghost" 
+              className="text-base font-medium"
+              onClick={() => handleNavigation("features")}
+            >
+              Features
+            </Button>
+            <Button 
+              variant="ghost" 
+              className="text-base font-medium"
+              onClick={() => handleNavigation("for-doctors")}
+            >
+              For Doctors
+            </Button>
+            <Button 
+              variant="ghost" 
+              className="text-base font-medium"
+              onClick={() => handleNavigation("contact")}
+            >
+              Contact
+            </Button>
           </div>
         )}
 
@@ -66,6 +105,7 @@ const Navbar = () => {
             <AnimatedButton
               className="rounded-full font-medium"
               animationDelay={200}
+              onClick={handleGetStarted}
             >
               Get Started
             </AnimatedButton>
@@ -80,11 +120,40 @@ const Navbar = () => {
           }`}
         >
           <div className="flex flex-col space-y-6 pt-24 px-6 bg-white">
-            <Button variant="ghost" className="justify-start text-lg font-medium">Home</Button>
-            <Button variant="ghost" className="justify-start text-lg font-medium" >Features</Button>
-            <Button variant="ghost" className="justify-start text-lg font-medium">For Doctors</Button>
-            <Button variant="ghost" className="justify-start text-lg font-medium">Contact</Button>
-            <AnimatedButton className="w-full mt-4">Get Started</AnimatedButton>
+            <Button 
+              variant="ghost" 
+              className="justify-start text-lg font-medium"
+              onClick={() => handleNavigation("hero")}
+            >
+              Home
+            </Button>
+            <Button 
+              variant="ghost" 
+              className="justify-start text-lg font-medium"
+              onClick={() => handleNavigation("features")}
+            >
+              Features
+            </Button>
+            <Button 
+              variant="ghost" 
+              className="justify-start text-lg font-medium"
+              onClick={() => handleNavigation("for-doctors")}
+            >
+              For Doctors
+            </Button>
+            <Button 
+              variant="ghost" 
+              className="justify-start text-lg font-medium"
+              onClick={() => handleNavigation("contact")}
+            >
+              Contact
+            </Button>
+            <AnimatedButton 
+              className="w-full mt-4"
+              onClick={handleGetStarted}
+            >
+              Get Started
+            </AnimatedButton>
           </div>
         </div>
       )}
