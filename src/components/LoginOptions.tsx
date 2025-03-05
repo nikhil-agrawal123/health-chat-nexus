@@ -1,5 +1,6 @@
 
 import React, { useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import GlassCard from "./ui/GlassCard";
 import AnimatedButton from "./ui/AnimatedButton";
 import { ArrowRight, Lock, Shield, User, UserCheck } from "lucide-react";
@@ -8,6 +9,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 const LoginOptions = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
   
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -32,6 +34,14 @@ const LoginOptions = () => {
       });
     };
   }, []);
+
+  const handlePatientLogin = () => {
+    navigate("/patient-login");
+  };
+
+  const handleProviderLogin = () => {
+    navigate("/provider-login");
+  };
 
   return (
     <section 
@@ -75,7 +85,10 @@ const LoginOptions = () => {
                 ))}
               </ul>
               
-              <AnimatedButton className="w-full justify-between">
+              <AnimatedButton 
+                className="w-full justify-between"
+                onClick={handlePatientLogin}
+              >
                 <span>Patient Login</span>
                 <ArrowRight className="h-5 w-5" />
               </AnimatedButton>
@@ -107,7 +120,11 @@ const LoginOptions = () => {
                 ))}
               </ul>
               
-              <AnimatedButton className="w-full justify-between" variant="outline" onClick={() => console.log("object")}>
+              <AnimatedButton 
+                className="w-full justify-between" 
+                variant="outline" 
+                onClick={handleProviderLogin}
+              >
                 <span>Provider Login</span>
                 <ArrowRight className="h-5 w-5" />
               </AnimatedButton>
