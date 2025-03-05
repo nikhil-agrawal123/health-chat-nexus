@@ -1,10 +1,21 @@
-
 import React, { useState, useEffect, useRef } from "react";
 import GlassCard from "./ui/GlassCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Send, Globe, MessageCircle } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
+
+async function multiLingual(language: string, text: string) {
+  const response = await fetch(`http://127.0.0.1:8000/${language}/`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ text: text }),
+  });
+  const data = await response.json();
+  return data["Translation"];
+}
 
 interface Message {
   id: number;
@@ -28,7 +39,7 @@ const ChatbotDemo = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
   
-  const languages = ["English", "Spanish", "French", "Chinese", "Arabic"];
+  const languages = ["English", "Hindi", "Gujrati", "Tamil", "Telugu","Bengali","Punjabi"];
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -51,13 +62,10 @@ const ChatbotDemo = () => {
     setIsTyping(true);
     
     // Simulate bot response after delay
-    setTimeout(() => {
+    setTimeout(async () => {
+      const responseText = await multiLingual(currentLanguage.toLowerCase(), "I understand your concern. Based on your symptoms, it could be seasonal allergies. Would you like me to suggest some over-the-counter remedies?");
       const responses = {
-        English: "I understand your concern. Based on your symptoms, it could be seasonal allergies. Would you like me to suggest some over-the-counter remedies?",
-        Spanish: "Entiendo tu preocupación. Según tus síntomas, podrían ser alergias estacionales. ¿Te gustaría que te sugiriera algunos remedios de venta libre?",
-        French: "Je comprends votre inquiétude. D'après vos symptômes, il pourrait s'agir d'allergies saisonnières. Souhaitez-vous que je vous suggère des remèdes en vente libre?",
-        Chinese: "我理解您的担忧。根据您的症状，这可能是季节性过敏。您想让我建议一些非处方药吗？",
-        Arabic: "أتفهم قلقك. بناءً على الأعراض التي تعاني منها، قد تكون حساسية موسمية. هل ترغب في أن أقترح عليك بعض الأدوية التي لا تستلزم وصفة طبية؟"
+        [currentLanguage]: responseText,
       };
       
       const botMessage: Message = {

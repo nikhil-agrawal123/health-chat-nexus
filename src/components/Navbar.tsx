@@ -81,7 +81,7 @@ const Navbar = () => {
         >
           <div className="flex flex-col space-y-6 pt-24 px-6 bg-white">
             <Button variant="ghost" className="justify-start text-lg font-medium">Home</Button>
-            <Button variant="ghost" className="justify-start text-lg font-medium">Features</Button>
+            <Button variant="ghost" className="justify-start text-lg font-medium" >Features</Button>
             <Button variant="ghost" className="justify-start text-lg font-medium">For Doctors</Button>
             <Button variant="ghost" className="justify-start text-lg font-medium">Contact</Button>
             <AnimatedButton className="w-full mt-4">Get Started</AnimatedButton>

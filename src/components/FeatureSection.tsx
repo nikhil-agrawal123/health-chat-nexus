@@ -61,7 +61,7 @@ const FeatureSection = () => {
       className="py-20 px-6 bg-gradient-to-b from-white to-health-50"
     >
       <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-16 animate-on-scroll">
+        <div className="text-center mb-16 animate-on-scroll" >
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
             Breaking Barriers in <span className="text-gradient">Healthcare</span>
           </h2>

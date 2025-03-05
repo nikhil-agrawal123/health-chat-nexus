@@ -107,7 +107,7 @@ const LoginOptions = () => {
                 ))}
               </ul>
               
-              <AnimatedButton className="w-full justify-between" variant="outline">
+              <AnimatedButton className="w-full justify-between" variant="outline" onClick={() => console.log("object")}>
                 <span>Provider Login</span>
                 <ArrowRight className="h-5 w-5" />
               </AnimatedButton>
