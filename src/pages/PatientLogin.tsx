@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -8,7 +7,7 @@ import GlassCard from "@/components/ui/GlassCard";
 import AnimatedButton from "@/components/ui/AnimatedButton";
 
 const PatientLogin = () => {
-  const [id, setEmail] = useState("");
+  const [id, setId] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
@@ -51,7 +50,7 @@ const PatientLogin = () => {
                 type="id"
                 placeholder="HOS1234456"
                 value={id}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => setId(e.target.value)}
                 className="pl-10"
                 required
               />

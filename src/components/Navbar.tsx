@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from "react";
+import  { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Globe, Menu, X } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
