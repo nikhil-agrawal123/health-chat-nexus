@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -72,6 +72,88 @@ interface Doctor {
   imaId: string; // Added IMA ID for verification
 }
 
+// Initial doctors data
+const initialDoctors: Doctor[] = [
+  {
+    id: 1,
+    name: "Dr. Emily Chen",
+    specialty: "Cardiology",
+    email: "emily.chen@hospital.org",
+    phone: "(555) 123-4567",
+    patients: 142,
+    status: "Active",
+    location: "Main Building, Floor 3",
+    nextAvailable: "Today, 2:00 PM",
+    image: "/placeholder.svg",
+    imaId: "IMA-KA-23567"
+  },
+  {
+    id: 2,
+    name: "Dr. Michael Wong",
+    specialty: "General Practice",
+    email: "michael.wong@hospital.org",
+    phone: "(555) 987-6543",
+    patients: 210,
+    status: "Active",
+    location: "West Wing, Floor 1",
+    nextAvailable: "Tomorrow, 9:30 AM",
+    image: "/placeholder.svg",
+    imaId: "IMA-DL-78901"
+  },
+  {
+    id: 3,
+    name: "Dr. Sarah Johnson",
+    specialty: "Dermatology",
+    email: "sarah.johnson@hospital.org",
+    phone: "(555) 456-7890",
+    patients: 98,
+    status: "On Leave",
+    location: "East Wing, Floor 2",
+    nextAvailable: "Next Monday, 11:00 AM",
+    image: "/placeholder.svg",
+    imaId: "IMA-MH-34512"
+  },
+  {
+    id: 4,
+    name: "Dr. Robert Smith",
+    specialty: "Orthopedics",
+    email: "robert.smith@hospital.org",
+    phone: "(555) 234-5678",
+    patients: 156,
+    status: "Active",
+    location: "Surgical Center, Floor 4",
+    nextAvailable: "Today, 4:30 PM",
+    image: "/placeholder.svg",
+    imaId: "IMA-TN-45678"
+  },
+  {
+    id: 5,
+    name: "Dr. Lisa Martinez",
+    specialty: "Pediatrics",
+    email: "lisa.martinez@hospital.org",
+    phone: "(555) 345-6789",
+    patients: 178,
+    status: "Active",
+    location: "Children's Wing, Floor 2",
+    nextAvailable: "Tomorrow, 10:15 AM",
+    image: "/placeholder.svg",
+    imaId: "IMA-KL-89012"
+  },
+  {
+    id: 6,
+    name: "Dr. James Williams",
+    specialty: "Neurology",
+    email: "james.williams@hospital.org",
+    phone: "(555) 567-8901",
+    patients: 115,
+    status: "Inactive",
+    location: "Research Building, Floor 5",
+    nextAvailable: "N/A",
+    image: "/placeholder.svg",
+    imaId: "IMA-GJ-56789"
+  }
+];
+
 const DoctorsList = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [specialtyFilter, setSpecialtyFilter] = useState("");
@@ -92,87 +174,16 @@ const DoctorsList = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   
-  // Mock data for doctors with IMA IDs
-  const [doctors, setDoctors] = useState<Doctor[]>([
-    {
-      id: 1,
-      name: "Dr. Emily Chen",
-      specialty: "Cardiology",
-      email: "emily.chen@hospital.org",
-      phone: "(555) 123-4567",
-      patients: 142,
-      status: "Active",
-      location: "Main Building, Floor 3",
-      nextAvailable: "Today, 2:00 PM",
-      image: "/placeholder.svg",
-      imaId: "IMA-KA-23567"
-    },
-    {
-      id: 2,
-      name: "Dr. Michael Wong",
-      specialty: "General Practice",
-      email: "michael.wong@hospital.org",
-      phone: "(555) 987-6543",
-      patients: 210,
-      status: "Active",
-      location: "West Wing, Floor 1",
-      nextAvailable: "Tomorrow, 9:30 AM",
-      image: "/placeholder.svg",
-      imaId: "IMA-DL-78901"
-    },
-    {
-      id: 3,
-      name: "Dr. Sarah Johnson",
-      specialty: "Dermatology",
-      email: "sarah.johnson@hospital.org",
-      phone: "(555) 456-7890",
-      patients: 98,
-      status: "On Leave",
-      location: "East Wing, Floor 2",
-      nextAvailable: "Next Monday, 11:00 AM",
-      image: "/placeholder.svg",
-      imaId: "IMA-MH-34512"
-    },
-    {
-      id: 4,
-      name: "Dr. Robert Smith",
-      specialty: "Orthopedics",
-      email: "robert.smith@hospital.org",
-      phone: "(555) 234-5678",
-      patients: 156,
-      status: "Active",
-      location: "Surgical Center, Floor 4",
-      nextAvailable: "Today, 4:30 PM",
-      image: "/placeholder.svg",
-      imaId: "IMA-TN-45678"
-    },
-    {
-      id: 5,
-      name: "Dr. Lisa Martinez",
-      specialty: "Pediatrics",
-      email: "lisa.martinez@hospital.org",
-      phone: "(555) 345-6789",
-      patients: 178,
-      status: "Active",
-      location: "Children's Wing, Floor 2",
-      nextAvailable: "Tomorrow, 10:15 AM",
-      image: "/placeholder.svg",
-      imaId: "IMA-KL-89012"
-    },
-    {
-      id: 6,
-      name: "Dr. James Williams",
-      specialty: "Neurology",
-      email: "james.williams@hospital.org",
-      phone: "(555) 567-8901",
-      patients: 115,
-      status: "Inactive",
-      location: "Research Building, Floor 5",
-      nextAvailable: "N/A",
-      image: "/placeholder.svg",
-      imaId: "IMA-GJ-56789"
-    }
-  ]);
+  // Use state with localStorage persistence
+  const [doctors, setDoctors] = useState<Doctor[]>(() => {
+    const savedDoctors = localStorage.getItem('doctorsList');
+    return savedDoctors ? JSON.parse(savedDoctors) : initialDoctors;
+  });
+  
+  // Save to localStorage whenever doctors change
+  useEffect(() => {
+    localStorage.setItem('doctorsList', JSON.stringify(doctors));
+  }, [doctors]);
   
   const specialties = [
     "All Specialties",
@@ -232,7 +243,7 @@ const DoctorsList = () => {
     }
 
     const newDoctorComplete: Doctor = {
-      id: doctors.length + 1,
+      id: doctors.length > 0 ? Math.max(...doctors.map(d => d.id)) + 1 : 1,
       name: newDoctor.name || "",
       specialty: newDoctor.specialty || "",
       email: newDoctor.email || "",
