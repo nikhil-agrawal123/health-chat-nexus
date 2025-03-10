@@ -16,7 +16,8 @@ import {
   Calendar, 
   MapPin, 
   Users, 
-  Stethoscope 
+  Stethoscope,
+  IdCard
 } from "lucide-react";
 import {
   Card,
@@ -32,14 +33,53 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
+
+// Extended doctor type to include IMA ID
+interface Doctor {
+  id: number;
+  name: string;
+  specialty: string;
+  email: string;
+  phone: string;
+  patients: number;
+  status: string;
+  location: string;
+  nextAvailable: string;
+  image: string;
+  imaId: string; // Added IMA ID for verification
+}
 
 const DoctorsList = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [specialtyFilter, setSpecialtyFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+  const [isAddDoctorOpen, setIsAddDoctorOpen] = useState(false);
+  const [newDoctor, setNewDoctor] = useState<Partial<Doctor>>({
+    name: "",
+    specialty: "",
+    email: "",
+    phone: "",
+    location: "",
+    status: "Active",
+    imaId: "",
+  });
+  const { toast } = useToast();
+  const navigate = useNavigate();
   
-  // Mock data for doctors
-  const doctors = [
+  // Mock data for doctors with IMA IDs
+  const [doctors, setDoctors] = useState<Doctor[]>([
     {
       id: 1,
       name: "Dr. Emily Chen",
@@ -50,7 +90,8 @@ const DoctorsList = () => {
       status: "Active",
       location: "Main Building, Floor 3",
       nextAvailable: "Today, 2:00 PM",
-      image: "/placeholder.svg"
+      image: "/placeholder.svg",
+      imaId: "IMA-KA-23567"
     },
     {
       id: 2,
@@ -62,7 +103,8 @@ const DoctorsList = () => {
       status: "Active",
       location: "West Wing, Floor 1",
       nextAvailable: "Tomorrow, 9:30 AM",
-      image: "/placeholder.svg"
+      image: "/placeholder.svg",
+      imaId: "IMA-DL-78901"
     },
     {
       id: 3,
@@ -74,7 +116,8 @@ const DoctorsList = () => {
       status: "On Leave",
       location: "East Wing, Floor 2",
       nextAvailable: "Next Monday, 11:00 AM",
-      image: "/placeholder.svg"
+      image: "/placeholder.svg",
+      imaId: "IMA-MH-34512"
     },
     {
       id: 4,
@@ -86,7 +129,8 @@ const DoctorsList = () => {
       status: "Active",
       location: "Surgical Center, Floor 4",
       nextAvailable: "Today, 4:30 PM",
-      image: "/placeholder.svg"
+      image: "/placeholder.svg",
+      imaId: "IMA-TN-45678"
     },
     {
       id: 5,
@@ -98,7 +142,8 @@ const DoctorsList = () => {
       status: "Active",
       location: "Children's Wing, Floor 2",
       nextAvailable: "Tomorrow, 10:15 AM",
-      image: "/placeholder.svg"
+      image: "/placeholder.svg",
+      imaId: "IMA-KL-89012"
     },
     {
       id: 6,
@@ -110,9 +155,10 @@ const DoctorsList = () => {
       status: "Inactive",
       location: "Research Building, Floor 5",
       nextAvailable: "N/A",
-      image: "/placeholder.svg"
+      image: "/placeholder.svg",
+      imaId: "IMA-GJ-56789"
     }
-  ];
+  ]);
   
   const specialties = [
     "All Specialties",
@@ -130,6 +176,66 @@ const DoctorsList = () => {
     "On Leave",
     "Inactive"
   ];
+
+  // Handle input change for new doctor form
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setNewDoctor(prev => ({ ...prev, [name]: value }));
+  };
+
+  // Handle specialty change for new doctor
+  const handleSpecialtyChange = (value: string) => {
+    setNewDoctor(prev => ({ ...prev, specialty: value }));
+  };
+
+  // Handle status change for new doctor
+  const handleStatusChange = (value: string) => {
+    setNewDoctor(prev => ({ ...prev, status: value }));
+  };
+
+  // Add new doctor
+  const handleAddDoctor = () => {
+    // Validation
+    if (!newDoctor.name || !newDoctor.specialty || !newDoctor.email || !newDoctor.imaId) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in all required fields.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const newDoctorComplete: Doctor = {
+      id: doctors.length + 1,
+      name: newDoctor.name || "",
+      specialty: newDoctor.specialty || "",
+      email: newDoctor.email || "",
+      phone: newDoctor.phone || "",
+      patients: 0,
+      status: newDoctor.status || "Active",
+      location: newDoctor.location || "",
+      nextAvailable: "Not scheduled",
+      image: "/placeholder.svg",
+      imaId: newDoctor.imaId || ""
+    };
+
+    setDoctors([...doctors, newDoctorComplete]);
+    setIsAddDoctorOpen(false);
+    setNewDoctor({
+      name: "",
+      specialty: "",
+      email: "",
+      phone: "",
+      location: "",
+      status: "Active",
+      imaId: ""
+    });
+
+    toast({
+      title: "Doctor Added",
+      description: `${newDoctorComplete.name} has been added to the directory.`
+    });
+  };
   
   // Filter doctors based on search term and filters
   const filteredDoctors = doctors.filter(doctor => {
@@ -150,10 +256,136 @@ const DoctorsList = () => {
           <h2 className="text-2xl font-bold mb-2">Doctors Directory</h2>
           <p className="text-gray-500">Manage and view all healthcare providers</p>
         </div>
-        <Button className="mt-4 md:mt-0">
-          <Plus className="mr-2 h-4 w-4" />
-          Add New Doctor
-        </Button>
+        <Dialog open={isAddDoctorOpen} onOpenChange={setIsAddDoctorOpen}>
+          <DialogTrigger asChild>
+            <Button className="mt-4 md:mt-0">
+              <Plus className="mr-2 h-4 w-4" />
+              Add New Doctor
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[525px]">
+            <DialogHeader>
+              <DialogTitle>Add New Doctor</DialogTitle>
+              <DialogDescription>
+                Enter the details of the new doctor to add to the directory.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="name" className="text-right">
+                  Name*
+                </Label>
+                <Input
+                  id="name"
+                  name="name"
+                  value={newDoctor.name}
+                  onChange={handleInputChange}
+                  className="col-span-3"
+                  placeholder="Dr. Full Name"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="specialty" className="text-right">
+                  Specialty*
+                </Label>
+                <div className="col-span-3">
+                  <Select value={newDoctor.specialty} onValueChange={handleSpecialtyChange}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a specialty" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {specialties.filter(s => s !== "All Specialties").map((specialty) => (
+                        <SelectItem key={specialty} value={specialty}>
+                          {specialty}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="email" className="text-right">
+                  Email*
+                </Label>
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  value={newDoctor.email}
+                  onChange={handleInputChange}
+                  className="col-span-3"
+                  placeholder="doctor@hospital.org"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="phone" className="text-right">
+                  Phone
+                </Label>
+                <Input
+                  id="phone"
+                  name="phone"
+                  value={newDoctor.phone}
+                  onChange={handleInputChange}
+                  className="col-span-3"
+                  placeholder="(555) 123-4567"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="location" className="text-right">
+                  Location
+                </Label>
+                <Input
+                  id="location"
+                  name="location"
+                  value={newDoctor.location}
+                  onChange={handleInputChange}
+                  className="col-span-3"
+                  placeholder="Building and floor"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="status" className="text-right">
+                  Status
+                </Label>
+                <div className="col-span-3">
+                  <Select value={newDoctor.status} onValueChange={handleStatusChange}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {statuses.filter(s => s !== "All Statuses").map((status) => (
+                        <SelectItem key={status} value={status}>
+                          {status}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="imaId" className="text-right">
+                  IMA ID*
+                </Label>
+                <Input
+                  id="imaId"
+                  name="imaId"
+                  value={newDoctor.imaId}
+                  onChange={handleInputChange}
+                  className="col-span-3"
+                  placeholder="IMA-XX-12345"
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setIsAddDoctorOpen(false)}>
+                Cancel
+              </Button>
+              <Button type="button" onClick={handleAddDoctor}>
+                Add Doctor
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
@@ -242,6 +474,13 @@ const DoctorsList = () => {
                 <div className="flex items-center">
                   <Calendar className="h-4 w-4 text-gray-400 mr-2" />
                   <span className="text-gray-600">Next available: {doctor.nextAvailable}</span>
+                </div>
+                <div className="flex items-center mt-1">
+                  <IdCard className="h-4 w-4 text-gray-400 mr-2" />
+                  <span className="text-gray-600 flex items-center">
+                    IMA ID: {doctor.imaId}
+                    <CheckCircle2 className="h-4 w-4 text-green-500 ml-2" />
+                  </span>
                 </div>
               </div>
             </CardContent>

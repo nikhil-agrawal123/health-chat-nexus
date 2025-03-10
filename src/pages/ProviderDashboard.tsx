@@ -21,6 +21,7 @@ import DoctorsList from "@/components/dashboard/DoctorsList";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 const ProviderDashboard = () => {
   const navigate = useNavigate();
