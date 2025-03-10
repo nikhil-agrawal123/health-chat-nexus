@@ -17,7 +17,8 @@ import {
   MapPin, 
   Users, 
   Stethoscope,
-  IdCard
+  IdCard,
+  AlertTriangle
 } from "lucide-react";
 import {
   Card,
@@ -42,6 +43,16 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
@@ -66,6 +77,9 @@ const DoctorsList = () => {
   const [specialtyFilter, setSpecialtyFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [isAddDoctorOpen, setIsAddDoctorOpen] = useState(false);
+  const [isEditDoctorOpen, setIsEditDoctorOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null);
   const [newDoctor, setNewDoctor] = useState<Partial<Doctor>>({
     name: "",
     specialty: "",
@@ -180,17 +194,29 @@ const DoctorsList = () => {
   // Handle input change for new doctor form
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setNewDoctor(prev => ({ ...prev, [name]: value }));
+    if (isEditDoctorOpen && selectedDoctor) {
+      setSelectedDoctor(prev => prev ? { ...prev, [name]: value } : null);
+    } else {
+      setNewDoctor(prev => ({ ...prev, [name]: value }));
+    }
   };
 
-  // Handle specialty change for new doctor
+  // Handle specialty change
   const handleSpecialtyChange = (value: string) => {
-    setNewDoctor(prev => ({ ...prev, specialty: value }));
+    if (isEditDoctorOpen && selectedDoctor) {
+      setSelectedDoctor(prev => prev ? { ...prev, specialty: value } : null);
+    } else {
+      setNewDoctor(prev => ({ ...prev, specialty: value }));
+    }
   };
 
-  // Handle status change for new doctor
+  // Handle status change
   const handleStatusChange = (value: string) => {
-    setNewDoctor(prev => ({ ...prev, status: value }));
+    if (isEditDoctorOpen && selectedDoctor) {
+      setSelectedDoctor(prev => prev ? { ...prev, status: value } : null);
+    } else {
+      setNewDoctor(prev => ({ ...prev, status: value }));
+    }
   };
 
   // Add new doctor
@@ -234,6 +260,59 @@ const DoctorsList = () => {
     toast({
       title: "Doctor Added",
       description: `${newDoctorComplete.name} has been added to the directory.`
+    });
+  };
+
+  // Open edit dialog with doctor data
+  const handleOpenEditDialog = (doctor: Doctor) => {
+    setSelectedDoctor(doctor);
+    setIsEditDoctorOpen(true);
+  };
+
+  // Update doctor
+  const handleUpdateDoctor = () => {
+    if (!selectedDoctor) return;
+
+    // Validation
+    if (!selectedDoctor.name || !selectedDoctor.specialty || !selectedDoctor.email || !selectedDoctor.imaId) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in all required fields.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const updatedDoctors = doctors.map(doc => 
+      doc.id === selectedDoctor.id ? selectedDoctor : doc
+    );
+
+    setDoctors(updatedDoctors);
+    setIsEditDoctorOpen(false);
+    
+    toast({
+      title: "Doctor Updated",
+      description: `${selectedDoctor.name}'s information has been updated.`
+    });
+  };
+
+  // Open delete confirmation dialog
+  const handleOpenDeleteDialog = (doctor: Doctor) => {
+    setSelectedDoctor(doctor);
+    setIsDeleteDialogOpen(true);
+  };
+
+  // Remove doctor
+  const handleRemoveDoctor = () => {
+    if (!selectedDoctor) return;
+    
+    const updatedDoctors = doctors.filter(doc => doc.id !== selectedDoctor.id);
+    setDoctors(updatedDoctors);
+    setIsDeleteDialogOpen(false);
+    
+    toast({
+      title: "Doctor Removed",
+      description: `${selectedDoctor.name} has been removed from the directory.`
     });
   };
   
@@ -388,6 +467,154 @@ const DoctorsList = () => {
         </Dialog>
       </div>
       
+      {/* Edit Doctor Dialog */}
+      <Dialog open={isEditDoctorOpen} onOpenChange={setIsEditDoctorOpen}>
+        <DialogContent className="sm:max-w-[525px]">
+          <DialogHeader>
+            <DialogTitle>Edit Doctor</DialogTitle>
+            <DialogDescription>
+              Update doctor information in the directory.
+            </DialogDescription>
+          </DialogHeader>
+          {selectedDoctor && (
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="edit-name" className="text-right">
+                  Name*
+                </Label>
+                <Input
+                  id="edit-name"
+                  name="name"
+                  value={selectedDoctor.name}
+                  onChange={handleInputChange}
+                  className="col-span-3"
+                  placeholder="Dr. Full Name"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="edit-specialty" className="text-right">
+                  Specialty*
+                </Label>
+                <div className="col-span-3">
+                  <Select value={selectedDoctor.specialty} onValueChange={handleSpecialtyChange}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a specialty" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {specialties.filter(s => s !== "All Specialties").map((specialty) => (
+                        <SelectItem key={specialty} value={specialty}>
+                          {specialty}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="edit-email" className="text-right">
+                  Email*
+                </Label>
+                <Input
+                  id="edit-email"
+                  name="email"
+                  type="email"
+                  value={selectedDoctor.email}
+                  onChange={handleInputChange}
+                  className="col-span-3"
+                  placeholder="doctor@hospital.org"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="edit-phone" className="text-right">
+                  Phone
+                </Label>
+                <Input
+                  id="edit-phone"
+                  name="phone"
+                  value={selectedDoctor.phone}
+                  onChange={handleInputChange}
+                  className="col-span-3"
+                  placeholder="(555) 123-4567"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="edit-location" className="text-right">
+                  Location
+                </Label>
+                <Input
+                  id="edit-location"
+                  name="location"
+                  value={selectedDoctor.location}
+                  onChange={handleInputChange}
+                  className="col-span-3"
+                  placeholder="Building and floor"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="edit-status" className="text-right">
+                  Status
+                </Label>
+                <div className="col-span-3">
+                  <Select value={selectedDoctor.status} onValueChange={handleStatusChange}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {statuses.filter(s => s !== "All Statuses").map((status) => (
+                        <SelectItem key={status} value={status}>
+                          {status}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="edit-imaId" className="text-right">
+                  IMA ID*
+                </Label>
+                <Input
+                  id="edit-imaId"
+                  name="imaId"
+                  value={selectedDoctor.imaId}
+                  onChange={handleInputChange}
+                  className="col-span-3"
+                  placeholder="IMA-XX-12345"
+                />
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setIsEditDoctorOpen(false)}>
+              Cancel
+            </Button>
+            <Button type="button" onClick={handleUpdateDoctor}>
+              Update Doctor
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Doctor Confirmation Dialog */}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirm Doctor Removal</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to remove {selectedDoctor?.name} from the directory? 
+              This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setIsDeleteDialogOpen(false)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleRemoveDoctor} className="bg-red-600 hover:bg-red-700">
+              <Trash2 className="mr-2 h-4 w-4" />
+              Remove
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -485,11 +712,20 @@ const DoctorsList = () => {
               </div>
             </CardContent>
             <CardFooter className="border-t pt-4 flex justify-between">
-              <Button variant="outline" size="sm">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => handleOpenEditDialog(doctor)}
+              >
                 <Edit className="h-4 w-4 mr-1" />
                 Edit
               </Button>
-              <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700 hover:bg-red-50">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                onClick={() => handleOpenDeleteDialog(doctor)}
+              >
                 <Trash2 className="h-4 w-4 mr-1" />
                 Remove
               </Button>

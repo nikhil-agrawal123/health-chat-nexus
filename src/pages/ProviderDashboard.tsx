@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import {
   Tabs,
   TabsContent,
@@ -15,17 +15,21 @@ import {
   Settings, 
   MessageSquare, 
   LogOut,
-  Bell
+  Bell,
+  Video
 } from "lucide-react";
 import DoctorsList from "@/components/dashboard/DoctorsList";
+import VirtualConsultation from "@/components/dashboard/VirtualConsultation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 const ProviderDashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [activeTab, setActiveTab] = useState("doctors");
 
   const handleLogout = () => {
     toast({
@@ -75,7 +79,7 @@ const ProviderDashboard = () => {
       
       {/* Main Content */}
       <div className="container mx-auto px-6 py-8">
-        <Tabs defaultValue="doctors" className="w-full">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <div className="border-b mb-6">
             <TabsList className="overflow-x-auto">
               <TabsTrigger value="dashboard">
@@ -89,6 +93,10 @@ const ProviderDashboard = () => {
               <TabsTrigger value="appointments">
                 <Calendar className="h-4 w-4 mr-2" />
                 Appointments
+              </TabsTrigger>
+              <TabsTrigger value="consultations">
+                <Video className="h-4 w-4 mr-2" />
+                Virtual Consultations
               </TabsTrigger>
               <TabsTrigger value="messages">
                 <MessageSquare className="h-4 w-4 mr-2" />
@@ -117,6 +125,10 @@ const ProviderDashboard = () => {
               <h2 className="text-xl font-bold mb-4">Appointments Management</h2>
               <p className="text-gray-500">Appointments calendar and management tools would go here.</p>
             </div>
+          </TabsContent>
+          
+          <TabsContent value="consultations" className="mt-0">
+            <VirtualConsultation />
           </TabsContent>
           
           <TabsContent value="messages" className="mt-0">
