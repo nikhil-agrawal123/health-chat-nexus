@@ -7,11 +7,6 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import PatientLogin from "./pages/PatientLogin";
 import ProviderLogin from "./pages/ProviderLogin";
-<<<<<<< HEAD
-import PatientDashboard from "./pages/PatientDashboard";
-import ProviderDashboard from "./pages/ProviderDashboard";
-=======
->>>>>>> parent of d7c47e1 (Implement patient dashboard)
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,11 +21,6 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/patient-login" element={<PatientLogin />} />
           <Route path="/provider-login" element={<ProviderLogin />} />
-<<<<<<< HEAD
-          <Route path="/patient-dashboard" element={<PatientDashboard />} />
-          <Route path="/provider-dashboard" element={<ProviderDashboard />} />
-=======
->>>>>>> parent of d7c47e1 (Implement patient dashboard)
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
