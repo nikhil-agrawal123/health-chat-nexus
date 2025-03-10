@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -6,26 +5,16 @@ import { Input } from "@/components/ui/input";
 import { Lock, User, ArrowLeft } from "lucide-react";
 import GlassCard from "@/components/ui/GlassCard";
 import AnimatedButton from "@/components/ui/AnimatedButton";
-import { useToast } from "@/hooks/use-toast";
 
 const PatientLogin = () => {
   const [id, setId] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
-  const { toast } = useToast();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Authentication logic would go here
     console.log("Patient login attempt with:", { id, password });
-    
-    // For demo purposes, we'll just navigate to the dashboard
-    toast({
-      title: "Login successful",
-      description: "Welcome back to your patient dashboard!",
-    });
-    
-    navigate("/patient-dashboard");
   };
 
   return (
