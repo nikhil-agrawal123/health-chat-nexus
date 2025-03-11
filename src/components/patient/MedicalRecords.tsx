@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { FileText, Upload, Download, Eye, Calendar, Clock, Plus, Pill } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import Prescriptions from "./Prescriptions";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface Record {
   id: string;
@@ -22,6 +23,7 @@ interface Record {
 
 const MedicalRecords = () => {
   const { toast } = useToast();
+  const { translate } = useLanguage();
   const [records, setRecords] = useState<Record[]>([]);
   const [selectedRecord, setSelectedRecord] = useState<Record | null>(null);
   const [showDetailsDialog, setShowDetailsDialog] = useState(false);
@@ -90,8 +92,8 @@ const MedicalRecords = () => {
   
   const handleDownload = (record: Record) => {
     toast({
-      title: "Record Downloaded",
-      description: `${record.fileName} has been downloaded.`,
+      title: translate("download"),
+      description: `${record.fileName} ${translate("has been downloaded")}.`,
     });
   };
   
@@ -108,8 +110,8 @@ const MedicalRecords = () => {
   const handleUpload = () => {
     if (!uploadTitle || !uploadType || !uploadProvider || !uploadFile) {
       toast({
-        title: "Incomplete Information",
-        description: "Please fill all fields and select a file to upload.",
+        title: translate("incompleteInformation"),
+        description: translate("fillAllFields"),
         variant: "destructive"
       });
       return;
@@ -130,8 +132,8 @@ const MedicalRecords = () => {
     setRecords(prev => [newRecord, ...prev]);
     
     toast({
-      title: "Record Uploaded",
-      description: `${uploadTitle} has been added to your medical records.`,
+      title: translate("recordUploaded"),
+      description: `${uploadTitle} ${translate("addedToRecords")}`,
     });
     
     // Reset form
@@ -157,13 +159,13 @@ const MedicalRecords = () => {
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <div className="flex justify-between items-center mb-4">
           <div>
-            <h2 className="text-2xl font-bold">Your Health Records</h2>
-            <p className="text-gray-500">Access and manage your medical documents</p>
+            <h2 className="text-2xl font-bold">{translate("yourHealthRecords")}</h2>
+            <p className="text-gray-500">{translate("accessManageDocuments")}</p>
           </div>
           
           <TabsList>
-            <TabsTrigger value="records">Records</TabsTrigger>
-            <TabsTrigger value="prescriptions">Prescriptions</TabsTrigger>
+            <TabsTrigger value="records">{translate("records")}</TabsTrigger>
+            <TabsTrigger value="prescriptions">{translate("prescriptions")}</TabsTrigger>
           </TabsList>
         </div>
         
@@ -171,7 +173,7 @@ const MedicalRecords = () => {
           <div className="flex justify-end mb-4">
             <Button onClick={handleOpenUploadDialog}>
               <Plus className="h-4 w-4 mr-2" />
-              Upload New Record
+              {translate("uploadRecord")}
             </Button>
           </div>
           
@@ -197,7 +199,10 @@ const MedicalRecords = () => {
                             </div>
                             <div className="flex items-center text-sm">
                               <span className="px-2 py-0.5 rounded-full text-xs bg-gray-100">
-                                {record.type.toUpperCase()}
+                                {record.type === "lab" ? translate("labReport") : 
+                                 record.type === "report" ? translate("medicalReport") : 
+                                 record.type === "image" ? translate("medicalImage") : 
+                                 translate("prescription")}
                               </span>
                             </div>
                           </div>
@@ -211,14 +216,14 @@ const MedicalRecords = () => {
                           onClick={() => handleViewDetails(record)}
                         >
                           <Eye className="h-4 w-4 mr-1" />
-                          View
+                          {translate("view")}
                         </Button>
                         <Button 
                           size="sm"
                           onClick={() => handleDownload(record)}
                         >
                           <Download className="h-4 w-4 mr-1" />
-                          Download
+                          {translate("download")}
                         </Button>
                       </div>
                     </div>
@@ -229,14 +234,14 @@ const MedicalRecords = () => {
           ) : (
             <div className="text-center p-8 border rounded-lg">
               <FileText className="h-12 w-12 mx-auto text-gray-300" />
-              <p className="mt-2 text-gray-500">No medical records found</p>
+              <p className="mt-2 text-gray-500">{translate("noRecordsFound")}</p>
               <Button 
                 className="mt-4" 
                 variant="outline" 
                 onClick={handleOpenUploadDialog}
               >
                 <Upload className="h-4 w-4 mr-2" />
-                Upload Your First Record
+                {translate("uploadYourFirst")}
               </Button>
             </div>
           )}
@@ -251,7 +256,7 @@ const MedicalRecords = () => {
       <Dialog open={showDetailsDialog} onOpenChange={setShowDetailsDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Record Details</DialogTitle>
+            <DialogTitle>{translate("recordDetails")}</DialogTitle>
           </DialogHeader>
           
           {selectedRecord && (
@@ -263,32 +268,37 @@ const MedicalRecords = () => {
               
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-sm text-gray-500">Record Type</p>
-                  <p className="font-medium">{selectedRecord.type.toUpperCase()}</p>
+                  <p className="text-sm text-gray-500">{translate("recordType")}</p>
+                  <p className="font-medium">
+                    {selectedRecord.type === "lab" ? translate("labReport") : 
+                     selectedRecord.type === "report" ? translate("medicalReport") : 
+                     selectedRecord.type === "image" ? translate("medicalImage") : 
+                     translate("prescription")}
+                  </p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Date</p>
+                  <p className="text-sm text-gray-500">{translate("recordDate")}</p>
                   <p className="font-medium">{selectedRecord.date}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Provider</p>
+                  <p className="text-sm text-gray-500">{translate("healthcareProvider")}</p>
                   <p className="font-medium">{selectedRecord.provider}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">File Size</p>
+                  <p className="text-sm text-gray-500">{translate("fileSize")}</p>
                   <p className="font-medium">{selectedRecord.fileSize}</p>
                 </div>
                 <div className="col-span-2">
-                  <p className="text-sm text-gray-500">File Name</p>
+                  <p className="text-sm text-gray-500">{translate("fileName")}</p>
                   <p className="font-medium">{selectedRecord.fileName}</p>
                 </div>
               </div>
               
               <div className="border rounded-lg p-4 text-center">
-                <p className="text-gray-500 mb-2">Preview not available</p>
+                <p className="text-gray-500 mb-2">{translate("previewNotAvailable")}</p>
                 <Button onClick={() => handleDownload(selectedRecord)}>
                   <Download className="h-4 w-4 mr-1" />
-                  Download to View
+                  {translate("downloadToView")}
                 </Button>
               </div>
             </div>
@@ -299,7 +309,7 @@ const MedicalRecords = () => {
               variant="outline" 
               onClick={() => setShowDetailsDialog(false)}
             >
-              Close
+              {translate("close")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -309,15 +319,15 @@ const MedicalRecords = () => {
       <Dialog open={showUploadDialog} onOpenChange={setShowUploadDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Upload Medical Record</DialogTitle>
+            <DialogTitle>{translate("uploadRecord")}</DialogTitle>
             <DialogDescription>
-              Add a new document to your medical records.
+              {translate("addedToRecords")}
             </DialogDescription>
           </DialogHeader>
           
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="title">Record Title</Label>
+              <Label htmlFor="title">{translate("recordTitle")}</Label>
               <Input 
                 id="title" 
                 value={uploadTitle} 
@@ -327,22 +337,22 @@ const MedicalRecords = () => {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="type">Record Type</Label>
+              <Label htmlFor="type">{translate("recordType")}</Label>
               <select 
                 id="type" 
                 className="w-full p-2 border rounded-md"
                 value={uploadType}
                 onChange={(e) => setUploadType(e.target.value as any)}
               >
-                <option value="lab">Lab Test</option>
-                <option value="report">Medical Report</option>
-                <option value="image">Medical Image</option>
-                <option value="prescription">Prescription</option>
+                <option value="lab">{translate("labReport")}</option>
+                <option value="report">{translate("medicalReport")}</option>
+                <option value="image">{translate("medicalImage")}</option>
+                <option value="prescription">{translate("prescription")}</option>
               </select>
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="provider">Healthcare Provider</Label>
+              <Label htmlFor="provider">{translate("healthcareProvider")}</Label>
               <Input 
                 id="provider" 
                 value={uploadProvider} 
@@ -352,7 +362,7 @@ const MedicalRecords = () => {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="file">Select File</Label>
+              <Label htmlFor="file">{translate("selectFile")}</Label>
               <div className="border-2 border-dashed rounded-md p-4 text-center">
                 <Upload className="h-8 w-8 mx-auto text-gray-400 mb-2" />
                 
@@ -361,7 +371,7 @@ const MedicalRecords = () => {
                     htmlFor="file-upload" 
                     className="cursor-pointer bg-health-50 text-health-600 px-4 py-2 rounded-md hover:bg-health-100"
                   >
-                    Choose File
+                    {translate("selectFile")}
                   </label>
                   <input 
                     id="file-upload" 
@@ -373,11 +383,11 @@ const MedicalRecords = () => {
                 
                 {uploadFile ? (
                   <p className="mt-2 text-sm text-gray-500">
-                    Selected: {uploadFile.name} ({formatFileSize(uploadFile.size)})
+                    {translate("selectedFile")}: {uploadFile.name} ({formatFileSize(uploadFile.size)})
                   </p>
                 ) : (
                   <p className="mt-2 text-sm text-gray-500">
-                    Supported formats: PDF, JPG, PNG, DOCX
+                    {translate("supportedFormats")}
                   </p>
                 )}
               </div>
@@ -389,13 +399,13 @@ const MedicalRecords = () => {
               variant="outline" 
               onClick={() => setShowUploadDialog(false)}
             >
-              Cancel
+              {translate("cancel")}
             </Button>
             <Button 
               onClick={handleUpload}
               disabled={!uploadTitle || !uploadType || !uploadProvider || !uploadFile}
             >
-              Upload Record
+              {translate("uploadRecord")}
             </Button>
           </DialogFooter>
         </DialogContent>
