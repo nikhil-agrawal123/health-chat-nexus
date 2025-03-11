@@ -1,0 +1,87 @@
+
+const translations = {
+  // Dashboard
+  "welcome": "Welcome, Patient",
+  "lastLogin": "Last login",
+  "dashboard": "Dashboard",
+  "consultations": "Consultations",
+  "aiAssistant": "AI Assistant",
+  "records": "Records",
+  "tests": "Lab Tests",
+  "yourHealthDashboard": "Your Health Dashboard",
+  "appointments": "Appointments",
+  "manageAppointments": "Manage your upcoming appointments",
+  "noAppointments": "You have no upcoming appointments.",
+  "scheduleAppointment": "Schedule Appointment",
+  "medicalRecords": "Medical Records",
+  "accessHealthDocuments": "Access your health documents",
+  "viewRecordsDesc": "View your test results and medical history.",
+  "viewRecords": "View Records",
+  "prescriptions": "Prescriptions",
+  "currentMedications": "Your current medications",
+  "managePrescriptions": "Manage and refill your prescriptions.",
+  "viewPrescriptions": "View Prescriptions",
+  "labTests": "Lab Tests",
+  "scheduleCollection": "Schedule home sample collection",
+  "bookLabDesc": "Book lab tests with home sample collection at your preferred time.",
+  "bookTests": "Book Tests",
+  "aiHealthAssistant": "AI Health Assistant",
+  "getChatbotAdvice": "Get quick health advice from our AI chatbot",
+  "chatbotDesc": "Describe your symptoms and get instant health recommendations, or find a specialist for a more in-depth consultation.",
+  "talkToAI": "Talk to AI Assistant",
+  "logout": "Logout",
+  "backToHome": "Back to Home",
+  
+  // Consultation
+  "findDoctor": "Find a Doctor",
+  "specialties": "Specialties",
+  "languages": "Languages",
+  "availability": "Availability",
+  "searchPlaceholder": "Search by doctor name or specialty",
+  "bookAppointment": "Book Appointment",
+  "selectDateTime": "Select Date & Time",
+  "confirmBooking": "Confirm Booking",
+  "cancel": "Cancel",
+  "reschedule": "Reschedule",
+  
+  // Medical Records
+  "uploadRecord": "Upload Record",
+  "createRecord": "Create Record",
+  "selectFile": "Select File",
+  "uploadFile": "Upload File",
+  "recordType": "Record Type",
+  "recordDate": "Record Date",
+  "description": "Description",
+  
+  // Prescription
+  "medication": "Medication",
+  "dosage": "Dosage",
+  "frequency": "Frequency",
+  "duration": "Duration",
+  "prescribedBy": "Prescribed By",
+  "prescribedDate": "Prescribed Date",
+  "instructions": "Instructions",
+  "refillsRemaining": "Refills Remaining",
+  "requestRefill": "Request Refill",
+  "refillRequested": "Refill Requested",
+  "download": "Download",
+  "viewDetails": "View Details",
+  
+  // Lab Tests
+  "bookLabTest": "Book Lab Test",
+  "testType": "Test Type",
+  "collectionDate": "Collection Date",
+  "collectionTime": "Collection Time",
+  "collectionAddress": "Collection Address",
+  "bookCollection": "Book Collection",
+  "selectTest": "Select Test",
+  
+  // AI Chatbot
+  "typeQuestion": "Type your health question...",
+  "send": "Send",
+  "chatbotGreeting": "Hello! How can I help with your health questions today?",
+  "tryAsking": "Try asking:",
+  "languageSelector": "Select Language",
+};
+
+export default translations;

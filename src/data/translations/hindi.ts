@@ -1,0 +1,87 @@
+
+const translations = {
+  // Dashboard
+  "welcome": "स्वागत है, रोगी",
+  "lastLogin": "अंतिम लॉगिन",
+  "dashboard": "डैशबोर्ड",
+  "consultations": "परामर्श",
+  "aiAssistant": "AI सहायक",
+  "records": "रिकॉर्ड्स",
+  "tests": "लैब टेस्ट",
+  "yourHealthDashboard": "आपका स्वास्थ्य डैशबोर्ड",
+  "appointments": "अपॉइंटमेंट्स",
+  "manageAppointments": "अपने आगामी अपॉइंटमेंट्स प्रबंधित करें",
+  "noAppointments": "आपके पास कोई आगामी अपॉइंटमेंट नहीं है।",
+  "scheduleAppointment": "अपॉइंटमेंट शेड्यूल करें",
+  "medicalRecords": "चिकित्सा रिकॉर्ड",
+  "accessHealthDocuments": "अपने स्वास्थ्य दस्तावेज़ों तक पहुंचें",
+  "viewRecordsDesc": "अपने टेस्ट परिणामों और चिकित्सा इतिहास देखें।",
+  "viewRecords": "रिकॉर्ड देखें",
+  "prescriptions": "नुस्खे",
+  "currentMedications": "आपकी वर्तमान दवाएं",
+  "managePrescriptions": "अपने नुस्खों का प्रबंधन करें और रिफिल करें।",
+  "viewPrescriptions": "नुस्खे देखें",
+  "labTests": "लैब टेस्ट",
+  "scheduleCollection": "घर पर नमूना संग्रह शेड्यूल करें",
+  "bookLabDesc": "अपने पसंदीदा समय पर घर पर नमूना संग्रह के साथ लैब टेस्ट बुक करें।",
+  "bookTests": "टेस्ट बुक करें",
+  "aiHealthAssistant": "AI स्वास्थ्य सहायक",
+  "getChatbotAdvice": "हमारे AI चैटबॉट से त्वरित स्वास्थ्य सलाह प्राप्त करें",
+  "chatbotDesc": "अपने लक्षणों का वर्णन करें और तुरंत स्वास्थ्य सिफारिशें प्राप्त करें, या अधिक विस्तृत परामर्श के लिए विशेषज्ञ खोजें।",
+  "talkToAI": "AI सहायक से बात करें",
+  "logout": "लॉगआउट",
+  "backToHome": "होम पर वापस जाएं",
+  
+  // Consultation
+  "findDoctor": "डॉक्टर खोजें",
+  "specialties": "विशेषताएं",
+  "languages": "भाषाएँ",
+  "availability": "उपलब्धता",
+  "searchPlaceholder": "डॉक्टर के नाम या विशेषता से खोजें",
+  "bookAppointment": "अपॉइंटमेंट बुक करें",
+  "selectDateTime": "तारीख और समय चुनें",
+  "confirmBooking": "बुकिंग की पुष्टि करें",
+  "cancel": "रद्द करें",
+  "reschedule": "पुनर्निर्धारित करें",
+  
+  // Medical Records
+  "uploadRecord": "रिकॉर्ड अपलोड करें",
+  "createRecord": "रिकॉर्ड बनाएं",
+  "selectFile": "फ़ाइल चुनें",
+  "uploadFile": "फ़ाइल अपलोड करें",
+  "recordType": "रिकॉर्ड प्रकार",
+  "recordDate": "रिकॉर्ड तिथि",
+  "description": "विवरण",
+  
+  // Prescription
+  "medication": "दवा",
+  "dosage": "खुराक",
+  "frequency": "आवृत्ति",
+  "duration": "अवधि",
+  "prescribedBy": "निर्धारित द्वारा",
+  "prescribedDate": "निर्धारित तिथि",
+  "instructions": "निर्देश",
+  "refillsRemaining": "शेष रिफिल्स",
+  "requestRefill": "रिफिल का अनुरोध करें",
+  "refillRequested": "रिफिल का अनुरोध किया गया",
+  "download": "डाउनलोड",
+  "viewDetails": "विवरण देखें",
+  
+  // Lab Tests
+  "bookLabTest": "लैब टेस्ट बुक करें",
+  "testType": "टेस्ट प्रकार",
+  "collectionDate": "संग्रह तिथि",
+  "collectionTime": "संग्रह समय",
+  "collectionAddress": "संग्रह पता",
+  "bookCollection": "संग्रह बुक करें",
+  "selectTest": "टेस्ट चुनें",
+  
+  // AI Chatbot
+  "typeQuestion": "अपना स्वास्थ्य प्रश्न लिखें...",
+  "send": "भेजें",
+  "chatbotGreeting": "नमस्ते! मैं आपके स्वास्थ्य प्रश्नों में कैसे मदद कर सकता हूं?",
+  "tryAsking": "ये प्रश्न पूछ कर देखें:",
+  "languageSelector": "भाषा चुनें",
+};
+
+export default translations;

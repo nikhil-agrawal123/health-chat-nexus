@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from "react";
 import GlassCard from "./ui/GlassCard";
 import { Button } from "@/components/ui/button";
@@ -6,15 +7,20 @@ import { Send, Globe, MessageCircle } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 async function multiLingual(language: string, text: string) {
-  const response = await fetch(`http://127.0.0.1:8000/${language}/`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ text: text }),
-  });
-  const data = await response.json();
-  return data["Translation"];
+  try {
+    const response = await fetch(`http://127.0.0.1:8000/${language.toLowerCase()}/`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ text: text }),
+    });
+    const data = await response.json();
+    return data["Translation"];
+  } catch (error) {
+    console.error("Translation error:", error);
+    return text; // Fallback to original text
+  }
 }
 
 interface Message {
@@ -39,7 +45,38 @@ const ChatbotDemo = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
   
-  const languages = ["English", "Hindi", "Gujrati", "Tamil", "Telugu","Bengali","Punjabi"];
+  const languages = ["English", "Hindi", "Gujarati", "Tamil", "Telugu", "Bengali", "Punjabi", "Urdu", "Haryanvi", "Bhojpuri"];
+  
+  // Update greeting when language changes
+  useEffect(() => {
+    const updateGreeting = async () => {
+      if (currentLanguage !== "English") {
+        const translatedGreeting = await multiLingual(
+          currentLanguage.toLowerCase(),
+          "Hello! How can I help with your health questions today?"
+        );
+        
+        setMessages([
+          {
+            id: 1,
+            text: translatedGreeting || "Hello! How can I help with your health questions today?",
+            sender: "bot",
+            language: currentLanguage
+          }
+        ]);
+      } else {
+        setMessages([
+          {
+            id: 1,
+            text: "Hello! How can I help with your health questions today?",
+            sender: "bot"
+          }
+        ]);
+      }
+    };
+    
+    updateGreeting();
+  }, [currentLanguage]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -64,13 +101,10 @@ const ChatbotDemo = () => {
     // Simulate bot response after delay
     setTimeout(async () => {
       const responseText = await multiLingual(currentLanguage.toLowerCase(), "I understand your concern. Based on your symptoms, it could be seasonal allergies. Would you like me to suggest some over-the-counter remedies?");
-      const responses = {
-        [currentLanguage]: responseText,
-      };
       
       const botMessage: Message = {
         id: messages.length + 2,
-        text: responses[currentLanguage as keyof typeof responses] || responses.English,
+        text: responseText || "I understand your concern. Based on your symptoms, it could be seasonal allergies. Would you like me to suggest some over-the-counter remedies?",
         sender: "bot",
         language: currentLanguage
       };
