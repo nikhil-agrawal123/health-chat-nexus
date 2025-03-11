@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { 
@@ -10,13 +10,17 @@ import {
   Video, 
   UserCircle, 
   MessageCircle,
-  Bot
+  Bot,
+  TestTube
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import DoctorConsultation from "@/components/patient/DoctorConsultation";
 import MedicalChatbot from "@/components/patient/MedicalChatbot";
+import Prescriptions from "@/components/patient/Prescriptions";
+import MedicalRecords from "@/components/patient/MedicalRecords";
+import LabTests from "@/components/patient/LabTests";
 
 const PatientDashboard = () => {
   const navigate = useNavigate();
@@ -62,7 +66,7 @@ const PatientDashboard = () => {
         </div>
         
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
-          <TabsList className="w-full max-w-3xl mx-auto grid grid-cols-4 mb-8">
+          <TabsList className="w-full max-w-3xl mx-auto grid grid-cols-5 mb-8">
             <TabsTrigger value="dashboard" className="gap-2">
               <UserCircle className="h-4 w-4" />
               <span className="hidden sm:inline">Dashboard</span>
@@ -78,6 +82,10 @@ const PatientDashboard = () => {
             <TabsTrigger value="records" className="gap-2">
               <FileText className="h-4 w-4" />
               <span className="hidden sm:inline">Records</span>
+            </TabsTrigger>
+            <TabsTrigger value="tests" className="gap-2">
+              <TestTube className="h-4 w-4" />
+              <span className="hidden sm:inline">Lab Tests</span>
             </TabsTrigger>
           </TabsList>
           
@@ -129,7 +137,30 @@ const PatientDashboard = () => {
                   <p className="text-gray-500">Manage and refill your prescriptions.</p>
                 </CardContent>
                 <CardFooter>
-                  <Button variant="outline" className="w-full">View Prescriptions</Button>
+                  <Button variant="outline" className="w-full" onClick={() => setActiveTab("records")}>View Prescriptions</Button>
+                </CardFooter>
+              </Card>
+            </div>
+            
+            <div className="mt-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <TestTube className="h-5 w-5 text-health-600" />
+                    Lab Tests
+                  </CardTitle>
+                  <CardDescription>Schedule home sample collection</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-gray-500">
+                    Book lab tests with home sample collection at your preferred time.
+                  </p>
+                </CardContent>
+                <CardFooter>
+                  <Button onClick={() => setActiveTab("tests")} className="w-full">
+                    <TestTube className="h-4 w-4 mr-2" />
+                    Book Tests
+                  </Button>
                 </CardFooter>
               </Card>
             </div>
@@ -168,16 +199,11 @@ const PatientDashboard = () => {
           </TabsContent>
           
           <TabsContent value="records">
-            <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-2xl font-bold mb-4">Medical Records</h2>
-              <p className="text-gray-500 mb-4">
-                Your medical records and history will be displayed here.
-              </p>
-              <div className="border rounded-lg p-8 text-center text-gray-400">
-                <FileText className="h-10 w-10 mx-auto mb-2 opacity-50" />
-                <p>No medical records found</p>
-              </div>
-            </div>
+            <MedicalRecords />
+          </TabsContent>
+          
+          <TabsContent value="tests">
+            <LabTests />
           </TabsContent>
         </Tabs>
       </div>

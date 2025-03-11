@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -21,6 +21,17 @@ interface Doctor {
   price: number;
 }
 
+interface Appointment {
+  id: string;
+  doctorId: string;
+  doctorName: string;
+  specialty: string;
+  date: string;
+  time: string;
+  status: "scheduled" | "completed" | "canceled";
+  photo: string;
+}
+
 const DoctorConsultation = () => {
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
@@ -29,6 +40,35 @@ const DoctorConsultation = () => {
   const [appointmentTime, setAppointmentTime] = useState<string | null>(null);
   const [bookingComplete, setBookingComplete] = useState(false);
   const [showDialog, setShowDialog] = useState(false);
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [currentAppointment, setCurrentAppointment] = useState<Appointment | null>(null);
+  const [showRescheduleDialog, setShowRescheduleDialog] = useState(false);
+  const [showCancelDialog, setShowCancelDialog] = useState(false);
+  const [newAppointmentTime, setNewAppointmentTime] = useState<string | null>(null);
+
+  // Load appointments from localStorage on component mount
+  useEffect(() => {
+    const savedAppointments = localStorage.getItem('appointments');
+    if (savedAppointments) {
+      setAppointments(JSON.parse(savedAppointments));
+      
+      // Find active appointment
+      const active = JSON.parse(savedAppointments).find(
+        (apt: Appointment) => apt.status === 'scheduled'
+      );
+      if (active) {
+        setCurrentAppointment(active);
+        setBookingComplete(true);
+      }
+    }
+  }, []);
+
+  // Save appointments to localStorage whenever they change
+  useEffect(() => {
+    if (appointments.length > 0) {
+      localStorage.setItem('appointments', JSON.stringify(appointments));
+    }
+  }, [appointments]);
 
   // Sample data for doctors
   const doctors: Doctor[] = [
@@ -114,15 +154,87 @@ const DoctorConsultation = () => {
   };
 
   const confirmBooking = () => {
-    setBookingComplete(true);
-    setShowDialog(false);
-    
-    toast({
-      title: "Appointment Booked",
-      description: `Your appointment with ${selectedDoctor?.name} at ${appointmentTime} has been confirmed.`,
-    });
-    
-    // In a real app, you would also send confirmation via SMS/email/WhatsApp here
+    if (selectedDoctor && appointmentTime) {
+      const newAppointment = {
+        id: Date.now().toString(),
+        doctorId: selectedDoctor.id,
+        doctorName: selectedDoctor.name,
+        specialty: selectedDoctor.specialty,
+        date: 'Today',
+        time: appointmentTime,
+        status: 'scheduled' as const,
+        photo: selectedDoctor.photo
+      };
+      
+      // Update the appointments list and current appointment
+      setAppointments(prev => [...prev, newAppointment]);
+      setCurrentAppointment(newAppointment);
+      setBookingComplete(true);
+      setShowDialog(false);
+      
+      toast({
+        title: "Appointment Booked",
+        description: `Your appointment with ${selectedDoctor.name} at ${appointmentTime} has been confirmed.`,
+      });
+    }
+  };
+
+  const handleCancelAppointment = () => {
+    setShowCancelDialog(true);
+  };
+
+  const confirmCancelAppointment = () => {
+    if (currentAppointment) {
+      // Update the appointment status to canceled
+      setAppointments(prev => 
+        prev.map(apt => 
+          apt.id === currentAppointment.id 
+            ? {...apt, status: 'canceled' as const} 
+            : apt
+        )
+      );
+      
+      // Reset the current view
+      setCurrentAppointment(null);
+      setBookingComplete(false);
+      setShowCancelDialog(false);
+      
+      toast({
+        title: "Appointment Canceled",
+        description: "Your appointment has been successfully canceled.",
+      });
+    }
+  };
+
+  const handleRescheduleAppointment = () => {
+    setShowRescheduleDialog(true);
+  };
+
+  const confirmRescheduleAppointment = () => {
+    if (currentAppointment && newAppointmentTime) {
+      // Update the appointment time
+      const updatedAppointment = {
+        ...currentAppointment,
+        time: newAppointmentTime
+      };
+      
+      setAppointments(prev => 
+        prev.map(apt => 
+          apt.id === currentAppointment.id 
+            ? updatedAppointment
+            : apt
+        )
+      );
+      
+      setCurrentAppointment(updatedAppointment);
+      setShowRescheduleDialog(false);
+      setNewAppointmentTime(null);
+      
+      toast({
+        title: "Appointment Rescheduled",
+        description: `Your appointment has been rescheduled to ${newAppointmentTime}.`,
+      });
+    }
   };
 
   const startConsultation = () => {
@@ -149,7 +261,7 @@ const DoctorConsultation = () => {
         )}
       </div>
       
-      {bookingComplete ? (
+      {bookingComplete && currentAppointment ? (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -161,19 +273,19 @@ const DoctorConsultation = () => {
           <CardContent>
             <div className="flex flex-col md:flex-row items-start md:items-center gap-4 p-4 border rounded-lg">
               <div className="flex-shrink-0 w-16 h-16 rounded-full overflow-hidden bg-gray-100">
-                <img src={selectedDoctor?.photo} alt={selectedDoctor?.name} className="w-full h-full object-cover" />
+                <img src={currentAppointment.photo} alt={currentAppointment.doctorName} className="w-full h-full object-cover" />
               </div>
               <div className="flex-grow">
-                <h3 className="text-lg font-semibold">{selectedDoctor?.name}</h3>
-                <p className="text-gray-500">{selectedDoctor?.specialty}</p>
+                <h3 className="text-lg font-semibold">{currentAppointment.doctorName}</h3>
+                <p className="text-gray-500">{currentAppointment.specialty}</p>
                 <div className="flex items-center gap-6 mt-2">
                   <div className="flex items-center gap-1">
                     <Calendar className="h-4 w-4 text-gray-400" />
-                    <span className="text-sm">Today</span>
+                    <span className="text-sm">{currentAppointment.date}</span>
                   </div>
                   <div className="flex items-center gap-1">
                     <Clock className="h-4 w-4 text-gray-400" />
-                    <span className="text-sm">{appointmentTime}</span>
+                    <span className="text-sm">{currentAppointment.time}</span>
                   </div>
                 </div>
               </div>
@@ -186,8 +298,8 @@ const DoctorConsultation = () => {
             </div>
           </CardContent>
           <CardFooter className="flex flex-col sm:flex-row gap-3">
-            <Button variant="outline" className="sm:flex-1">Reschedule</Button>
-            <Button variant="destructive" className="sm:flex-1">Cancel Appointment</Button>
+            <Button variant="outline" className="sm:flex-1" onClick={handleRescheduleAppointment}>Reschedule</Button>
+            <Button variant="destructive" className="sm:flex-1" onClick={handleCancelAppointment}>Cancel Appointment</Button>
             <Button className="sm:flex-1" onClick={startConsultation}>
               <Video className="h-4 w-4 mr-2" />
               Join Now
@@ -354,6 +466,7 @@ const DoctorConsultation = () => {
         </Tabs>
       )}
       
+      {/* Booking Dialog */}
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
         <DialogContent>
           <DialogHeader>
@@ -407,6 +520,80 @@ const DoctorConsultation = () => {
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowDialog(false)}>Cancel</Button>
             <Button onClick={confirmBooking}>Confirm Booking</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Reschedule Dialog */}
+      <Dialog open={showRescheduleDialog} onOpenChange={setShowRescheduleDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Reschedule Appointment</DialogTitle>
+            <DialogDescription>
+              Select a new time for your appointment with {currentAppointment?.doctorName}.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="flex justify-between items-center">
+              <span className="font-medium">Current time:</span>
+              <span>{currentAppointment?.time}</span>
+            </div>
+            
+            <div>
+              <Label htmlFor="new-time">New appointment time:</Label>
+              <div className="flex flex-wrap gap-2 mt-2">
+                {selectedDoctor?.availability.map((time) => (
+                  <Button
+                    key={time}
+                    variant={newAppointmentTime === time ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setNewAppointmentTime(time)}
+                  >
+                    {time}
+                  </Button>
+                ))}
+              </div>
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowRescheduleDialog(false)}>Cancel</Button>
+            <Button 
+              onClick={confirmRescheduleAppointment} 
+              disabled={!newAppointmentTime}
+            >
+              Confirm Reschedule
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Cancel Dialog */}
+      <Dialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Cancel Appointment</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to cancel your appointment with {currentAppointment?.doctorName}?
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <p className="text-gray-500">
+              Cancellation is free if done 2 hours before the appointment. 
+              Last-minute cancellations may incur a fee.
+            </p>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCancelDialog(false)}>Keep Appointment</Button>
+            <Button 
+              variant="destructive" 
+              onClick={confirmCancelAppointment}
+            >
+              Yes, Cancel Appointment
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
