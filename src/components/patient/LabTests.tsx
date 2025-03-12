@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -62,47 +63,47 @@ const LabTests = () => {
     const sampleTests: LabTest[] = [
       {
         id: "1",
-        name: "Complete Blood Count (CBC)",
-        description: "Measures red blood cells, white blood cells, and platelets in your blood.",
+        name: translate("completeBloodCount"),
+        description: translate("Measures red blood cells, white blood cells, and platelets in your blood."),
         price: 25,
-        preparationInstructions: "No special preparation required. Fasting not necessary.",
-        processingTime: "24 hours",
+        preparationInstructions: translate("No special preparation required. Fasting not necessary."),
+        processingTime: translate("24 hours"),
         category: "blood"
       },
       {
         id: "2",
-        name: "Lipid Profile",
-        description: "Measures cholesterol levels including HDL, LDL, and triglycerides.",
+        name: translate("lipidProfile"),
+        description: translate("Measures cholesterol levels including HDL, LDL, and triglycerides."),
         price: 35,
-        preparationInstructions: "Fast for 9-12 hours before the test. Water is allowed.",
-        processingTime: "24 hours",
+        preparationInstructions: translate("Fast for 9-12 hours before the test. Water is allowed."),
+        processingTime: translate("24 hours"),
         category: "blood"
       },
       {
         id: "3",
-        name: "Blood Glucose Test",
-        description: "Measures the amount of glucose in your blood to screen for diabetes.",
+        name: translate("glucoseTest"),
+        description: translate("Measures the amount of glucose in your blood to screen for diabetes."),
         price: 20,
-        preparationInstructions: "For fasting test, do not eat or drink for 8 hours before the test.",
-        processingTime: "24 hours",
+        preparationInstructions: translate("For fasting test, do not eat or drink for 8 hours before the test."),
+        processingTime: translate("24 hours"),
         category: "blood"
       },
       {
         id: "4",
-        name: "Urinalysis",
-        description: "Analyzes the contents of your urine for signs of infection or disease.",
+        name: translate("urineAnalysis"),
+        description: translate("Analyzes the contents of your urine for signs of infection or disease."),
         price: 15,
-        preparationInstructions: "Collect a clean mid-stream sample in the provided container.",
-        processingTime: "24 hours",
+        preparationInstructions: translate("Collect a clean mid-stream sample in the provided container."),
+        processingTime: translate("24 hours"),
         category: "urine"
       },
       {
         id: "5",
-        name: "Thyroid Function Test",
-        description: "Measures thyroid hormone levels to check thyroid function.",
+        name: translate("thyroidProfile"),
+        description: translate("Measures thyroid hormone levels to check thyroid function."),
         price: 45,
-        preparationInstructions: "No special preparation required.",
-        processingTime: "48 hours",
+        preparationInstructions: translate("No special preparation required."),
+        processingTime: translate("48 hours"),
         category: "blood"
       }
     ];
@@ -114,7 +115,7 @@ const LabTests = () => {
     if (savedBookings) {
       setBookings(JSON.parse(savedBookings));
     }
-  }, []);
+  }, [translate]);
   
   // Save bookings to localStorage whenever they change
   useEffect(() => {
@@ -153,7 +154,7 @@ const LabTests = () => {
   const handleConfirmBooking = () => {
     if (!bookingDate || !bookingTimeSlot || !bookingAddress) {
       toast({
-        title: translate("Incomplete Information"),
+        title: translate("incompleteInformation"),
         description: translate("Please fill in all the required fields."),
         variant: "destructive"
       });
@@ -178,7 +179,7 @@ const LabTests = () => {
     setBookingAddress("");
     
     toast({
-      title: translate("Booking Confirmed"),
+      title: translate("bookingConfirmed"),
       description: translate("Your lab tests have been scheduled for") + ` ${bookingDate} at ${bookingTimeSlot}.`,
     });
     
@@ -207,8 +208,8 @@ const LabTests = () => {
       setShowCancelDialog(false);
       
       toast({
-        title: "Booking Canceled",
-        description: "Your lab test booking has been canceled successfully.",
+        title: translate("Booking Canceled"),
+        description: translate("Your lab test booking has been canceled successfully."),
       });
     }
   };
@@ -217,14 +218,14 @@ const LabTests = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold">{translate("Lab Tests")}</h2>
-          <p className="text-gray-500">{translate("Book tests with home sample collection")}</p>
+          <h2 className="text-2xl font-bold">{translate("labTests")}</h2>
+          <p className="text-gray-500">{translate("scheduleCollection")}</p>
         </div>
       </div>
       
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="available">{translate("Available Tests")}</TabsTrigger>
+          <TabsTrigger value="available">{translate("availableLabTests")}</TabsTrigger>
           <TabsTrigger value="bookings">{translate("Your Bookings")}</TabsTrigger>
         </TabsList>
         
@@ -319,7 +320,7 @@ const LabTests = () => {
                       disabled={selectedTests.length === 0}
                       onClick={handleBookNow}
                     >
-                      {translate("Book Home Collection")}
+                      {translate("bookHomeSampleCollection")}
                     </Button>
                   </CardFooter>
                 </Card>
@@ -386,13 +387,13 @@ const LabTests = () => {
                                 onClick={() => handleCancelBooking(booking)}
                               >
                                 <X className="h-4 w-4 mr-1" />
-                                {translate("Cancel")}
+                                {translate("cancel")}
                               </Button>
                               <Button 
                                 size="sm"
                                 onClick={() => handleViewDetails(booking)}
                               >
-                                {translate("View Details")}
+                                {translate("viewDetails")}
                               </Button>
                             </>
                           )}
@@ -402,7 +403,7 @@ const LabTests = () => {
                               size="sm"
                               onClick={() => handleViewDetails(booking)}
                             >
-                              {translate("View Details")}
+                              {translate("viewDetails")}
                             </Button>
                           )}
                         </div>
@@ -431,7 +432,7 @@ const LabTests = () => {
       <Dialog open={showBookingDialog} onOpenChange={setShowBookingDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{translate("Book Home Sample Collection")}</DialogTitle>
+            <DialogTitle>{translate("bookHomeSampleCollection")}</DialogTitle>
             <DialogDescription>
               {translate("Select your preferred date, time, and collection address.")}
             </DialogDescription>
@@ -439,7 +440,7 @@ const LabTests = () => {
           
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="date">{translate("Collection Date")}</Label>
+              <Label htmlFor="date">{translate("collectionDate")}</Label>
               <Input 
                 id="date" 
                 type="date" 
@@ -450,7 +451,7 @@ const LabTests = () => {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="time">{translate("Collection Time Slot")}</Label>
+              <Label htmlFor="time">{translate("collectionTime")}</Label>
               <select 
                 id="time" 
                 className="w-full p-2 border rounded-md"
@@ -465,7 +466,7 @@ const LabTests = () => {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="address">{translate("Collection Address")}</Label>
+              <Label htmlFor="address">{translate("collectionAddress")}</Label>
               <Input 
                 id="address" 
                 value={bookingAddress} 
@@ -498,13 +499,13 @@ const LabTests = () => {
               variant="outline" 
               onClick={() => setShowBookingDialog(false)}
             >
-              {translate("Cancel")}
+              {translate("cancel")}
             </Button>
             <Button 
               onClick={handleConfirmBooking}
               disabled={!bookingDate || !bookingTimeSlot || !bookingAddress}
             >
-              {translate("Confirm Booking")}
+              {translate("confirmBooking")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -514,61 +515,61 @@ const LabTests = () => {
       <Dialog open={showDetailsDialog} onOpenChange={setShowDetailsDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Booking Details</DialogTitle>
+            <DialogTitle>{translate("Booking Details")}</DialogTitle>
           </DialogHeader>
           
           {selectedBooking && (
             <div className="space-y-4 py-4">
               <div className="flex items-center gap-2">
                 <TestTube className="h-5 w-5 text-health-600" />
-                <h3 className="text-lg font-semibold">Lab Tests Booking</h3>
+                <h3 className="text-lg font-semibold">{translate("Lab Tests Booking")}</h3>
                 {selectedBooking.status === "scheduled" && (
                   <span className="px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">
-                    Scheduled
+                    {translate("Scheduled")}
                   </span>
                 )}
                 {selectedBooking.status === "completed" && (
                   <span className="px-2 py-1 rounded-full text-xs bg-green-100 text-green-800">
-                    Completed
+                    {translate("Completed")}
                   </span>
                 )}
                 {selectedBooking.status === "canceled" && (
                   <span className="px-2 py-1 rounded-full text-xs bg-red-100 text-red-800">
-                    Canceled
+                    {translate("Canceled")}
                   </span>
                 )}
               </div>
               
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-sm text-gray-500">Collection Date</p>
+                  <p className="text-sm text-gray-500">{translate("collectionDate")}</p>
                   <p className="font-medium">{selectedBooking.date}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Time Slot</p>
+                  <p className="text-sm text-gray-500">{translate("collectionTime")}</p>
                   <p className="font-medium">{selectedBooking.timeSlot}</p>
                 </div>
                 <div className="col-span-2">
-                  <p className="text-sm text-gray-500">Collection Address</p>
+                  <p className="text-sm text-gray-500">{translate("collectionAddress")}</p>
                   <p className="font-medium">{selectedBooking.address}</p>
                 </div>
               </div>
               
               <div className="mt-4">
-                <h4 className="font-medium mb-2">Tests:</h4>
+                <h4 className="font-medium mb-2">{translate("tests")}:</h4>
                 <div className="border rounded-lg divide-y">
                   {selectedBooking.tests.map((test) => (
                     <div key={test.id} className="flex justify-between items-center p-3">
                       <div>
                         <p className="font-medium">{test.name}</p>
-                        <p className="text-xs text-gray-500">Results in {test.processingTime}</p>
+                        <p className="text-xs text-gray-500">{translate("Results in")} {test.processingTime}</p>
                       </div>
                       <span>${test.price}</span>
                     </div>
                   ))}
                   <div className="p-3 bg-gray-50 font-semibold">
                     <div className="flex justify-between items-center">
-                      <span>Total:</span>
+                      <span>{translate("Total")}:</span>
                       <span>${selectedBooking.totalPrice}</span>
                     </div>
                   </div>
@@ -578,20 +579,20 @@ const LabTests = () => {
               <div className="bg-gray-50 p-4 rounded-lg">
                 <h4 className="font-medium flex items-center gap-1 mb-2">
                   <AlertCircle className="h-4 w-4 text-health-600" />
-                  Important Instructions
+                  {translate("Important Instructions")}
                 </h4>
                 <ul className="text-sm text-gray-700 space-y-2">
                   <li className="flex items-start gap-2">
                     <ArrowRight className="h-4 w-4 text-health-600 flex-shrink-0 mt-0.5" />
-                    Our phlebotomist will arrive during the selected time slot.
+                    {translate("Our phlebotomist will arrive during the selected time slot.")}
                   </li>
                   <li className="flex items-start gap-2">
                     <ArrowRight className="h-4 w-4 text-health-600 flex-shrink-0 mt-0.5" />
-                    Please ensure someone is available at the address during the selected time.
+                    {translate("Please ensure someone is available at the address during the selected time.")}
                   </li>
                   <li className="flex items-start gap-2">
                     <ArrowRight className="h-4 w-4 text-health-600 flex-shrink-0 mt-0.5" />
-                    Results will be available in your Records section after processing.
+                    {translate("Results will be available in your Records section after processing.")}
                   </li>
                 </ul>
               </div>
@@ -607,14 +608,14 @@ const LabTests = () => {
                   handleCancelBooking(selectedBooking);
                 }}
               >
-                Cancel Booking
+                {translate("Cancel Booking")}
               </Button>
             )}
             <Button 
               variant="outline" 
               onClick={() => setShowDetailsDialog(false)}
             >
-              Close
+              {translate("close")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -624,16 +625,15 @@ const LabTests = () => {
       <Dialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Cancel Booking</DialogTitle>
+            <DialogTitle>{translate("Cancel Booking")}</DialogTitle>
             <DialogDescription>
-              Are you sure you want to cancel this lab test booking?
+              {translate("Are you sure you want to cancel this lab test booking?")}
             </DialogDescription>
           </DialogHeader>
           
           <div className="space-y-4 py-4">
             <p className="text-gray-500">
-              Cancellation is free if done 12 hours before the scheduled time.
-              You can book again at any time.
+              {translate("Cancellation is free if done 12 hours before the scheduled time. You can book again at any time.")}
             </p>
           </div>
           
@@ -642,13 +642,13 @@ const LabTests = () => {
               variant="outline" 
               onClick={() => setShowCancelDialog(false)}
             >
-              Keep Booking
+              {translate("Keep Booking")}
             </Button>
             <Button 
               variant="destructive" 
               onClick={confirmCancelBooking}
             >
-              Yes, Cancel Booking
+              {translate("Yes, Cancel Booking")}
             </Button>
           </DialogFooter>
         </DialogContent>

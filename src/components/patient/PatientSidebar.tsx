@@ -141,7 +141,7 @@ const PatientSidebar: React.FC<PatientSidebarProps> = ({
                   <DropdownMenuTrigger asChild>
                     <SidebarMenuButton>
                       <Globe className="h-5 w-5" />
-                      <span>{language}</span>
+                      <span>{translate("languageSelector")}</span>
                     </SidebarMenuButton>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
@@ -169,7 +169,7 @@ const PatientSidebar: React.FC<PatientSidebarProps> = ({
       </SidebarContent>
       
       <SidebarFooter className="border-t p-4">
-        {/* Removed the health profile completion section */}
+        {/* Footer area - previously contained health profile completion */}
       </SidebarFooter>
     </Sidebar>
   );
