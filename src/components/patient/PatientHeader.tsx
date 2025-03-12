@@ -21,7 +21,7 @@ const PatientHeader: React.FC<PatientHeaderProps> = ({ activeTab, menuItems }) =
   return (
     <header className="border-b bg-white p-4 flex items-center justify-between">
       <div className="flex items-center gap-2">
-        <SidebarTrigger asChild>
+        <SidebarTrigger>
           <Button variant="ghost" size="icon">
             <ArrowLeft className="h-5 w-5" />
           </Button>
