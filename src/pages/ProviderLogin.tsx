@@ -6,17 +6,27 @@ import { Input } from "@/components/ui/input";
 import { Lock, User, ArrowLeft, Hospital, Building, HelpCircle } from "lucide-react";
 import GlassCard from "@/components/ui/GlassCard";
 import AnimatedButton from "@/components/ui/AnimatedButton";
+import { useToast } from "@/hooks/use-toast";
 
 const ProviderLogin = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [hospitalId, setHospitalId] = useState("");
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Authentication logic would go here
     console.log("Provider login attempt with:", { email, password, hospitalId });
+    
+    // For demo purposes, we'll just navigate to the dashboard
+    toast({
+      title: "Login successful",
+      description: "Welcome to the provider dashboard!",
+    });
+    
+    navigate("/provider-dashboard");
   };
 
   return (
