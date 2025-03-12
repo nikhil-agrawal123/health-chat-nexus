@@ -120,10 +120,10 @@ const PatientDashboard = () => {
   ];
 
   return (
-    <SidebarProvider>
+    <SidebarProvider defaultOpen={!isMobile} onOpenChange={setIsCollapsed} className="border-r bg-white">
       <div className="min-h-screen flex w-full bg-gradient-to-b from-health-50/50 to-white">
         {/* Sidebar */}
-        <Sidebar defaultCollapsed={isMobile} onCollapsedChange={setIsCollapsed} className="border-r bg-white">
+        <Sidebar className="border-r bg-white">
           <SidebarHeader className="border-b p-4">
             <div className="flex items-center space-x-2">
               <div className="h-8 w-8 rounded-full bg-health-500 flex items-center justify-center">
@@ -226,145 +226,147 @@ const PatientDashboard = () => {
           
           <main className="flex-1 p-6 overflow-auto">
             {/* Main content tabs */}
-            <TabsContent value="dashboard" className={activeTab === "dashboard" ? "block" : "hidden"}>
-              <div className="mb-6">
-                <Card className="border-0 shadow-sm hover:shadow-md transition-shadow bg-white">
-                  <CardContent className="p-6">
-                    <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
-                      <Avatar className="h-16 w-16 border-4 border-health-100">
-                        <AvatarFallback className="bg-health-500 text-white text-xl">
-                          RP
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1">
-                        <h2 className="text-2xl font-bold">{translate("welcome")}</h2>
-                        <p className="text-muted-foreground">{translate("lastLogin")}: {new Date().toLocaleString()}</p>
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <TabsContent value="dashboard">
+                <div className="mb-6">
+                  <Card className="border-0 shadow-sm hover:shadow-md transition-shadow bg-white">
+                    <CardContent className="p-6">
+                      <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
+                        <Avatar className="h-16 w-16 border-4 border-health-100">
+                          <AvatarFallback className="bg-health-500 text-white text-xl">
+                            RP
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1">
+                          <h2 className="text-2xl font-bold">{translate("welcome")}</h2>
+                          <p className="text-muted-foreground">{translate("lastLogin")}: {new Date().toLocaleString()}</p>
+                        </div>
+                        <Button 
+                          onClick={() => setActiveTab("profile")}
+                          className="mt-2 md:mt-0 whitespace-nowrap"
+                        >
+                          {translate("viewProfile")}
+                        </Button>
                       </div>
-                      <Button 
-                        onClick={() => setActiveTab("profile")}
-                        className="mt-2 md:mt-0 whitespace-nowrap"
-                      >
-                        {translate("viewProfile")}
+                    </CardContent>
+                  </Card>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                  <Card className="border hover:shadow-md transition-shadow">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Calendar className="h-5 w-5 text-health-600" />
+                        {translate("appointments")}
+                      </CardTitle>
+                      <CardDescription>{translate("manageAppointments")}</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-gray-500">{translate("noAppointments")}</p>
+                    </CardContent>
+                    <CardFooter>
+                      <Button className="w-full" onClick={() => setActiveTab("consultation")}>{translate("scheduleAppointment")}</Button>
+                    </CardFooter>
+                  </Card>
+                  
+                  <Card className="border hover:shadow-md transition-shadow">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <FileText className="h-5 w-5 text-health-600" />
+                        {translate("medicalRecords")}
+                      </CardTitle>
+                      <CardDescription>{translate("accessHealthDocuments")}</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-gray-500">{translate("viewRecordsDesc")}</p>
+                    </CardContent>
+                    <CardFooter>
+                      <Button variant="outline" className="w-full" onClick={() => setActiveTab("records")}>{translate("viewRecords")}</Button>
+                    </CardFooter>
+                  </Card>
+                  
+                  <Card className="border hover:shadow-md transition-shadow">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Pill className="h-5 w-5 text-health-600" />
+                        {translate("prescriptions")}
+                      </CardTitle>
+                      <CardDescription>{translate("currentMedications")}</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-gray-500">{translate("managePrescriptions")}</p>
+                    </CardContent>
+                    <CardFooter>
+                      <Button variant="outline" className="w-full" onClick={() => setActiveTab("records")}>{translate("viewPrescriptions")}</Button>
+                    </CardFooter>
+                  </Card>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <Card className="border hover:shadow-md transition-shadow">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <TestTube className="h-5 w-5 text-health-600" />
+                        {translate("labTests")}
+                      </CardTitle>
+                      <CardDescription>{translate("scheduleCollection")}</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-gray-500">
+                        {translate("bookLabDesc")}
+                      </p>
+                    </CardContent>
+                    <CardFooter>
+                      <Button onClick={() => setActiveTab("tests")} className="w-full">
+                        <TestTube className="h-4 w-4 mr-2" />
+                        {translate("bookTests")}
                       </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
+                    </CardFooter>
+                  </Card>
+                  
+                  <Card className="border hover:shadow-md transition-shadow">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <MessageCircle className="h-5 w-5 text-health-600" />
+                        {translate("aiHealthAssistant")}
+                      </CardTitle>
+                      <CardDescription>{translate("getChatbotAdvice")}</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-gray-500">
+                        {translate("chatbotDesc")}
+                      </p>
+                    </CardContent>
+                    <CardFooter>
+                      <Button onClick={() => setActiveTab("chatbot")} className="w-full">
+                        <Bot className="h-4 w-4 mr-2" />
+                        {translate("talkToAI")}
+                      </Button>
+                    </CardFooter>
+                  </Card>
+                </div>
+              </TabsContent>
               
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                <Card className="border hover:shadow-md transition-shadow">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Calendar className="h-5 w-5 text-health-600" />
-                      {translate("appointments")}
-                    </CardTitle>
-                    <CardDescription>{translate("manageAppointments")}</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-gray-500">{translate("noAppointments")}</p>
-                  </CardContent>
-                  <CardFooter>
-                    <Button className="w-full" onClick={() => setActiveTab("consultation")}>{translate("scheduleAppointment")}</Button>
-                  </CardFooter>
-                </Card>
-                
-                <Card className="border hover:shadow-md transition-shadow">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <FileText className="h-5 w-5 text-health-600" />
-                      {translate("medicalRecords")}
-                    </CardTitle>
-                    <CardDescription>{translate("accessHealthDocuments")}</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-gray-500">{translate("viewRecordsDesc")}</p>
-                  </CardContent>
-                  <CardFooter>
-                    <Button variant="outline" className="w-full" onClick={() => setActiveTab("records")}>{translate("viewRecords")}</Button>
-                  </CardFooter>
-                </Card>
-                
-                <Card className="border hover:shadow-md transition-shadow">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Pill className="h-5 w-5 text-health-600" />
-                      {translate("prescriptions")}
-                    </CardTitle>
-                    <CardDescription>{translate("currentMedications")}</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-gray-500">{translate("managePrescriptions")}</p>
-                  </CardContent>
-                  <CardFooter>
-                    <Button variant="outline" className="w-full" onClick={() => setActiveTab("records")}>{translate("viewPrescriptions")}</Button>
-                  </CardFooter>
-                </Card>
-              </div>
+              <TabsContent value="profile">
+                <UserProfile />
+              </TabsContent>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Card className="border hover:shadow-md transition-shadow">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <TestTube className="h-5 w-5 text-health-600" />
-                      {translate("labTests")}
-                    </CardTitle>
-                    <CardDescription>{translate("scheduleCollection")}</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-gray-500">
-                      {translate("bookLabDesc")}
-                    </p>
-                  </CardContent>
-                  <CardFooter>
-                    <Button onClick={() => setActiveTab("tests")} className="w-full">
-                      <TestTube className="h-4 w-4 mr-2" />
-                      {translate("bookTests")}
-                    </Button>
-                  </CardFooter>
-                </Card>
-                
-                <Card className="border hover:shadow-md transition-shadow">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <MessageCircle className="h-5 w-5 text-health-600" />
-                      {translate("aiHealthAssistant")}
-                    </CardTitle>
-                    <CardDescription>{translate("getChatbotAdvice")}</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-gray-500">
-                      {translate("chatbotDesc")}
-                    </p>
-                  </CardContent>
-                  <CardFooter>
-                    <Button onClick={() => setActiveTab("chatbot")} className="w-full">
-                      <Bot className="h-4 w-4 mr-2" />
-                      {translate("talkToAI")}
-                    </Button>
-                  </CardFooter>
-                </Card>
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="profile" className={activeTab === "profile" ? "block" : "hidden"}>
-              <UserProfile />
-            </TabsContent>
-            
-            <TabsContent value="consultation" className={activeTab === "consultation" ? "block" : "hidden"}>
-              <DoctorConsultation />
-            </TabsContent>
-            
-            <TabsContent value="chatbot" className={activeTab === "chatbot" ? "block" : "hidden"}>
-              <MedicalChatbot />
-            </TabsContent>
-            
-            <TabsContent value="records" className={activeTab === "records" ? "block" : "hidden"}>
-              <MedicalRecords />
-            </TabsContent>
-            
-            <TabsContent value="tests" className={activeTab === "tests" ? "block" : "hidden"}>
-              <LabTests />
-            </TabsContent>
+              <TabsContent value="consultation">
+                <DoctorConsultation />
+              </TabsContent>
+              
+              <TabsContent value="chatbot">
+                <MedicalChatbot />
+              </TabsContent>
+              
+              <TabsContent value="records">
+                <MedicalRecords />
+              </TabsContent>
+              
+              <TabsContent value="tests">
+                <LabTests />
+              </TabsContent>
+            </Tabs>
           </main>
         </div>
       </div>
