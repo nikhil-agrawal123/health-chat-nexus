@@ -23,7 +23,6 @@ import {
   SidebarGroupContent,
   SidebarGroupLabel,
 } from "@/components/ui/sidebar";
-import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/contexts/LanguageContext";
 import {
@@ -37,14 +36,12 @@ interface PatientSidebarProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
   isCollapsed: boolean;
-  healthProfileComplete: number;
 }
 
 const PatientSidebar: React.FC<PatientSidebarProps> = ({ 
   activeTab, 
   setActiveTab, 
   isCollapsed,
-  healthProfileComplete
 }) => {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -172,13 +169,7 @@ const PatientSidebar: React.FC<PatientSidebarProps> = ({
       </SidebarContent>
       
       <SidebarFooter className="border-t p-4">
-        {!isCollapsed && (
-          <div className="flex flex-col space-y-2">
-            <span className="text-sm text-muted-foreground">{translate("healthProfile")}</span>
-            <Progress value={healthProfileComplete} className="h-2" />
-            <span className="text-xs text-muted-foreground">{healthProfileComplete}% {translate("complete")}</span>
-          </div>
-        )}
+        {/* Removed the health profile completion section */}
       </SidebarFooter>
     </Sidebar>
   );

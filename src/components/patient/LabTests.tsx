@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { TestTube, Calendar, Clock, MapPin, Check, AlertCircle, X, ArrowRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface LabTest {
   id: string;
@@ -42,6 +42,7 @@ const timeSlots = [
 
 const LabTests = () => {
   const { toast } = useToast();
+  const { translate } = useLanguage();
   const [activeTab, setActiveTab] = useState("available");
   const [labTests, setLabTests] = useState<LabTest[]>([]);
   const [selectedTests, setSelectedTests] = useState<LabTest[]>([]);
@@ -135,8 +136,8 @@ const LabTests = () => {
   const handleBookNow = () => {
     if (selectedTests.length === 0) {
       toast({
-        title: "No Tests Selected",
-        description: "Please select at least one test to continue.",
+        title: translate("No Tests Selected"),
+        description: translate("Please select at least one test to continue."),
         variant: "destructive"
       });
       return;
@@ -152,8 +153,8 @@ const LabTests = () => {
   const handleConfirmBooking = () => {
     if (!bookingDate || !bookingTimeSlot || !bookingAddress) {
       toast({
-        title: "Incomplete Information",
-        description: "Please fill in all the required fields.",
+        title: translate("Incomplete Information"),
+        description: translate("Please fill in all the required fields."),
         variant: "destructive"
       });
       return;
@@ -177,8 +178,8 @@ const LabTests = () => {
     setBookingAddress("");
     
     toast({
-      title: "Booking Confirmed",
-      description: `Your lab tests have been scheduled for ${bookingDate} at ${bookingTimeSlot}.`,
+      title: translate("Booking Confirmed"),
+      description: translate("Your lab tests have been scheduled for") + ` ${bookingDate} at ${bookingTimeSlot}.`,
     });
     
     setActiveTab("bookings");
@@ -216,15 +217,15 @@ const LabTests = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold">Lab Tests</h2>
-          <p className="text-gray-500">Book tests with home sample collection</p>
+          <h2 className="text-2xl font-bold">{translate("Lab Tests")}</h2>
+          <p className="text-gray-500">{translate("Book tests with home sample collection")}</p>
         </div>
       </div>
       
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="available">Available Tests</TabsTrigger>
-          <TabsTrigger value="bookings">Your Bookings</TabsTrigger>
+          <TabsTrigger value="available">{translate("Available Tests")}</TabsTrigger>
+          <TabsTrigger value="bookings">{translate("Your Bookings")}</TabsTrigger>
         </TabsList>
         
         <TabsContent value="available" className="space-y-4 mt-4">
@@ -260,11 +261,11 @@ const LabTests = () => {
                           <div className="flex flex-wrap gap-2 mt-2">
                             <span className="inline-flex items-center px-2 py-1 rounded text-xs bg-gray-100 text-gray-800">
                               <Clock className="h-3 w-3 mr-1" />
-                              Results in {test.processingTime}
+                              {translate("Results in")} {test.processingTime}
                             </span>
                             <span className="inline-flex items-center px-2 py-1 rounded text-xs bg-health-50 text-health-700">
                               <TestTube className="h-3 w-3 mr-1" />
-                              {test.category}
+                              {translate(test.category)}
                             </span>
                           </div>
                         </div>
@@ -283,9 +284,9 @@ const LabTests = () => {
               <div className="sticky top-4">
                 <Card>
                   <CardHeader>
-                    <CardTitle>Selected Tests</CardTitle>
+                    <CardTitle>{translate("Selected Tests")}</CardTitle>
                     <CardDescription>
-                      {selectedTests.length} test{selectedTests.length !== 1 ? 's' : ''} selected
+                      {selectedTests.length} {translate(selectedTests.length !== 1 ? 'tests' : 'test')} {translate("selected")}
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
@@ -303,13 +304,13 @@ const LabTests = () => {
                         
                         <div className="pt-2 mt-2 border-t">
                           <div className="flex justify-between items-center font-semibold">
-                            <span>Total:</span>
+                            <span>{translate("Total")}:</span>
                             <span>${calculateTotal()}</span>
                           </div>
                         </div>
                       </div>
                     ) : (
-                      <p className="text-gray-500 text-sm">No tests selected. Click on tests to add them to your booking.</p>
+                      <p className="text-gray-500 text-sm">{translate("No tests selected. Click on tests to add them to your booking.")}</p>
                     )}
                   </CardContent>
                   <CardFooter>
@@ -318,7 +319,7 @@ const LabTests = () => {
                       disabled={selectedTests.length === 0}
                       onClick={handleBookNow}
                     >
-                      Book Home Collection
+                      {translate("Book Home Collection")}
                     </Button>
                   </CardFooter>
                 </Card>
@@ -338,21 +339,21 @@ const LabTests = () => {
                         <div className="flex items-center gap-2 mb-2">
                           {booking.status === "scheduled" && (
                             <span className="px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">
-                              Scheduled
+                              {translate("Scheduled")}
                             </span>
                           )}
                           {booking.status === "completed" && (
                             <span className="px-2 py-1 rounded-full text-xs bg-green-100 text-green-800">
-                              Completed
+                              {translate("Completed")}
                             </span>
                           )}
                           {booking.status === "canceled" && (
                             <span className="px-2 py-1 rounded-full text-xs bg-red-100 text-red-800">
-                              Canceled
+                              {translate("Canceled")}
                             </span>
                           )}
                           <h3 className="font-semibold">
-                            {booking.tests.length} Test{booking.tests.length !== 1 ? 's' : ''} Booked
+                            {booking.tests.length} {translate(booking.tests.length !== 1 ? 'Tests' : 'Test')} {translate("Booked")}
                           </h3>
                         </div>
                         
@@ -374,7 +375,7 @@ const LabTests = () => {
                       
                       <div className="flex flex-col gap-2 w-full md:w-auto">
                         <div className="text-right mb-2">
-                          <span className="font-semibold text-health-700">Total: ${booking.totalPrice}</span>
+                          <span className="font-semibold text-health-700">{translate("Total")}: ${booking.totalPrice}</span>
                         </div>
                         <div className="flex flex-wrap gap-2 justify-end">
                           {booking.status === "scheduled" && (
@@ -385,13 +386,13 @@ const LabTests = () => {
                                 onClick={() => handleCancelBooking(booking)}
                               >
                                 <X className="h-4 w-4 mr-1" />
-                                Cancel
+                                {translate("Cancel")}
                               </Button>
                               <Button 
                                 size="sm"
                                 onClick={() => handleViewDetails(booking)}
                               >
-                                View Details
+                                {translate("View Details")}
                               </Button>
                             </>
                           )}
@@ -401,7 +402,7 @@ const LabTests = () => {
                               size="sm"
                               onClick={() => handleViewDetails(booking)}
                             >
-                              View Details
+                              {translate("View Details")}
                             </Button>
                           )}
                         </div>
@@ -414,12 +415,12 @@ const LabTests = () => {
           ) : (
             <div className="text-center p-8 border rounded-lg">
               <TestTube className="h-12 w-12 mx-auto text-gray-300" />
-              <p className="mt-2 text-gray-500">No lab test bookings found</p>
+              <p className="mt-2 text-gray-500">{translate("No lab test bookings found")}</p>
               <Button 
                 className="mt-4" 
                 onClick={() => setActiveTab("available")}
               >
-                Book Your First Test
+                {translate("Book Your First Test")}
               </Button>
             </div>
           )}
@@ -430,15 +431,15 @@ const LabTests = () => {
       <Dialog open={showBookingDialog} onOpenChange={setShowBookingDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Book Home Sample Collection</DialogTitle>
+            <DialogTitle>{translate("Book Home Sample Collection")}</DialogTitle>
             <DialogDescription>
-              Select your preferred date, time, and collection address.
+              {translate("Select your preferred date, time, and collection address.")}
             </DialogDescription>
           </DialogHeader>
           
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="date">Collection Date</Label>
+              <Label htmlFor="date">{translate("Collection Date")}</Label>
               <Input 
                 id="date" 
                 type="date" 
@@ -449,14 +450,14 @@ const LabTests = () => {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="time">Collection Time Slot</Label>
+              <Label htmlFor="time">{translate("Collection Time Slot")}</Label>
               <select 
                 id="time" 
                 className="w-full p-2 border rounded-md"
                 value={bookingTimeSlot}
                 onChange={(e) => setBookingTimeSlot(e.target.value)}
               >
-                <option value="">Select a time slot</option>
+                <option value="">{translate("Select a time slot")}</option>
                 {timeSlots.map((slot) => (
                   <option key={slot} value={slot}>{slot}</option>
                 ))}
@@ -464,17 +465,17 @@ const LabTests = () => {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="address">Collection Address</Label>
+              <Label htmlFor="address">{translate("Collection Address")}</Label>
               <Input 
                 id="address" 
                 value={bookingAddress} 
                 onChange={(e) => setBookingAddress(e.target.value)} 
-                placeholder="Enter your full address"
+                placeholder={translate("Enter your full address")}
               />
             </div>
             
             <div className="border rounded-lg p-4 mt-4">
-              <h4 className="font-medium mb-2">Selected Tests:</h4>
+              <h4 className="font-medium mb-2">{translate("Selected Tests")}:</h4>
               <div className="space-y-2">
                 {selectedTests.map((test) => (
                   <div key={test.id} className="flex justify-between items-center">
@@ -484,7 +485,7 @@ const LabTests = () => {
                 ))}
                 <div className="pt-2 mt-2 border-t font-semibold">
                   <div className="flex justify-between items-center">
-                    <span>Total:</span>
+                    <span>{translate("Total")}:</span>
                     <span>${calculateTotal()}</span>
                   </div>
                 </div>
@@ -497,13 +498,13 @@ const LabTests = () => {
               variant="outline" 
               onClick={() => setShowBookingDialog(false)}
             >
-              Cancel
+              {translate("Cancel")}
             </Button>
             <Button 
               onClick={handleConfirmBooking}
               disabled={!bookingDate || !bookingTimeSlot || !bookingAddress}
             >
-              Confirm Booking
+              {translate("Confirm Booking")}
             </Button>
           </DialogFooter>
         </DialogContent>

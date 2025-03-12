@@ -21,7 +21,6 @@ const PatientDashboard = () => {
   const { translate } = useLanguage();
   const isMobile = useIsMobile();
   const [isCollapsed, setIsCollapsed] = useState(isMobile);
-  const [healthProfileComplete, setHealthProfileComplete] = useState(65);
 
   const menuItems = [
     {
@@ -64,12 +63,15 @@ const PatientDashboard = () => {
           activeTab={activeTab} 
           setActiveTab={setActiveTab} 
           isCollapsed={isCollapsed}
-          healthProfileComplete={healthProfileComplete}
         />
         
         {/* Main Content */}
         <div className="flex-1 flex flex-col">
-          <PatientHeader activeTab={activeTab} menuItems={menuItems} />
+          <PatientHeader 
+            activeTab={activeTab} 
+            menuItems={menuItems} 
+            setActiveTab={setActiveTab}
+          />
           
           <main className="flex-1 p-6 overflow-auto">
             {/* Main content tabs */}

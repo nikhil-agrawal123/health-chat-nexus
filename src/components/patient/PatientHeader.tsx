@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { Menu } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -13,9 +13,10 @@ interface PatientHeaderProps {
     label: string;
     value: string;
   }>;
+  setActiveTab: (tab: string) => void;
 }
 
-const PatientHeader: React.FC<PatientHeaderProps> = ({ activeTab, menuItems }) => {
+const PatientHeader: React.FC<PatientHeaderProps> = ({ activeTab, menuItems, setActiveTab }) => {
   const { translate } = useLanguage();
 
   return (
@@ -23,7 +24,7 @@ const PatientHeader: React.FC<PatientHeaderProps> = ({ activeTab, menuItems }) =
       <div className="flex items-center gap-2">
         <SidebarTrigger>
           <Button variant="ghost" size="icon">
-            <ArrowLeft className="h-5 w-5" />
+            <Menu className="h-5 w-5" />
           </Button>
         </SidebarTrigger>
         <h1 className="text-xl font-semibold">
@@ -32,7 +33,10 @@ const PatientHeader: React.FC<PatientHeaderProps> = ({ activeTab, menuItems }) =
       </div>
       
       <div className="flex items-center gap-2">
-        <Avatar className="h-9 w-9">
+        <Avatar 
+          className="h-9 w-9 cursor-pointer" 
+          onClick={() => setActiveTab("profile")}
+        >
           <AvatarFallback className="bg-health-100 text-health-700">
             RP
           </AvatarFallback>
