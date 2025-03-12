@@ -160,7 +160,6 @@ const translations = {
   "edit": "संपादित करें",
   "delete": "हटाएं",
   "confirm": "पुष्टि करें",
-  "cancel": "रद्द करें",
   "search": "खोजें",
   "filter": "फ़िल्टर",
   "sort": "क्रमबद्ध करें",

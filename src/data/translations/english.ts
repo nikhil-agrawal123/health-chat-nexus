@@ -89,6 +89,9 @@ const translations = {
   "view": "View",
   "close": "Close",
   "labReport": "Lab Test",
+  "fileName": "File Name",
+  "fileSize": "File Size",
+  "has been downloaded": "has been downloaded",
   
   // Prescription
   "medication": "Medication",
@@ -157,7 +160,6 @@ const translations = {
   "edit": "Edit",
   "delete": "Delete",
   "confirm": "Confirm",
-  "cancel": "Cancel",
   "search": "Search",
   "filter": "Filter",
   "sort": "Sort",
@@ -168,6 +170,7 @@ const translations = {
   "failure": "Failure",
   "warning": "Warning",
   "info": "Information",
+  "You have been successfully logged out.": "You have been successfully logged out."
 };
 
 export default translations;
