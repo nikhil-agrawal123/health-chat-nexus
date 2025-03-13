@@ -9,6 +9,9 @@ import Footer from "@/components/Footer";
 
 const Index = () => {
   useEffect(() => {
+    // Reset scroll position when the page loads
+    window.scrollTo(0, 0);
+    
     // Add scroll animation observer
     const observer = new IntersectionObserver(
       (entries) => {

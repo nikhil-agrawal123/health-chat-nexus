@@ -37,14 +37,19 @@ const MedicalChatbot = () => {
   const [input, setInput] = useState("");
   const [isRecording, setIsRecording] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [shouldScroll, setShouldScroll] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+    // Only scroll when explicitly set to do so
+    if (shouldScroll) {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      setShouldScroll(false);
+    }
+  }, [shouldScroll]);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    setShouldScroll(true);
   };
 
   const simulateAiResponse = (userMessage: string) => {
@@ -61,6 +66,7 @@ const MedicalChatbot = () => {
     };
     
     setMessages(prev => [...prev, processingMessage]);
+    setShouldScroll(true);
     
     // Simulate API delay
     setTimeout(() => {
@@ -104,6 +110,7 @@ const MedicalChatbot = () => {
       
       setMessages(prev => [...prev, botMessage]);
       setLoading(false);
+      setShouldScroll(true);
     }, 2000);
   };
 
@@ -119,6 +126,7 @@ const MedicalChatbot = () => {
     
     setMessages(prev => [...prev, newMessage]);
     setInput("");
+    setShouldScroll(true);
     
     simulateAiResponse(input);
   };
@@ -132,6 +140,7 @@ const MedicalChatbot = () => {
     };
     
     setMessages(prev => [...prev, newMessage]);
+    setShouldScroll(true);
     
     simulateAiResponse(suggestion);
   };

@@ -114,7 +114,7 @@
 
 html, body {
   font-family: 'Inter', sans-serif;
-  scroll-behavior: smooth;
+  scroll-behavior: auto; /* Changed from smooth to auto to prevent auto-scrolling */
   height: 100%;
   width: 100%;
   overflow-x: hidden;
