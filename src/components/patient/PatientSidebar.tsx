@@ -130,10 +130,14 @@ const PatientSidebar: React.FC<PatientSidebarProps> = ({
               {menuItems.map((item) => (
                 <SidebarMenuItem key={item.value}>
                   <SidebarMenuButton 
-                    className={activeTab === item.value ? "bg-health-50 text-health-700" : ""}
+                    className={
+                      activeTab === item.value 
+                        ? "bg-health-500 text-white hover:bg-health-600 transition-colors" 
+                        : "hover:bg-health-50 hover:text-health-700 transition-colors"
+                    }
                     onClick={() => setActiveTab(item.value)}
                   >
-                    <item.icon className="h-5 w-5" />
+                    <item.icon className={`h-5 w-5 ${activeTab === item.value ? "text-white" : ""}`} />
                     <span>{item.label}</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -151,7 +155,7 @@ const PatientSidebar: React.FC<PatientSidebarProps> = ({
               <SidebarMenuItem>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <SidebarMenuButton>
+                    <SidebarMenuButton className="hover:bg-health-50 hover:text-health-700 transition-colors">
                       <Globe className="h-5 w-5" />
                       <span>{translate("languageSelector")}</span>
                     </SidebarMenuButton>
@@ -161,7 +165,7 @@ const PatientSidebar: React.FC<PatientSidebarProps> = ({
                       <DropdownMenuItem 
                         key={lang}
                         onClick={() => setLanguage(lang as any)}
-                        className={language === lang ? "bg-health-50" : ""}
+                        className={language === lang ? "bg-health-100 text-health-700" : ""}
                       >
                         {lang}
                       </DropdownMenuItem>
@@ -170,7 +174,10 @@ const PatientSidebar: React.FC<PatientSidebarProps> = ({
                 </DropdownMenu>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton onClick={handleLogout}>
+                <SidebarMenuButton 
+                  onClick={handleLogout}
+                  className="hover:bg-health-50 hover:text-health-700 transition-colors"
+                >
                   <LogOut className="h-5 w-5" />
                   <span>{translate("logout")}</span>
                 </SidebarMenuButton>
