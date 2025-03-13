@@ -82,6 +82,23 @@ const translations = {
   "chatbotGreeting": "السلام علیکم! میں آپ کے صحت کے سوالات میں کیسے مدد کر سکتا ہوں؟",
   "tryAsking": "یہ پوچھ کر دیکھیں:",
   "languageSelector": "زبان منتخب کریں",
+  
+  // New Additions
+  "myPrescriptions": "میرے نسخے",
+  "governmentSchemes": "سرکاری سکیمیں",
+  "healthSchemes": "صحت سے متعلق سرکاری سکیمیں",
+  "schemesDesc": "صحت سے متعلق سرکاری سکیموں کو دیکھیں اور ان کے فوائد حاصل کریں",
+  "viewSchemes": "سکیمیں دیکھیں",
+  "exploreHealthSchemes": "صحت سے متعلق سرکاری سکیموں کو دیکھیں اور فوائد حاصل کرنے کے لیے درخواست دیں",
+  "searchSchemes": "سکیموں میں تلاش کریں...",
+  "eligibility": "اہلیت",
+  "benefits": "فوائد",
+  "requiredDocuments": "درکار دستاویزات",
+  "visitWebsite": "ویب سائٹ پر جائیں",
+  "visitOfficialWebsite": "سرکاری ویب سائٹ پر جائیں",
+  "noSchemesFound": "کوئی سکیم نہیں ملی",
+  "profile": "پروفائل",
+  "settings": "ترتیبات",
 };
 
 export default translations;

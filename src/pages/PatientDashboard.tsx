@@ -4,7 +4,16 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { LayoutDashboard, User, Video, Bot, FileText, TestTube } from "lucide-react";
+import { 
+  LayoutDashboard, 
+  User, 
+  Video, 
+  Bot, 
+  FileText, 
+  TestTube, 
+  Pill,
+  Shield
+} from "lucide-react";
 
 // Components
 import PatientSidebar from "@/components/patient/PatientSidebar";
@@ -15,6 +24,8 @@ import DoctorConsultation from "@/components/patient/DoctorConsultation";
 import MedicalChatbot from "@/components/patient/MedicalChatbot";
 import MedicalRecords from "@/components/patient/MedicalRecords";
 import LabTests from "@/components/patient/LabTests";
+import Prescriptions from "@/components/patient/Prescriptions";
+import GovernmentSchemes from "@/components/patient/GovernmentSchemes";
 
 const PatientDashboard = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -52,6 +63,16 @@ const PatientDashboard = () => {
       icon: TestTube,
       label: translate("tests"),
       value: "tests"
+    },
+    {
+      icon: Pill,
+      label: translate("myPrescriptions"),
+      value: "prescriptions"
+    },
+    {
+      icon: Shield,
+      label: translate("governmentSchemes"),
+      value: "schemes"
     }
   ];
 
@@ -98,6 +119,14 @@ const PatientDashboard = () => {
               
               <TabsContent value="tests">
                 <LabTests />
+              </TabsContent>
+              
+              <TabsContent value="prescriptions">
+                <Prescriptions />
+              </TabsContent>
+              
+              <TabsContent value="schemes">
+                <GovernmentSchemes />
               </TabsContent>
             </Tabs>
           </main>

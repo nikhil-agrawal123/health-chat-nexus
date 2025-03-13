@@ -7,7 +7,8 @@ import {
   Pill, 
   TestTube,
   MessageCircle,
-  Bot
+  Bot,
+  Shield
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -91,7 +92,7 @@ const PatientDashboardContent: React.FC<PatientDashboardContentProps> = ({ setAc
             <p className="text-gray-500">{translate("managePrescriptions")}</p>
           </CardContent>
           <CardFooter>
-            <Button variant="outline" className="w-full" onClick={() => setActiveTab("records")}>{translate("viewPrescriptions")}</Button>
+            <Button variant="outline" className="w-full" onClick={() => setActiveTab("prescriptions")}>{translate("viewPrescriptions")}</Button>
           </CardFooter>
         </Card>
       </div>
@@ -135,6 +136,29 @@ const PatientDashboardContent: React.FC<PatientDashboardContentProps> = ({ setAc
             <Button onClick={() => setActiveTab("chatbot")} className="w-full">
               <Bot className="h-4 w-4 mr-2" />
               {translate("talkToAI")}
+            </Button>
+          </CardFooter>
+        </Card>
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+        <Card className="border hover:shadow-md transition-shadow">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Shield className="h-5 w-5 text-health-600" />
+              {translate("governmentSchemes")}
+            </CardTitle>
+            <CardDescription>{translate("healthSchemes")}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="text-gray-500">
+              {translate("schemesDesc")}
+            </p>
+          </CardContent>
+          <CardFooter>
+            <Button onClick={() => setActiveTab("schemes")} className="w-full">
+              <Shield className="h-4 w-4 mr-2" />
+              {translate("viewSchemes")}
             </Button>
           </CardFooter>
         </Card>

@@ -9,7 +9,9 @@ import {
   FileText, 
   TestTube,
   Globe,
-  LogOut
+  LogOut,
+  Pill,
+  Shield
 } from "lucide-react";
 import {
   Sidebar,
@@ -97,6 +99,16 @@ const PatientSidebar: React.FC<PatientSidebarProps> = ({
       icon: TestTube,
       label: translate("tests"),
       value: "tests"
+    },
+    {
+      icon: Pill,
+      label: translate("myPrescriptions"),
+      value: "prescriptions"
+    },
+    {
+      icon: Shield,
+      label: translate("governmentSchemes"),
+      value: "schemes"
     }
   ];
 
