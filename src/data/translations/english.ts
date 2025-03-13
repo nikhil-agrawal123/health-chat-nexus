@@ -1,5 +1,11 @@
 
 const translations = {
+  // Homepage
+  "healthPortal": "Health Portal",
+  "patientLogin": "Patient Login",
+  "doctorLogin": "Doctor Login",
+  "providerLogin": "Provider Login",
+  
   // Dashboard
   "welcome": "Welcome, Patient",
   "lastLogin": "Last login",
@@ -200,6 +206,34 @@ const translations = {
   "tryAsking": "Try asking:",
   "languageSelector": "Select Language",
   
+  // Doctor Dashboard
+  "patients": "Patients",
+  "patientManagement": "Patient Management",
+  "doctorSettings": "Doctor Settings",
+  "messages": "Messages",
+  "viewAll": "View All",
+  "patientMessages": "Patient Messages",
+  "nearby": "Nearby Patients",
+  "todaysPatients": "Today's Patients",
+  "pendingPrescriptions": "Pending Prescriptions",
+  "nextAppointment": "Next Appointment",
+  "appointmentsManagement": "Appointments Management",
+  "searchPatients": "Search patients...",
+  "filter": "Filter",
+  "viewPrescription": "View Prescription",
+  "editPrescription": "Edit Prescription",
+  "prescriptionHistory": "Prescriptions History",
+  "dispensed": "Dispensed",
+  "patientProfile": "Patient Profile",
+  "profileSettings": "Profile Settings",
+  "doctorProfile": "Doctor Profile",
+  "yearsExperience": "Years Experience",
+  "qualifications": "Qualifications",
+  "specialization": "Specialization",
+  "clinicAddress": "Clinic Address",
+  "consultationFees": "Consultation Fees",
+  "workingHours": "Working Hours",
+  
   // Common
   "loading": "Loading...",
   "error": "An error occurred",
@@ -214,7 +248,22 @@ const translations = {
   "failure": "Failure",
   "warning": "Warning",
   "info": "Information",
-  "You have been successfully logged out.": "You have been successfully logged out."
+  "You have been successfully logged out.": "You have been successfully logged out.",
+  
+  // New Additions
+  "myPrescriptions": "My Prescriptions",
+  "governmentSchemes": "Government Schemes",
+  "healthSchemes": "Health related Government Schemes",
+  "schemesDesc": "View health related government schemes and get benefits",
+  "viewSchemes": "View Schemes",
+  "exploreHealthSchemes": "View health related government schemes and apply for benefits",
+  "searchSchemes": "Search in schemes...",
+  "eligibility": "Eligibility",
+  "benefits": "Benefits",
+  "requiredDocuments": "Required Documents",
+  "visitWebsite": "Visit Website",
+  "visitOfficialWebsite": "Visit Official Website",
+  "noSchemesFound": "No schemes found",
 };
 
 export default translations;
