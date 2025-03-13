@@ -3,7 +3,7 @@ import React, { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import GlassCard from "./ui/GlassCard";
 import AnimatedButton from "./ui/AnimatedButton";
-import { ArrowRight, Lock, Shield, User, UserCheck } from "lucide-react";
+import { ArrowRight, Lock, Shield, User, Stethoscope } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const LoginOptions = () => {
@@ -39,8 +39,8 @@ const LoginOptions = () => {
     navigate("/patient-login");
   };
 
-  const handleProviderLogin = () => {
-    navigate("/provider-login");
+  const handleDoctorLogin = () => {
+    navigate("/doctor-login");
   };
 
   return (
@@ -55,7 +55,7 @@ const LoginOptions = () => {
             Choose Your <span className="text-gradient">Access Portal</span>
           </h2>
           <p className="text-muted-foreground text-lg md:text-xl max-w-2xl mx-auto">
-            Whether you're a patient seeking care or a healthcare provider, we have a secure login portal for you.
+            Whether you're a patient seeking care or a doctor providing treatment, we have a secure login portal for you.
           </p>
         </div>
 
@@ -98,19 +98,19 @@ const LoginOptions = () => {
           <div className="animate-on-scroll" style={{ transitionDelay: "100ms" }}>
             <GlassCard hoverEffect className="h-full border-health-200 flex flex-col">
               <div className="h-16 w-16 rounded-xl bg-health-50 flex items-center justify-center mb-6">
-                <UserCheck className="h-8 w-8 text-health-600" />
+                <Stethoscope className="h-8 w-8 text-health-600" />
               </div>
               
-              <h3 className="text-2xl font-bold mb-3">Healthcare Providers</h3>
+              <h3 className="text-2xl font-bold mb-3">Doctors Portal</h3>
               
               <p className="text-muted-foreground mb-6 flex-grow">
-                Manage your patient interactions, access medical resources, 
-                and provide care in multiple languages through our secure 
-                provider platform.
+                Securely manage your patients, conduct video consultations, 
+                upload digital prescriptions, and provide personalized care 
+                with IMA verified credentialing.
               </p>
               
               <ul className="space-y-3 mb-8">
-                {["Patient management tools", "Real-time translation", "Secure messaging", "Medical resource library"].map((feature, index) => (
+                {["IMA verification", "Patient management", "Digital prescriptions", "Video conferencing"].map((feature, index) => (
                   <li key={index} className="flex items-center gap-2">
                     <div className="h-5 w-5 rounded-full bg-health-100 flex items-center justify-center">
                       <div className="h-2 w-2 rounded-full bg-health-600"></div>
@@ -123,9 +123,9 @@ const LoginOptions = () => {
               <AnimatedButton 
                 className="w-full justify-between" 
                 variant="outline" 
-                onClick={handleProviderLogin}
+                onClick={handleDoctorLogin}
               >
-                <span>Provider Login</span>
+                <span>Doctor Login</span>
                 <ArrowRight className="h-5 w-5" />
               </AnimatedButton>
             </GlassCard>
