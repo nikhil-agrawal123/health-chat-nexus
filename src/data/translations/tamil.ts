@@ -82,6 +82,23 @@ const translations = {
   "chatbotGreeting": "வணக்கம்! உங்கள் சுகாதார கேள்விகளுக்கு நான் எவ்வாறு உதவ முடியும்?",
   "tryAsking": "இதைக் கேட்டு பாருங்கள்:",
   "languageSelector": "மொழியைத் தேர்ந்தெடுக்கவும்",
+  
+  // New Additions
+  "myPrescriptions": "எனது மருந்து சீட்டுகள்",
+  "governmentSchemes": "அரசு திட்டங்கள்",
+  "healthSchemes": "சுகாதார தொடர்பான அரசு திட்டங்கள்",
+  "schemesDesc": "சுகாதார தொடர்பான அரசு திட்டங்களைப் பார்த்து பயன்களைப் பெறுங்கள்",
+  "viewSchemes": "திட்டங்களைப் பார்க்கவும்",
+  "exploreHealthSchemes": "சுகாதார தொடர்பான அரசு திட்டங்களைப் பார்த்து பயன்களைப் பெற விண்ணப்பிக்கவும்",
+  "searchSchemes": "திட்டங்களில் தேடுங்கள்...",
+  "eligibility": "தகுதி",
+  "benefits": "பயன்கள்",
+  "requiredDocuments": "தேவையான ஆவணங்கள்",
+  "visitWebsite": "வலைத்தளத்திற்குச் செல்லுங்கள்",
+  "visitOfficialWebsite": "அதிகாரப்பூர்வ வலைத்தளத்திற்குச் செல்லுங்கள்",
+  "noSchemesFound": "திட்டங்கள் எதுவும் கண்டுபிடிக்கப்படவில்லை",
+  "profile": "சுயவிவரம்",
+  "settings": "அமைப்புகள்",
 };
 
 export default translations;

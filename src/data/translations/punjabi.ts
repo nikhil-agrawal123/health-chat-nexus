@@ -82,6 +82,23 @@ const translations = {
   "chatbotGreeting": "ਸਤ ਸ੍ਰੀ ਅਕਾਲ! ਮੈਂ ਤੁਹਾਡੇ ਸਿਹਤ ਸਵਾਲਾਂ ਨਾਲ ਕਿਵੇਂ ਮਦਦ ਕਰ ਸਕਦਾ ਹਾਂ?",
   "tryAsking": "ਇਹ ਪੁੱਛ ਕੇ ਦੇਖੋ:",
   "languageSelector": "ਭਾਸ਼ਾ ਚੁਣੋ",
+  
+  // New Additions
+  "myPrescriptions": "ਮੇਰੇ ਨੁਸਖੇ",
+  "governmentSchemes": "ਸਰਕਾਰੀ ਸਕੀਮਾਂ",
+  "healthSchemes": "ਸਿਹਤ ਸਬੰਧੀ ਸਰਕਾਰੀ ਸਕੀਮਾਂ",
+  "schemesDesc": "ਸਿਹਤ ਸਬੰਧੀ ਸਰਕਾਰੀ ਸਕੀਮਾਂ ਦੇਖੋ ਅਤੇ ਲਾਭ ਪ੍ਰਾਪਤ ਕਰੋ",
+  "viewSchemes": "ਸਕੀਮਾਂ ਦੇਖੋ",
+  "exploreHealthSchemes": "ਸਿਹਤ ਸਬੰਧੀ ਸਰਕਾਰੀ ਸਕੀਮਾਂ ਦੇਖੋ ਅਤੇ ਲਾਭ ਪ੍ਰਾਪਤ ਕਰਨ ਲਈ ਅਰਜ਼ੀ ਦਿਓ",
+  "searchSchemes": "ਸਕੀਮਾਂ ਵਿੱਚ ਖੋਜੋ...",
+  "eligibility": "ਯੋਗਤਾ",
+  "benefits": "ਲਾਭ",
+  "requiredDocuments": "ਲੋੜੀਂਦੇ ਦਸਤਾਵੇਜ਼",
+  "visitWebsite": "ਵੈੱਬਸਾਈਟ 'ਤੇ ਜਾਓ",
+  "visitOfficialWebsite": "ਅਧਿਕਾਰਿਕ ਵੈੱਬਸਾਈਟ 'ਤੇ ਜਾਓ",
+  "noSchemesFound": "ਕੋਈ ਸਕੀਮ ਨਹੀਂ ਮਿਲੀ",
+  "profile": "ਪ੍ਰੋਫਾਈਲ",
+  "settings": "ਸੈਟਿੰਗਜ਼",
 };
 
 export default translations;

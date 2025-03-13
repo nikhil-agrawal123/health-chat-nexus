@@ -82,6 +82,23 @@ const translations = {
   "chatbotGreeting": "నమస్కారం! నేను మీ ఆరోగ్య ప్రశ్నలతో ఎలా సహాయపడగలను?",
   "tryAsking": "ఇలా అడగండి:",
   "languageSelector": "భాషను ఎంచుకోండి",
+  
+  // New Additions
+  "myPrescriptions": "నా మందుల పర్చీలు",
+  "governmentSchemes": "ప్రభుత్వ పథకాలు",
+  "healthSchemes": "ఆరోగ్య సంబంధిత ప్రభుత్వ పథకాలు",
+  "schemesDesc": "ఆరోగ్య సంబంధిత ప్రభుత్వ పథకాలను చూడండి మరియు ప్రయోజనాలను పొందండి",
+  "viewSchemes": "పథకాలను చూడండి",
+  "exploreHealthSchemes": "ఆరోగ్య సంబంధిత ప్రభుత్వ పథకాలను చూడండి మరియు ప్రయోజనాలను పొందడానికి దరఖాస్తు చేయండి",
+  "searchSchemes": "పథకాలలో శోధించండి...",
+  "eligibility": "అర్హత",
+  "benefits": "ప్రయోజనాలు",
+  "requiredDocuments": "అవసరమైన పత్రాలు",
+  "visitWebsite": "వెబ్‌సైట్‌ను సందర్శించండి",
+  "visitOfficialWebsite": "అధికారిక వెబ్‌సైట్‌ను సందర్శించండి",
+  "noSchemesFound": "పథకాలు ఏవీ కనుగొనబడలేదు",
+  "profile": "ప్రొఫైల్",
+  "settings": "సెట్టింగ్‌లు",
 };
 
 export default translations;

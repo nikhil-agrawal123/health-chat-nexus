@@ -82,6 +82,23 @@ const translations = {
   "chatbotGreeting": "प्रणाम! हम आपके स्वास्थ्य सवाल में केहिया मदद कर सकत बानी?",
   "tryAsking": "ई सवाल पूछ के देखीं:",
   "languageSelector": "भाषा चुनीं",
+  
+  // New Additions
+  "myPrescriptions": "हमार दवा पर्ची",
+  "governmentSchemes": "सरकारी योजना",
+  "healthSchemes": "स्वास्थ्य संबंधी सरकारी योजना",
+  "schemesDesc": "स्वास्थ्य संबंधी सरकारी योजना देखीं अउर लाभ पाईं",
+  "viewSchemes": "योजना देखीं",
+  "exploreHealthSchemes": "स्वास्थ्य संबंधी सरकारी योजना देखीं अउर लाभ पावे खातिर आवेदन करीं",
+  "searchSchemes": "योजना में खोजीं...",
+  "eligibility": "योग्यता",
+  "benefits": "लाभ",
+  "requiredDocuments": "जरूरी कागजात",
+  "visitWebsite": "वेबसाइट पर जाईं",
+  "visitOfficialWebsite": "सरकारी वेबसाइट पर जाईं",
+  "noSchemesFound": "कौनो योजना ना मिलल",
+  "profile": "प्रोफाइल",
+  "settings": "सेटिंग",
 };
 
 export default translations;
