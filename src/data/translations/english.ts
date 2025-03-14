@@ -145,7 +145,7 @@ const translations = {
   "labReport": "Lab Test",
   "fileName": "File Name",
   "fileSize": "File Size",
-  "has been downloaded": "has been downloaded",
+  "hasBeenDownloaded": "has been downloaded",
   
   // Prescription
   "medication": "Medication",
@@ -239,7 +239,6 @@ const translations = {
   "error": "An error occurred",
   "retry": "Retry",
   "search": "Search",
-  "filter": "Filter",
   "sort": "Sort",
   "submit": "Submit",
   "next": "Next",

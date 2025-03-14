@@ -3,12 +3,12 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Button } from "@/components/ui/button";
-import { Hero } from "@/components/Hero";
-import { FeatureSection } from "@/components/FeatureSection";
-import { Footer } from "@/components/Footer";
+import Hero from "@/components/Hero";
+import FeatureSection from "@/components/FeatureSection";
+import Footer from "@/components/Footer";
 import { Globe } from "lucide-react";
-import { Navbar } from "@/components/Navbar";
-import { ChatbotDemo } from "@/components/ChatbotDemo";
+import Navbar from "@/components/Navbar";
+import ChatbotDemo from "@/components/ChatbotDemo";
 import {
   DropdownMenu,
   DropdownMenuContent,
