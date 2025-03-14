@@ -1,5 +1,15 @@
 
 const translations = {
+  // Homepage
+  "healthPortal": "صحت پورٹل",
+  "patientLogin": "مریض لاگ ان",
+  "doctorLogin": "ڈاکٹر لاگ ان",
+  "home": "ہوم",
+  "features": "خصوصیات",
+  "forDoctors": "ڈاکٹرز کے لیے",
+  "contact": "رابطہ",
+  "getStarted": "شروع کریں",
+  
   // Dashboard
   "welcome": "خوش آمدید، مریض",
   "lastLogin": "آخری لاگ ان",
@@ -99,6 +109,7 @@ const translations = {
   "noSchemesFound": "کوئی سکیم نہیں ملی",
   "profile": "پروفائل",
   "settings": "ترتیبات",
+  "filter": "فلٹر",
 };
 
 export default translations;

@@ -5,6 +5,11 @@ const translations = {
   "patientLogin": "Patient Login",
   "doctorLogin": "Doctor Login",
   "providerLogin": "Provider Login",
+  "home": "Home",
+  "features": "Features",
+  "forDoctors": "For Doctors",
+  "contact": "Contact",
+  "getStarted": "Get Started",
   
   // Dashboard
   "welcome": "Welcome, Patient",
