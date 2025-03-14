@@ -1,18 +1,16 @@
 
-import { useState, useEffect } from "react";
+import  { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Globe, Menu, X } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import AnimatedButton from "./ui/AnimatedButton";
 import { useNavigate } from "react-router-dom";
-import { useLanguage } from "@/contexts/LanguageContext";
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const isMobile = useIsMobile();
   const navigate = useNavigate();
-  const { language, translate } = useLanguage();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -48,7 +46,7 @@ const Navbar = () => {
           <div className="h-10 w-10 rounded-lg bg-health-600 flex items-center justify-center">
             <span className="text-white font-semibold text-lg">HC</span>
           </div>
-          <span className="font-semibold text-xl">{translate("healthPortal")}</span>
+          <span className="font-semibold text-xl">HealthChat</span>
         </div>
 
         {!isMobile && (
@@ -58,28 +56,28 @@ const Navbar = () => {
               className="text-base font-medium"
               onClick={() => handleNavigation("hero")}
             >
-              {translate("home")}
+              Home
             </Button>
             <Button 
               variant="ghost" 
               className="text-base font-medium"
               onClick={() => handleNavigation("features")}
             >
-              {translate("features")}
+              Features
             </Button>
             <Button 
               variant="ghost" 
               className="text-base font-medium"
               onClick={() => handleNavigation("for-doctors")}
             >
-              {translate("forDoctors")}
+              For Doctors
             </Button>
             <Button 
               variant="ghost" 
               className="text-base font-medium"
               onClick={() => handleNavigation("contact")}
             >
-              {translate("contact")}
+              Contact
             </Button>
           </div>
         )}
@@ -87,7 +85,7 @@ const Navbar = () => {
         <div className="flex items-center gap-4">
           <Button variant="outline" size="sm" className="flex items-center gap-2 rounded-full">
             <Globe className="h-4 w-4" />
-            <span>{language.slice(0, 2)}</span>
+            <span>EN</span>
           </Button>
           
           <Button 
@@ -109,7 +107,7 @@ const Navbar = () => {
               animationDelay={200}
               onClick={handleGetStarted}
             >
-              {translate("getStarted")}
+              Get Started
             </AnimatedButton>
           )}
         </div>
@@ -127,34 +125,34 @@ const Navbar = () => {
               className="justify-start text-lg font-medium"
               onClick={() => handleNavigation("hero")}
             >
-              {translate("home")}
+              Home
             </Button>
             <Button 
               variant="ghost" 
               className="justify-start text-lg font-medium"
               onClick={() => handleNavigation("features")}
             >
-              {translate("features")}
+              Features
             </Button>
             <Button 
               variant="ghost" 
               className="justify-start text-lg font-medium"
               onClick={() => handleNavigation("for-doctors")}
             >
-              {translate("forDoctors")}
+              For Doctors
             </Button>
             <Button 
               variant="ghost" 
               className="justify-start text-lg font-medium"
               onClick={() => handleNavigation("contact")}
             >
-              {translate("contact")}
+              Contact
             </Button>
             <AnimatedButton 
               className="w-full mt-4"
               onClick={handleGetStarted}
             >
-              {translate("getStarted")}
+              Get Started
             </AnimatedButton>
           </div>
         </div>
