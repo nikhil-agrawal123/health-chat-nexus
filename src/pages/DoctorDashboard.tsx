@@ -116,6 +116,13 @@ const DoctorDashboard = () => {
   const [prescriptionImage, setPrescriptionImage] = useState<File | null>(null);
   const [prescriptionNotes, setPrescriptionNotes] = useState("");
   const [currentPatientId, setCurrentPatientId] = useState<string | null>(null);
+  const [showNewAppointmentDialog, setShowNewAppointmentDialog] = useState(false);
+  const [appointmentData, setAppointmentData] = useState({
+    patientName: "",
+    date: "",
+    time: "",
+    type: "Video",
+  });
 
   const handleLogout = () => {
     toast({
@@ -163,6 +170,34 @@ const DoctorDashboard = () => {
     setPrescriptionImage(null);
     setPrescriptionNotes("");
     setCurrentPatientId(null);
+  };
+
+  const handleScheduleNew = () => {
+    setShowNewAppointmentDialog(true);
+  };
+
+  const handleAppointmentSubmit = () => {
+    if (!appointmentData.patientName || !appointmentData.date || !appointmentData.time) {
+      toast({
+        title: "Missing information",
+        description: "Please fill in all required fields.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    toast({
+      title: "Appointment scheduled",
+      description: `New appointment with ${appointmentData.patientName} has been scheduled.`
+    });
+
+    setShowNewAppointmentDialog(false);
+    setAppointmentData({
+      patientName: "",
+      date: "",
+      time: "",
+      type: "Video",
+    });
   };
 
   return (
@@ -432,7 +467,7 @@ const DoctorDashboard = () => {
             <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <h2 className="text-2xl font-bold">Upcoming Consultations</h2>
-                <Button>
+                <Button onClick={handleScheduleNew}>
                   <Calendar className="h-4 w-4 mr-2" />
                   Schedule New
                 </Button>
@@ -534,9 +569,87 @@ const DoctorDashboard = () => {
           </TabsContent>
           
           <TabsContent value="appointments" className="mt-0">
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <h2 className="text-xl font-bold mb-4">Appointments Management</h2>
-              <p className="text-gray-500">Appointments calendar and scheduling tools would go here.</p>
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <h2 className="text-2xl font-bold">Appointments Management</h2>
+                <Button onClick={handleScheduleNew}>
+                  <Calendar className="h-4 w-4 mr-2" />
+                  Schedule New
+                </Button>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">Today</CardTitle>
+                    <CardDescription>April 6, 2025</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {consultations
+                      .filter(c => c.date === "Today")
+                      .map((appointment) => (
+                        <div key={appointment.id} className="flex justify-between items-center p-3 border rounded-md bg-blue-50 hover:bg-blue-100 transition-colors">
+                          <div>
+                            <p className="font-medium">{appointment.patient}</p>
+                            <div className="text-sm text-gray-600">{appointment.time}</div>
+                          </div>
+                          <Button size="sm" variant="ghost">View</Button>
+                        </div>
+                      ))}
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">Tomorrow</CardTitle>
+                    <CardDescription>April 7, 2025</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex justify-between items-center p-3 border rounded-md hover:bg-gray-50 transition-colors">
+                      <div>
+                        <p className="font-medium">Ananya Desai</p>
+                        <div className="text-sm text-gray-600">11:30 AM - 12:00 PM</div>
+                      </div>
+                      <Button size="sm" variant="ghost">View</Button>
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">Upcoming Week</CardTitle>
+                    <CardDescription>April 8 - April 12, 2025</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex justify-between items-center p-3 border rounded-md hover:bg-gray-50 transition-colors">
+                      <div>
+                        <p className="font-medium">Rohit Kumar</p>
+                        <div className="text-sm text-gray-600">April 8, 10:00 AM</div>
+                      </div>
+                      <Button size="sm" variant="ghost">View</Button>
+                    </div>
+                    <div className="flex justify-between items-center p-3 border rounded-md hover:bg-gray-50 transition-colors">
+                      <div>
+                        <p className="font-medium">Sneha Reddy</p>
+                        <div className="text-sm text-gray-600">April 9, 2:15 PM</div>
+                      </div>
+                      <Button size="sm" variant="ghost">View</Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+              
+              <Card>
+                <CardHeader>
+                  <CardTitle>Calendar View</CardTitle>
+                  <CardDescription>All scheduled appointments</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-96 flex items-center justify-center border rounded-md bg-gray-50">
+                    <p className="text-gray-500">Calendar view will be implemented here</p>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           </TabsContent>
           
@@ -602,7 +715,76 @@ const DoctorDashboard = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Video Consultation Dialog would go here */}
+      {/* New Appointment Dialog */}
+      <Dialog open={showNewAppointmentDialog} onOpenChange={setShowNewAppointmentDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Schedule New Appointment</DialogTitle>
+            <DialogDescription>
+              Create a new appointment for a patient.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="grid w-full items-center gap-1.5">
+              <label htmlFor="patientName" className="text-sm font-medium">
+                Patient Name
+              </label>
+              <Input
+                id="patientName"
+                placeholder="Enter patient name"
+                value={appointmentData.patientName}
+                onChange={(e) => setAppointmentData({...appointmentData, patientName: e.target.value})}
+              />
+            </div>
+            
+            <div className="grid w-full items-center gap-1.5">
+              <label htmlFor="appointmentDate" className="text-sm font-medium">
+                Date
+              </label>
+              <Input
+                id="appointmentDate"
+                type="date"
+                value={appointmentData.date}
+                onChange={(e) => setAppointmentData({...appointmentData, date: e.target.value})}
+              />
+            </div>
+            
+            <div className="grid w-full items-center gap-1.5">
+              <label htmlFor="appointmentTime" className="text-sm font-medium">
+                Time
+              </label>
+              <Input
+                id="appointmentTime"
+                type="time"
+                value={appointmentData.time}
+                onChange={(e) => setAppointmentData({...appointmentData, time: e.target.value})}
+              />
+            </div>
+            
+            <div className="grid w-full items-center gap-1.5">
+              <label htmlFor="appointmentType" className="text-sm font-medium">
+                Appointment Type
+              </label>
+              <select
+                id="appointmentType"
+                className="w-full rounded-md border border-gray-300 p-2 text-sm"
+                value={appointmentData.type}
+                onChange={(e) => setAppointmentData({...appointmentData, type: e.target.value})}
+              >
+                <option value="Video">Video Consultation</option>
+                <option value="Audio">Audio Call</option>
+                <option value="In-Person">In-Person Visit</option>
+              </select>
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowNewAppointmentDialog(false)}>Cancel</Button>
+            <Button type="submit" onClick={handleAppointmentSubmit}>Schedule Appointment</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
