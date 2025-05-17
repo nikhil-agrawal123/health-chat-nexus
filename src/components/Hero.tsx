@@ -13,6 +13,13 @@ const Hero = () => {
     setLoaded(true);
   }, []);
 
+    const handleNavigation = (id: string) => {
+    const element = document.getElementById(id);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
     <section className="pt-32 pb-20 md:pt-40 md:pb-32 px-6 relative overflow-hidden">
       {/* Background Elements */}
@@ -43,13 +50,14 @@ const Hero = () => {
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 pt-6">
-              <AnimatedButton className="rounded-full px-6 py-6 text-lg">
-                Start Chatting
+              <AnimatedButton className="rounded-full px-6 py-6 text-lg" onClick={() => handleNavigation("demo")}>
+                  Start Chatting
                 <ArrowRight className="ml-2 h-5 w-5" />
               </AnimatedButton>
               <Button 
                 variant="outline" 
                 className="rounded-full px-6 py-6 text-lg transition-all hover:bg-background hover:text-health-600 hover:border-health-200"
+                onClick={() => handleNavigation("features")}
               >
                 Learn How It Works
               </Button>
