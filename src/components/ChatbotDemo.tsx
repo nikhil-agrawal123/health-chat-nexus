@@ -46,7 +46,7 @@ const ChatbotDemo = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
   
-  const languages = ["English", "Hindi", "Gujarati", "Tamil", "Telugu", "Bengali", "Punjabi", "Urdu", "Haryanvi", "Bhojpuri"];
+  const languages = ["English", "Hindi", "Gujarati", "Tamil", "Telugu", "Bengali", "Punjabi"];
   
   // Update greeting when language changes
   useEffect(() => {
