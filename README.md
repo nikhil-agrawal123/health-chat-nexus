@@ -1,5 +1,3 @@
-# Welcome to your Lovable project
-
 ## Project info
 
 ## How can I edit this code?
@@ -47,3 +45,12 @@ This project is built with .
 - React
 - shadcn-ui
 - Tailwind CSS
+
+
+##Backend
+
+You can run the backend by going to the multilingual api folder using
+
+-cd backend
+-cd multilingual api
+uvicorn main:app --reload
