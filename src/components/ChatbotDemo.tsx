@@ -46,7 +46,7 @@ const ChatbotDemo = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
   
-  const languages = ["English", "Hindi", "Gujarati", "Tamil", "Telugu", "Bengali", "Punjabi", "Urdu", "Haryanvi", "Bhojpuri"];
+  const languages = ["English", "Hindi", "Gujarati", "Tamil", "Telugu", "Bengali", "Punjabi"];
   
   // Update greeting when language changes
   useEffect(() => {
@@ -127,7 +127,7 @@ const ChatbotDemo = () => {
 
   return (
     <section className="py-20 px-6 relative">
-      <div className="absolute top-40 left-0 w-96 h-96 bg-health-50 rounded-full filter blur-3xl opacity-50 -z-10"></div>
+      <div className="absolute top-40 left-0 w-96 h-96 bg-health-50 rounded-full filter blur-3xl opacity-50 -z-10 " id = "demo"></div>
       
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-16 animate-on-scroll">
@@ -242,6 +242,7 @@ const ChatbotDemo = () => {
               <h4 className="font-medium mb-2">Try asking:</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li>"What could be causing my headache?"</li>
+                <li>"What could be the possible symptoms malaria"</li>
                 <li>"How can I manage my allergies naturally?"</li>
                 <li>"What are the symptoms of dehydration?"</li>
                 <li>"Should I be worried about this rash?"</li>

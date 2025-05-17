@@ -21,9 +21,9 @@ const Navbar = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const handleNavigation = (sectionId: string) => {
+  const handleNavigation = (id: string) => {
     setIsMenuOpen(false);
-    const element = document.getElementById(sectionId);
+    const element = document.getElementById(id);
     if (element) {
       element.scrollIntoView({ behavior: 'smooth' });
     }
@@ -75,7 +75,7 @@ const Navbar = () => {
             <Button 
               variant="ghost" 
               className="text-base font-medium"
-              onClick={() => handleNavigation("contact")}
+              onClick={() => handleNavigation("footer")}
             >
               Contact
             </Button>
@@ -83,10 +83,10 @@ const Navbar = () => {
         )}
 
         <div className="flex items-center gap-4">
-          <Button variant="outline" size="sm" className="flex items-center gap-2 rounded-full">
+          {/* <Button variant="outline" size="sm" className="flex items-center gap-2 rounded-full">
             <Globe className="h-4 w-4" />
             <span>EN</span>
-          </Button>
+          </Button> */}
           
           <Button 
             variant="ghost" 
@@ -144,7 +144,7 @@ const Navbar = () => {
             <Button 
               variant="ghost" 
               className="justify-start text-lg font-medium"
-              onClick={() => handleNavigation("contact")}
+              onClick={() => handleNavigation("footer")}
             >
               Contact
             </Button>

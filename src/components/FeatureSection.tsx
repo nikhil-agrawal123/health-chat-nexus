@@ -59,6 +59,7 @@ const FeatureSection = () => {
     <section 
       ref={sectionRef}
       className="py-20 px-6 bg-gradient-to-b from-white to-health-50"
+      id = "features"
     >
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-16 animate-on-scroll" >
