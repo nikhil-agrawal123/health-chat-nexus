@@ -8,6 +8,8 @@ const translations = {
   "aiAssistant": "AI सहायक",
   "records": "रिकॉर्ड्स",
   "tests": "लैब टेस्ट",
+  "myPrescriptions": "मेरे नुस्खे",
+  "governmentSchemes": "सरकारी योजनाएँ",
   "yourHealthDashboard": "आपका स्वास्थ्य डैशबोर्ड",
   "appointments": "अपॉइंटमेंट्स",
   "manageAppointments": "अपने आगामी अपॉइंटमेंट्स प्रबंधित करें",

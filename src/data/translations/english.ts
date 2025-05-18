@@ -8,6 +8,8 @@ const translations = {
   "aiAssistant": "AI Assistant",
   "records": "Records",
   "tests": "Lab Tests",
+  "myPrescriptions": "My Prescriptions",
+  "governmentSchemes": "Government Schemes",
   "yourHealthDashboard": "Your Health Dashboard",
   "appointments": "Appointments",
   "manageAppointments": "Manage your upcoming appointments",
