@@ -79,7 +79,6 @@ const ChatbotDemo = () => {
   const [inputValue, setInputValue] = useState("");
   const [currentLanguage, setCurrentLanguage] = useState("English");
   const [isTyping, setIsTyping] = useState(false);
-  const [shouldScroll, setShouldScroll] = useState(false);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
@@ -117,14 +116,6 @@ const ChatbotDemo = () => {
     updateGreeting();
   }, [currentLanguage]);
 
-  useEffect(() => {
-    // Only scroll when a new message is added by the user or bot
-    if (shouldScroll) {
-      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-      setShouldScroll(false);
-    }
-  }, [shouldScroll]);
-
   const handleSendMessage = (e?: React.FormEvent) => {
     e?.preventDefault();
     
@@ -140,7 +131,6 @@ const ChatbotDemo = () => {
     setMessages([...messages, newMessage]);
     setInputValue("");
     setIsTyping(true);
-    setShouldScroll(true);
     
     // Simulate bot response after delay
     setTimeout(async () => {
@@ -155,7 +145,6 @@ const ChatbotDemo = () => {
       
       setMessages(prevMessages => [...prevMessages, botMessage]);
       setIsTyping(false);
-      setShouldScroll(true);
     }, 1500);
   };
 
