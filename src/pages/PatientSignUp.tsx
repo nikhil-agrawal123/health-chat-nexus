@@ -14,6 +14,21 @@ const PatientSignup = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  const patientData = {
+    id,
+    password,
+  };
+
+  async function savePatient(patientData: any) {
+    const response = await fetch("http://localhost:8081/patient", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(patientData),
+    });
+    const data = await response.json();
+    return data.patient_id;
+  }
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Authentication logic would go here
@@ -25,7 +40,7 @@ const PatientSignup = () => {
         });
         return;
     }
-
+    savePatient(patientData)
     toast({
       title: "SignUp Successful",
       description: "Welcome to your patient dashboard.",
