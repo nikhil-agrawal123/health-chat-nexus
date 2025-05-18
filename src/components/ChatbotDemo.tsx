@@ -11,7 +11,7 @@ if (!model_key) {
   throw new Error("API key is not set. Please set the GOOGLE_GENAI_API_KEY environment variable.");
 }
 
-let newResponse = "";
+let newResponse = "Waiting for response...";
 
 const ai = new GoogleGenAI({ apiKey: model_key });
 
@@ -24,15 +24,20 @@ async function Chat(question: string): Promise<string> {
         parts: [
           {
             text:
-              "Given the question, strictly answer only when the question is asked about the symptoms of a disease. Otherwise, answer in a friendly manner asking them to login or signup to continue. Question is: " + question,
+              "Given the question, strictly answer only when the question is asked about the symptoms of a disease and you may suggest home remedies to ease the symptoms. Otherwise, answer in a friendly manner asking them to login or signup to continue. Question is: " + question,
           },
         ],
       },
     ],
   });
 
-  const candidate = result.text;
-  newResponse = candidate;
+  // Wait until result.text is available
+  while (!result || !result.text) {
+    await new Promise((resolve) => setTimeout(resolve, 100));
+  newResponse = result.text;
+  console.log(newResponse);
+  }
+  newResponse = result.text;
   console.log(newResponse);
   return;
 }
@@ -202,7 +207,7 @@ const ChatbotDemo = () => {
                           : "bg-gray-100 text-gray-800 rounded-tl-none"
                       }`}
                     >
-                      <p>{message.text}</p>
+                      <p className="w-100">{message.text}</p>
                       {message.language && message.sender === "bot" && (
                         <p className="text-xs mt-1 opacity-70">
                           Responding in {message.language}
@@ -254,7 +259,7 @@ const ChatbotDemo = () => {
             </h3>
             
             <p className="text-muted-foreground">
-              {newResponse}
+              "Please select your preferred language to get personalized health information."
             </p>
             
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
