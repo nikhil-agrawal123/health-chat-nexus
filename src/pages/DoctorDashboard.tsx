@@ -27,6 +27,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import DoctorProfile from "@/components/doctor/DoctorProfile";
 
 // Mock data for patients
 const patients = [
@@ -661,10 +662,7 @@ const DoctorDashboard = () => {
           </TabsContent>
           
           <TabsContent value="settings" className="mt-0">
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <h2 className="text-xl font-bold mb-4">Doctor Settings</h2>
-              <p className="text-gray-500">Configure your profile, notification preferences, and availability here.</p>
-            </div>
+            <DoctorProfile />
           </TabsContent>
         </Tabs>
       </div>
