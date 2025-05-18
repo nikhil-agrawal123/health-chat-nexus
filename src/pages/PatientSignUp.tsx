@@ -7,24 +7,30 @@ import GlassCard from "@/components/ui/GlassCard";
 import AnimatedButton from "@/components/ui/AnimatedButton";
 import { useToast } from "@/hooks/use-toast";
 
-const PatientLogin = () => {
+const PatientSignup = () => {
   const [id, setId] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const navigate = useNavigate();
   const { toast } = useToast();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Authentication logic would go here
-    console.log("Patient login attempt with:", { id, password });
-    
-    // Show success toast and navigate to dashboard
+    if(password !== confirmPassword) {
+        toast({
+            title: "Error",
+            description: "Passwords do not match.",
+            variant: "destructive",
+        });
+        return;
+    }
+
     toast({
-      title: "Login Successful",
+      title: "SignUp Successful",
       description: "Welcome to your patient dashboard.",
     });
     
-    // Navigate to patient dashboard
     navigate("/patient-dashboard");
   };
 
@@ -44,22 +50,22 @@ const PatientLogin = () => {
           <div className="h-16 w-16 rounded-xl bg-health-50 flex items-center justify-center mx-auto mb-4">
             <User className="h-8 w-8 text-health-600" />
           </div>
-          <h1 className="text-2xl font-bold">Patient Portal Login</h1>
+          <h1 className="text-2xl font-bold">Patient Portal SignUp</h1>
           <p className="text-muted-foreground mt-2">
-            Access your health records and appointments
+            One stop area to manage your health records and appointments.
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <label htmlFor="id" className="text-sm font-medium">
-              User ID
+              Your Name
             </label>
             <div className="relative">
               <Input
                 id="id"
                 type="text"
-                placeholder="HOS1234456"
+                placeholder="John Doe"
                 value={id}
                 onChange={(e) => setId(e.target.value)}
                 className="pl-10"
@@ -87,34 +93,36 @@ const PatientLogin = () => {
             </div>
           </div>
 
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                id="remember"
-                className="rounded border-gray-300 text-health-600 focus:ring-health-500"
+          <div className="space-y-2">
+            <label htmlFor="password" className="text-sm font-medium">
+              Confirm Password
+            </label>
+            <div className="relative">
+              <Input
+                id="password"
+                type="password"
+                placeholder="••••••••"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className="pl-10"
+                required
               />
-              <label htmlFor="remember" className="text-sm text-gray-600">
-                Remember me
-              </label>
+              <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             </div>
-            <a href="#" className="text-sm text-health-600 hover:underline">
-              Forgot password?
-            </a>
           </div>
 
           <AnimatedButton type="submit" className="w-full">
-            Sign In
+            Sign Up
           </AnimatedButton>
 
           <div className="text-center text-sm text-muted-foreground mt-6">
-            Don't have an account?{" "}
+            Have an account?{" "}
             <a href="#" className="text-health-600 hover:underline">
-              <button
-                onClick={() => navigate("/patient-signup")}
-              >
-                Create one now
-              </button>
+                <button
+                onClick={() => navigate("/patient-login")}
+                >
+                     Sign In   
+                </button>
             </a>
           </div>
         </form>
@@ -123,4 +131,4 @@ const PatientLogin = () => {
   );
 };
 
-export default PatientLogin;
+export default PatientSignup;
