@@ -4,6 +4,45 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Send, Globe, MessageCircle } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { GoogleGenAI } from "@google/genai";
+
+const model_key = import.meta.env.VITE_GOOGLE_GENAI_API_KEY;
+if (!model_key) {
+  throw new Error("API key is not set. Please set the GOOGLE_GENAI_API_KEY environment variable.");
+}
+
+let newResponse = "Waiting for response...";
+
+const ai = new GoogleGenAI({ apiKey: model_key });
+
+async function Chat(question: string): Promise<string> {
+  const result = await ai.models.generateContent({
+    model: "gemini-2.0-flash",
+    contents: [
+      {
+        role: "user",
+        parts: [
+          {
+            text:
+              "Given the question, strictly answer only when the question is asked about the symptoms of a disease and you may suggest home remedies to ease the symptoms. Otherwise, answer in a friendly manner asking them to login or signup to continue. Question is: " + question,
+          },
+        ],
+      },
+    ],
+  });
+
+  // Wait until result.text is available
+  while (!result || !result.text) {
+    await new Promise((resolve) => setTimeout(resolve, 100));
+  newResponse = result.text;
+  console.log(newResponse);
+  }
+  newResponse = result.text;
+  console.log(newResponse);
+  return;
+}
+
+
 
 async function multiLingual(language: string, text: string) {
   try {
@@ -95,11 +134,11 @@ const ChatbotDemo = () => {
     
     // Simulate bot response after delay
     setTimeout(async () => {
-      const responseText = await multiLingual(currentLanguage.toLowerCase(), "I understand your concern. Based on your symptoms, it could be seasonal allergies. Would you like me to suggest some over-the-counter remedies?");
+      const responseText = await multiLingual(currentLanguage.toLowerCase(), newResponse);
       
       const botMessage: Message = {
         id: messages.length + 2,
-        text: responseText || "I understand your concern. Based on your symptoms, it could be seasonal allergies. Would you like me to suggest some over-the-counter remedies?",
+        text: responseText,
         sender: "bot",
         language: currentLanguage
       };
@@ -157,7 +196,7 @@ const ChatbotDemo = () => {
                           : "bg-gray-100 text-gray-800 rounded-tl-none"
                       }`}
                     >
-                      <p>{message.text}</p>
+                      <p className="w-100">{message.text}</p>
                       {message.language && message.sender === "bot" && (
                         <p className="text-xs mt-1 opacity-70">
                           Responding in {message.language}
@@ -182,10 +221,12 @@ const ChatbotDemo = () => {
                 <div ref={messagesEndRef} />
               </div>
               
-              <form onSubmit={handleSendMessage} className="p-4 border-t border-gray-200 flex gap-2">
+                <form onSubmit={handleSendMessage} className="p-4 border-t border-gray-200 flex gap-2">
                 <Input
                   value={inputValue}
-                  onChange={(e) => setInputValue(e.target.value)}
+                  onChange={(e) => {
+                  setInputValue(e.target.value);
+                  }}
                   placeholder="Type your health question..."
                   className="flex-1"
                 />
@@ -193,10 +234,11 @@ const ChatbotDemo = () => {
                   type="submit" 
                   size="icon"
                   disabled={!inputValue.trim()}
+                  onClick={() => Chat(inputValue)}
                 >
                   <Send className="h-4 w-4" />
                 </Button>
-              </form>
+                </form>
             </GlassCard>
           </div>
           
@@ -206,7 +248,7 @@ const ChatbotDemo = () => {
             </h3>
             
             <p className="text-muted-foreground">
-              Our chatbot can understand and respond in multiple languages, making healthcare accessible to everyone, regardless of the language they speak.
+              "Please select your preferred language to get personalized health information."
             </p>
             
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">

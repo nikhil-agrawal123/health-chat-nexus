@@ -21,6 +21,11 @@ class Text(BaseModel):
 
 translator = Translator()
 
+@app.post("/english/")
+async def english(text: Text):
+    translation = await translator.translate(text.text, dest='en')
+    return JSONResponse(content={"Translation": translation.text})
+
 @app.post("/hindi/")
 async def hindi(text: Text):
     translation = await translator.translate(text.text, src="en", dest='hi')
