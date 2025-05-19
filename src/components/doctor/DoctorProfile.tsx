@@ -7,7 +7,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { 
   User, 
   Mail, 
-  Phone, 
+  Phone,
   Calendar, 
   MapPin, 
   UserCircle,
