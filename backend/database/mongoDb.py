@@ -27,13 +27,23 @@ def save_patient(patient_data):
     result = patients_collection.insert_one(patient_data)
     return result.inserted_id
 
-# Example usage:
-if __name__ == "__main__":
-    doctor = {"name": "Dr. Smith", "specialty": "Cardiology", "email": "drsmith@example.com","password": "password123"}
-    patient = {"name": "John Doe", "age": 30, "email": "johndoe@example.com","password": "password123"}
-
-    doctor_id = save_doctor(doctor)
-    print(f"Doctor saved with ID: {doctor_id}")
-
-    patient_id = save_patient(patient)
-    print(f"Patient saved with ID: {patient_id}")
+def get_patient_by_id(patient_id):
+    patient = patients_collection.find_one({"id": patient_id})
+    if patient:
+        return {
+            "id": str(patient["_id"]),
+            "name": patient["id"],
+            "password": patient["password"],
+        }
+    return None
+    
+def get_doctor_by_id(doctor_id):
+    doctor = doctors_collection.find_one({"id": doctor_id})
+    if doctor:
+        return {
+            "id": str(doctor["_id"]),
+            "name": doctor["id"],
+            "image": doctor["ima"],
+            "password": doctor["password"],
+        }
+    return None
