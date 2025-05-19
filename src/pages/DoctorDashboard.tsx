@@ -29,6 +29,8 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from "@/components/ui/input";
 import DoctorProfile from "@/components/doctor/DoctorProfile";
 
+const name = localStorage.getItem("name");
+
 // Mock data for patients
 const patients = [
   {
@@ -209,7 +211,7 @@ const DoctorDashboard = () => {
           <div className="flex items-center">
             <Stethoscope className="h-8 w-8 text-health-600 mr-3" />
             <div>
-              <h1 className="text-xl font-bold text-gray-900">Dr. Rahul Verma</h1>
+              <h1 className="text-xl font-bold text-gray-900">Dr. {name}</h1>
               <p className="text-sm text-gray-500">General Physician • IMA Certified</p>
             </div>
           </div>
@@ -226,7 +228,7 @@ const DoctorDashboard = () => {
                 <AvatarFallback>DR</AvatarFallback>
               </Avatar>
               <div className="hidden md:block">
-                <p className="text-sm font-medium">Dr. Rahul Verma</p>
+                <p className="text-sm font-medium">Dr. {name}</p>
                 <p className="text-xs text-gray-500">IMA #MH12345</p>
               </div>
             </div>

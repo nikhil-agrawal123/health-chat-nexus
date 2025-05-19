@@ -18,6 +18,15 @@ db = client["health_chat"]
 
 doctors_collection = db["doctors"]
 patients_collection = db["patients"]
+meetings_collection = db["meetings"]
+
+def save_meeting(meeting_data):
+    result = meetings_collection.insert_one(meeting_data)
+    return result.inserted_id
+
+def delete_meeting(meeting_id):
+    result = meetings_collection.delete_one({"id": meeting_id})
+    return result.deleted_count
 
 def save_doctor(doctor_data):
     result = doctors_collection.insert_one(doctor_data)

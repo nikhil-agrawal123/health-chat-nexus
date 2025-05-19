@@ -10,6 +10,8 @@ import { useToast } from "@/hooks/use-toast";
 const PatientSignup = () => {
   const [id, setId] = useState("");
   const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -18,7 +20,12 @@ const PatientSignup = () => {
     id,
     password,
   };
-
+  const patientDetails = {
+    id,
+    email,
+    phone,
+    password,
+  };
   async function savePatient(patientData: any) {
     const response = await fetch("http://localhost:8081/patient", {
       method: "POST",
@@ -91,6 +98,42 @@ const PatientSignup = () => {
           </div>
 
           <div className="space-y-2">
+            <label htmlFor="email" className="text-sm font-medium">
+              Email
+            </label>
+            <div className="relative">
+              <Input
+                id="email"
+                type="email"
+                placeholder="johndoe@gmail.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="pl-10"
+                required
+              />
+              <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <label htmlFor="phone" className="text-sm font-medium">
+              Phone Number
+            </label>
+            <div className="relative">
+              <Input
+                id="phone"
+                type="tel"
+                placeholder="+1 234 567 8900"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                className="pl-10"
+                required
+              />
+              <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            </div>
+          </div>
+
+          <div className="space-y-2">
             <label htmlFor="password" className="text-sm font-medium">
               Password
             </label>
@@ -126,7 +169,12 @@ const PatientSignup = () => {
             </div>
           </div>
 
-          <AnimatedButton type="submit" className="w-full">
+          <AnimatedButton type="submit" className="w-full"
+            onClick={() => {
+              localStorage.setItem("patientData", JSON.stringify(patientDetails));
+            }
+          }
+          >
             Sign Up
           </AnimatedButton>
 

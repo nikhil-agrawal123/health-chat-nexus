@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from mongoDb import save_doctor, save_patient
-from mongoDb import get_patient_by_id, get_doctor_by_id
+from mongoDb import get_patient_by_id, get_doctor_by_id, save_meeting
 app = FastAPI()
 
 # Allow frontend to call backend
@@ -24,6 +24,19 @@ async def add_patient(request: Request):
     data = await request.json()
     pat_id = save_patient(data)
     return {"patient_id": str(pat_id)}
+
+@app.post("/meeting")
+async def add_meeting(request: Request):
+    data = await request.json()
+    meeting_id = save_meeting(data)
+    return {"meeting_id": str(meeting_id)}
+
+@app.delete("/meeting/{meeting_id}")
+async def delete_meeting(meeting_id: str):
+    deleted_count = delete_meeting(meeting_id)
+    if deleted_count:
+        return {"detail": "Meeting deleted successfully"}
+    return {"detail": "Meeting not found"}, 404
 
 @app.post("/patient/login")
 async def login_patient(request: Request):

@@ -24,7 +24,7 @@ async function Chat(question: string): Promise<string> {
         parts: [
           {
             text:
-              "Given the question, strictly answer only when the question is asked about the symptoms of a disease and you may suggest home remedies to ease the symptoms. Otherwise, answer in a friendly manner asking them to login or signup to continue. Question is: " + question,
+              "Given the question, answer only when the question is asked about the symptoms of a disease and you may suggest home remedies to ease the symptoms. Otherwise, answer in a friendly manner asking them to login or signup to continue. Question is: " + question,
           },
         ],
       },
