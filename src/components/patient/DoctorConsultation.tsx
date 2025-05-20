@@ -63,6 +63,16 @@ const DoctorConsultation = () => {
     }
   }, []);
 
+  async function saveAppointment(appointment: Appointment) {
+    const response = await fetch("http://localhost:8081/meeting", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(appointment),
+    });
+    const data = await response.json();
+    return data.appointment_id;
+  }
+
   // Save appointments to localStorage whenever they change
   useEffect(() => {
     if (appointments.length > 0) {
@@ -165,6 +175,17 @@ const DoctorConsultation = () => {
         status: 'scheduled' as const,
         photo: selectedDoctor.photo
       };
+
+      saveAppointment({
+        id: Date.now().toString(),
+        doctorId: selectedDoctor.id,
+        doctorName: selectedDoctor.name,
+        specialty: selectedDoctor.specialty,
+        date: 'Today',
+        time: appointmentTime,
+        status: 'scheduled',
+        photo: selectedDoctor.photo
+      })
       
       // Update the appointments list and current appointment
       setAppointments(prev => [...prev, newAppointment]);
@@ -183,9 +204,20 @@ const DoctorConsultation = () => {
     setShowCancelDialog(true);
   };
 
+  async function cancelAppointment(appointmentId: string) {
+    const response = await fetch(`http://localhost:8081/meeting/${appointmentId}`, {
+      method: "DELETE",
+    });
+    const data = await response.json();
+    return data;
+  }
+
   const confirmCancelAppointment = () => {
     if (currentAppointment) {
       // Update the appointment status to canceled
+      console.log(currentAppointment);
+      const id = currentAppointment.id;
+      cancelAppointment(id);
       setAppointments(prev => 
         prev.map(apt => 
           apt.id === currentAppointment.id 

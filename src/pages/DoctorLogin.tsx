@@ -14,6 +14,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 const formSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address" }),
+  name: z.string().min(2, { message: "Name must be at least 2 characters" }),
   password: z.string().min(8, { message: "Password must be at least 8 characters" }),
   imaNumber: z.string().min(6, { message: "Please enter a valid IMA registration number" }),
 });
@@ -27,10 +28,21 @@ const DoctorLogin = () => {
     resolver: zodResolver(formSchema),
     defaultValues: {
       email: "",
+      name: "",
       password: "",
       imaNumber: "",
     },
   });
+
+  async function savePatient(doctorData: any) {
+    const response = await fetch("http://localhost:8081/doctor", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(doctorData),
+    });
+    const data = await response.json();
+    return data.patient_id;
+  }
 
   const handleSubmit = (values: z.infer<typeof formSchema>) => {
     console.log("Doctor login attempt with:", values);
@@ -41,12 +53,14 @@ const DoctorLogin = () => {
         description: "We're verifying your IMA credentials. You'll receive an email once approved.",
       });
       setTimeout(() => navigate("/"), 3000);
+      savePatient(values);
     } else {
       toast({
         title: "Login successful",
         description: "Welcome to your doctor dashboard!",
       });
       navigate("/doctor-dashboard");
+      localStorage.setItem("name", values.name);
     }
   };
 
@@ -87,6 +101,27 @@ const DoctorLogin = () => {
                     <FormControl>
                       <Input
                         placeholder="doctor@hospital.org"
+                        className="pl-10"
+                        {...field}
+                      />
+                    </FormControl>
+                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  </div>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+      
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Full Name</FormLabel>
+                  <div className="relative">
+                    <FormControl>
+                      <Input
+                        placeholder="Dr. John Doe"
                         className="pl-10"
                         {...field}
                       />
