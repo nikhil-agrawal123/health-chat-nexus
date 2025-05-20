@@ -1,5 +1,6 @@
-
+import ZegoVideoConference from "@/pages/video-conference";
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -45,6 +46,8 @@ const DoctorConsultation = () => {
   const [showRescheduleDialog, setShowRescheduleDialog] = useState(false);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [newAppointmentTime, setNewAppointmentTime] = useState<string | null>(null);
+  const [id, setId] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   // Load appointments from localStorage on component mount
   useEffect(() => {
@@ -70,7 +73,7 @@ const DoctorConsultation = () => {
       body: JSON.stringify(appointment),
     });
     const data = await response.json();
-    return data.appointment_id;
+    return data;
   }
 
   // Save appointments to localStorage whenever they change
@@ -176,16 +179,7 @@ const DoctorConsultation = () => {
         photo: selectedDoctor.photo
       };
 
-      saveAppointment({
-        id: Date.now().toString(),
-        doctorId: selectedDoctor.id,
-        doctorName: selectedDoctor.name,
-        specialty: selectedDoctor.specialty,
-        date: 'Today',
-        time: appointmentTime,
-        status: 'scheduled',
-        photo: selectedDoctor.photo
-      })
+      saveAppointment(newAppointment)
       
       // Update the appointments list and current appointment
       setAppointments(prev => [...prev, newAppointment]);
@@ -216,8 +210,7 @@ const DoctorConsultation = () => {
     if (currentAppointment) {
       // Update the appointment status to canceled
       console.log(currentAppointment);
-      const id = currentAppointment.id;
-      cancelAppointment(id);
+      cancelAppointment(currentAppointment.id);
       setAppointments(prev => 
         prev.map(apt => 
           apt.id === currentAppointment.id 
@@ -274,6 +267,7 @@ const DoctorConsultation = () => {
       title: "Joining Consultation",
       description: "Connecting to your doctor...",
     });
+    navigate("/video-conference");
     // In a real app, this would initiate the video call
   };
 
