@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -19,10 +19,8 @@ import {
   GraduationCap,
   Clock
 } from "lucide-react";
-import { useLanguage } from "@/contexts/LanguageContext";
 
 const DoctorProfile = () => {
-  const { translate } = useLanguage();
   const [activeTab, setActiveTab] = useState("personal");
   const [editMode, setEditMode] = useState(false);
   
@@ -104,15 +102,15 @@ const DoctorProfile = () => {
             {editMode ? (
               <div className="flex gap-2">
                 <Button variant="outline" onClick={() => setEditMode(false)}>
-                  {translate("cancel")}
+                  Cancel
                 </Button>
                 <Button onClick={handleSave}>
-                  {translate("save")}
+                  Save
                 </Button>
               </div>
             ) : (
               <Button onClick={() => setEditMode(true)}>
-                {translate("edit")}
+                Edit
               </Button>
             )}
           </div>
@@ -123,19 +121,19 @@ const DoctorProfile = () => {
         <TabsList className="grid grid-cols-4 md:w-[500px] mx-auto">
           <TabsTrigger value="personal">
             <User className="h-4 w-4 mr-2" />
-            <span>{translate("personalInfo")}</span>
+            <span>Personal Info</span>
           </TabsTrigger>
           <TabsTrigger value="professional">
             <Stethoscope className="h-4 w-4 mr-2" />
-            <span>{translate("professional")}</span>
+            <span>Professional Info</span>
           </TabsTrigger>
           <TabsTrigger value="practice">
             <Clock className="h-4 w-4 mr-2" />
-            <span>{translate("practice")}</span>
+            <span>Practice Info</span>
           </TabsTrigger>
           <TabsTrigger value="settings">
             <Shield className="h-4 w-4 mr-2" />
-            <span>{translate("security")}</span>
+            <span>Security</span>
           </TabsTrigger>
         </TabsList>
         
@@ -144,16 +142,16 @@ const DoctorProfile = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <UserCircle className="h-5 w-5 text-health-600" />
-                {translate("personalDetails")}
+                Personal Information
               </CardTitle>
               <CardDescription>
-                {translate("yourPersonalInfo")}
+                Your Personal Information
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">{translate("firstName")}</label>
+                  <label className="text-sm font-medium">First Name</label>
                   <Input 
                     value={doctorData.firstName} 
                     disabled={!editMode}
@@ -161,7 +159,7 @@ const DoctorProfile = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">{translate("lastName")}</label>
+                  <label className="text-sm font-medium">Last Name</label>
                   <Input 
                     value={doctorData.lastName} 
                     disabled={!editMode}
@@ -169,7 +167,7 @@ const DoctorProfile = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">{translate("email")}</label>
+                  <label className="text-sm font-medium">Email</label>
                   <Input 
                     value={doctorData.email} 
                     disabled={!editMode}
@@ -177,7 +175,7 @@ const DoctorProfile = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">{translate("phone")}</label>
+                  <label className="text-sm font-medium">Phone</label>
                   <Input 
                     value={doctorData.phone} 
                     disabled={!editMode}
@@ -185,7 +183,7 @@ const DoctorProfile = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">{translate("alternatePhone")}</label>
+                  <label className="text-sm font-medium">Alternate Phone</label>
                   <Input 
                     value={doctorData.alternatePhone} 
                     disabled={!editMode}
@@ -193,7 +191,7 @@ const DoctorProfile = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">{translate("dateOfBirth")}</label>
+                  <label className="text-sm font-medium">Date of Birth</label>
                   <Input 
                     type="date" 
                     value={doctorData.dob} 
@@ -202,7 +200,7 @@ const DoctorProfile = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">{translate("gender")}</label>
+                  <label className="text-sm font-medium">Gender</label>
                   <Input 
                     value={doctorData.gender} 
                     disabled={!editMode}
@@ -210,7 +208,7 @@ const DoctorProfile = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">{translate("languages")}</label>
+                  <label className="text-sm font-medium">Languages</label>
                   <Input 
                     value={doctorData.languages} 
                     disabled={!editMode}
@@ -225,16 +223,16 @@ const DoctorProfile = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <MapPin className="h-5 w-5 text-health-600" />
-                {translate("contactDetails")}
+                Contact Details
               </CardTitle>
               <CardDescription>
-                {translate("yourContactInfo")}
+                Your Contact Information
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">{translate("address")}</label>
+                  <label className="text-sm font-medium">Address</label>
                   <Input 
                     value={doctorData.address} 
                     disabled={!editMode}
@@ -242,7 +240,7 @@ const DoctorProfile = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">{translate("city")}</label>
+                  <label className="text-sm font-medium">City</label>
                   <Input 
                     value={doctorData.city} 
                     disabled={!editMode}
@@ -250,7 +248,7 @@ const DoctorProfile = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">{translate("state")}</label>
+                  <label className="text-sm font-medium">State</label>
                   <Input 
                     value={doctorData.state} 
                     disabled={!editMode}
@@ -258,7 +256,7 @@ const DoctorProfile = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">{translate("pincode")}</label>
+                  <label className="text-sm font-medium">Pincode</label>
                   <Input 
                     value={doctorData.pincode} 
                     disabled={!editMode}
@@ -277,11 +275,11 @@ const DoctorProfile = () => {
                 <GraduationCap className="h-5 w-5 text-blue-500" />
                 <h3 className="text-xl font-bold">Qualifications And Certifications</h3>
               </div>
-              <p className="text-sm text-muted-foreground mb-4">yourProfessionalQualifications</p>
+              <p className="text-sm text-muted-foreground mb-4">Your Professional Qualifications</p>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">qualification</label>
+                  <label className="text-sm font-medium">Qualification</label>
                   <Input 
                     value={doctorData.qualification} 
                     disabled={!editMode}
@@ -289,7 +287,7 @@ const DoctorProfile = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">specialization</label>
+                  <label className="text-sm font-medium">Specialization</label>
                   <Input 
                     value={doctorData.specialization} 
                     disabled={!editMode}
@@ -297,7 +295,7 @@ const DoctorProfile = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">experience (years)</label>
+                  <label className="text-sm font-medium">Experience (Years)</label>
                   <Input 
                     value={doctorData.experience} 
                     disabled={!editMode}
@@ -305,7 +303,7 @@ const DoctorProfile = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">hospitalAffiliation</label>
+                  <label className="text-sm font-medium">Hospital Affiliation</label>
                   <Input 
                     value={doctorData.hospitalAffiliation} 
                     disabled={!editMode}
@@ -320,13 +318,13 @@ const DoctorProfile = () => {
             <CardContent className="p-6">
               <div className="flex items-center gap-2 mb-1">
                 <Award className="h-5 w-5 text-blue-500" />
-                <h3 className="text-xl font-bold">registrationDetails</h3>
+                <h3 className="text-xl font-bold">Registration Details</h3>
               </div>
-              <p className="text-sm text-muted-foreground mb-4">yourMedicalRegistration</p>
-              
+              <p className="text-sm text-muted-foreground mb-4">Your Medical Registration</p>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">imaNumber</label>
+                  <label className="text-sm font-medium">IMA Number</label>
                   <Input 
                     value={doctorData.imaNumber} 
                     disabled={!editMode}
@@ -334,7 +332,7 @@ const DoctorProfile = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">registrationNumber</label>
+                  <label className="text-sm font-medium">Registration Number</label>
                   <Input 
                     value={doctorData.registrationNumber} 
                     disabled={!editMode}
@@ -349,13 +347,13 @@ const DoctorProfile = () => {
             <CardContent className="p-6">
               <div className="flex items-center gap-2 mb-1">
                 <AlertCircle className="h-5 w-5 text-blue-500" />
-                <h3 className="text-xl font-bold">professionalBio</h3>
+                <h3 className="text-xl font-bold">Professional Bio</h3>
               </div>
-              <p className="text-sm text-muted-foreground mb-4">yourProfessionalSummary</p>
-              
+              <p className="text-sm text-muted-foreground mb-4">Your Professional Summary</p>
+
               <div className="grid grid-cols-1 gap-4">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">bio</label>
+                  <label className="text-sm font-medium">Bio</label>
                   <textarea 
                     className="w-full min-h-[100px] p-2 border rounded-md"
                     value={doctorData.bio} 
@@ -373,13 +371,13 @@ const DoctorProfile = () => {
             <CardContent className="p-6">
               <div className="flex items-center gap-2 mb-1">
                 <Clock className="h-5 w-5 text-blue-500" />
-                <h3 className="text-xl font-bold">practiceDetails</h3>
+                <h3 className="text-xl font-bold">Practice Details</h3>
               </div>
-              <p className="text-sm text-muted-foreground mb-4">yourPracticeInformation</p>
-              
+              <p className="text-sm text-muted-foreground mb-4">Your Practice Information</p>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">consultationFee (₹)</label>
+                  <label className="text-sm font-medium">Consultation Fee (₹)</label>
                   <Input 
                     value={doctorData.consultationFee} 
                     disabled={!editMode}
@@ -387,7 +385,7 @@ const DoctorProfile = () => {
                   />
                 </div>
                 <div className="space-y-2 md:col-span-2">
-                  <label className="text-sm font-medium">availableSlots</label>
+                  <label className="text-sm font-medium">Available Slots</label>
                   <Input 
                     value={doctorData.availableSlots} 
                     disabled={!editMode}
@@ -404,28 +402,28 @@ const DoctorProfile = () => {
             <CardContent className="p-6">
               <div className="flex items-center gap-2 mb-1">
                 <Shield className="h-5 w-5 text-blue-500" />
-                <h3 className="text-xl font-bold">accountSecurity</h3>
+                <h3 className="text-xl font-bold">Account Security</h3>
               </div>
-              <p className="text-sm text-muted-foreground mb-4">managePassword</p>
-              
+              <p className="text-sm text-muted-foreground mb-4">Manage Password</p>
+
               <div className="grid grid-cols-1 gap-4">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">currentPassword</label>
+                  <label className="text-sm font-medium">Current Password</label>
                   <Input type="password" disabled={!editMode} placeholder="********" />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">newPassword</label>
+                  <label className="text-sm font-medium">New Password</label>
                   <Input type="password" disabled={!editMode} />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">confirmPassword</label>
+                  <label className="text-sm font-medium">Confirm Password</label>
                   <Input type="password" disabled={!editMode} />
                 </div>
               </div>
               
               <div className="mt-6">
                 <Button variant="outline" disabled={!editMode}>
-                  changePassword
+                  Change Password
                 </Button>
               </div>
             </CardContent>
@@ -435,15 +433,15 @@ const DoctorProfile = () => {
             <CardContent className="p-6">
               <div className="flex items-center gap-2 mb-1">
                 <Bell className="h-5 w-5 text-blue-500" />
-                <h3 className="text-xl font-bold">notifications</h3>
+                <h3 className="text-xl font-bold">Notifications</h3>
               </div>
-              <p className="text-sm text-muted-foreground mb-4">manageNotifications</p>
-              
+              <p className="text-sm text-muted-foreground mb-4">Manage Notifications</p>
+
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h4 className="font-medium">emailNotifications</h4>
-                    <p className="text-sm text-muted-foreground">receiveEmailNotifs</p>
+                    <h4 className="font-medium">Email Notifications</h4>
+                    <p className="text-sm text-muted-foreground">Receive Email Notifications</p>
                   </div>
                   <div>
                     <input
@@ -457,8 +455,8 @@ const DoctorProfile = () => {
                 </div>
                 <div className="flex items-center justify-between">
                   <div>
-                    <h4 className="font-medium">smsNotifications</h4>
-                    <p className="text-sm text-muted-foreground">receiveSmsNotifs</p>
+                    <h4 className="font-medium">SMS Notifications</h4>
+                    <p className="text-sm text-muted-foreground">Receive SMS Notifications</p>
                   </div>
                   <div>
                     <input
@@ -472,8 +470,8 @@ const DoctorProfile = () => {
                 </div>
                 <div className="flex items-center justify-between">
                   <div>
-                    <h4 className="font-medium">appointmentReminders</h4>
-                    <p className="text-sm text-muted-foreground">receiveAppointmentReminders</p>
+                    <h4 className="font-medium">Appointment Reminders</h4>
+                    <p className="text-sm text-muted-foreground">Receive Appointment Reminders</p>
                   </div>
                   <div>
                     <input
