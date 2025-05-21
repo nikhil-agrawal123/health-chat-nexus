@@ -1,9 +1,8 @@
-
 import React, { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Bot, User, Send, Mic, MicOff, ArrowRight, Clock, Brain } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
 
 interface Message {
   id: number;
@@ -40,6 +39,52 @@ const MedicalChatbot = () => {
   const [shouldScroll, setShouldScroll] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  // Speech recognition hook
+  const {
+    transcript,
+    listening,
+    resetTranscript,
+    browserSupportsSpeechRecognition
+  } = useSpeechRecognition();
+
+  // Start/stop speech recognition and handle transcript
+  const toggleRecording = () => {
+    if (!browserSupportsSpeechRecognition) {
+      toast({
+        title: "Speech Recognition Not Supported",
+        description: "Your browser does not support speech recognition.",
+        variant: "destructive"
+      });
+      return;
+    }
+    if (isRecording) {
+      SpeechRecognition.stopListening();
+      // The effect below will handle setting the transcript as input
+    } else {
+      setInput(""); // Optionally clear input before recording
+      setIsRecording(true);
+      toast({
+        title: "Voice recording started",
+        description: "Speak clearly to describe your symptoms..."
+      });
+      SpeechRecognition.startListening({ continuous: false, language: "en-IN" });
+    }
+  };
+
+  // When recording stops, set transcript as input
+  useEffect(() => {
+    if (!listening && isRecording) {
+      setIsRecording(false);
+      setInput(transcript);
+      toast({
+        title: "Voice recording stopped",
+        description: "Transcription complete. You can edit or send your message."
+      });
+      resetTranscript();
+    }
+    // eslint-disable-next-line
+  }, [listening]);
+
   useEffect(() => {
     // Only scroll when explicitly set to do so
     if (shouldScroll) {
@@ -53,9 +98,8 @@ const MedicalChatbot = () => {
   };
 
   const simulateAiResponse = (userMessage: string) => {
-    // In a real application, this would be an API call to an AI model
     setLoading(true);
-    
+
     // Add a processing message
     const processingMessage: Message = {
       id: messages.length + 2,
@@ -64,19 +108,18 @@ const MedicalChatbot = () => {
       timestamp: new Date(),
       isProcessing: true
     };
-    
+
     setMessages(prev => [...prev, processingMessage]);
     setShouldScroll(true);
-    
-    // Simulate API delay
+
     setTimeout(() => {
       // Remove the processing message
       setMessages(prev => prev.filter(m => !m.isProcessing));
-      
+
       let response = "";
       let suggestions: string[] = [];
       let doctorReferral = undefined;
-      
+
       // Simple keyword-based logic to simulate AI responses
       if (userMessage.toLowerCase().includes("headache")) {
         response = "Based on your description, you may be experiencing a tension headache. These are common and can be caused by stress, dehydration, or eye strain. Try resting in a dark room, staying hydrated, and taking an over-the-counter pain reliever if needed.";
@@ -98,7 +141,7 @@ const MedicalChatbot = () => {
         response = "Thank you for sharing your symptoms. While I'm designed to provide general health information, I'm not able to provide a specific diagnosis. If your symptoms are causing you significant discomfort or concern, I'd recommend consulting with a healthcare provider for personalized advice.";
         suggestions = ["Can you tell me more about your symptoms?", "When did these symptoms start?", "Have you experienced this before?"];
       }
-      
+
       const botMessage: Message = {
         id: messages.length + 3,
         text: response,
@@ -107,7 +150,7 @@ const MedicalChatbot = () => {
         suggestions,
         doctorReferral
       };
-      
+
       setMessages(prev => [...prev, botMessage]);
       setLoading(false);
       setShouldScroll(true);
@@ -116,18 +159,18 @@ const MedicalChatbot = () => {
 
   const handleSendMessage = () => {
     if (input.trim() === "") return;
-    
+
     const newMessage: Message = {
       id: messages.length + 1,
       text: input,
       sender: "user",
       timestamp: new Date()
     };
-    
+
     setMessages(prev => [...prev, newMessage]);
     setInput("");
     setShouldScroll(true);
-    
+
     simulateAiResponse(input);
   };
 
@@ -138,38 +181,11 @@ const MedicalChatbot = () => {
       sender: "user",
       timestamp: new Date()
     };
-    
+
     setMessages(prev => [...prev, newMessage]);
     setShouldScroll(true);
-    
-    simulateAiResponse(suggestion);
-  };
 
-  const toggleRecording = () => {
-    if (isRecording) {
-      setIsRecording(false);
-      toast({
-        title: "Voice recording stopped",
-        description: "Processing your message..."
-      });
-      
-      // Simulate voice transcription
-      setTimeout(() => {
-        const simulatedTranscription = "I've been having a headache for two days now.";
-        setInput(simulatedTranscription);
-        
-        // Optional: Auto-send the transcribed message
-        // const newMessage = { id: messages.length + 1, text: simulatedTranscription, sender: "user", timestamp: new Date() };
-        // setMessages(prev => [...prev, newMessage]);
-        // simulateAiResponse(simulatedTranscription);
-      }, 1500);
-    } else {
-      setIsRecording(true);
-      toast({
-        title: "Voice recording started",
-        description: "Speak clearly to describe your symptoms..."
-      });
-    }
+    simulateAiResponse(suggestion);
   };
 
   const bookAppointmentWithSpecialist = (specialty: string) => {
@@ -177,8 +193,7 @@ const MedicalChatbot = () => {
       title: "Referral Processing",
       description: `Looking for available ${specialty} specialists...`
     });
-    
-    // In a real app, this would navigate to the doctor booking UI filtered for the specialty
+
     setTimeout(() => {
       toast({
         title: "Specialists Found",

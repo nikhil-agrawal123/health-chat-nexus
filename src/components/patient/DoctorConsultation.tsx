@@ -209,7 +209,6 @@ const DoctorConsultation = () => {
   const confirmCancelAppointment = () => {
     if (currentAppointment) {
       // Update the appointment status to canceled
-      console.log(currentAppointment);
       cancelAppointment(currentAppointment.id);
       setAppointments(prev => 
         prev.map(apt => 
@@ -267,9 +266,14 @@ const DoctorConsultation = () => {
       title: "Joining Consultation",
       description: "Connecting to your doctor...",
     });
+
+    confirmCancelAppointment();
+
     navigate("/video-conference");
+    const meetingId = localStorage.getItem("meeting_id");
     // In a real app, this would initiate the video call
   };
+
 
   return (
     <div className="space-y-6">

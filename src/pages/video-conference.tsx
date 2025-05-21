@@ -13,8 +13,17 @@ function getUrlParams(url: string): Record<string, string> {
   return Object.fromEntries(urlSearchParams.entries());
 }
 
-
 const ZegoVideoConference: React.FC = () => {
+  // Force reload once on navigation to this page
+  useEffect(() => {
+    if (!sessionStorage.getItem("videoConferenceReloaded")) {
+      sessionStorage.setItem("videoConferenceReloaded", "true");
+      window.location.reload();
+    } else {
+      sessionStorage.removeItem("videoConferenceReloaded");
+    }
+  }, []);
+
   const rootRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
@@ -22,6 +31,20 @@ const ZegoVideoConference: React.FC = () => {
     const roomID =
       getUrlParams(window.location.href)["roomID"] ||
       Math.floor(Math.random() * 10000).toString();
+
+    // Construct the final meeting link
+    const meetingLink =
+      window.location.protocol +
+      "//" +
+      window.location.host +
+      window.location.pathname +
+      "?roomID=" +
+      roomID;
+
+    // Save the meeting id and final link in localStorage
+    localStorage.setItem("meeting_id", roomID);
+    localStorage.setItem("meeting_link", meetingLink);
+
     const userID = Math.floor(Math.random() * 10000).toString();
     const userName = "userName" + userID;
     const appID = 2003699826;
@@ -37,16 +60,13 @@ const ZegoVideoConference: React.FC = () => {
     const zp = window.ZegoUIKitPrebuilt.create(kitToken);
     zp.joinRoom({
       container: rootRef.current,
+      onLeaveRoom: () => {
+        navigate("/patient-dashboard");
+      },
       sharedLinks: [
         {
           name: "Personal link",
-          url:
-            window.location.protocol +
-            "//" +
-            window.location.host +
-            window.location.pathname +
-            "?roomID=" +
-            roomID,
+          url: meetingLink,
         },
       ],
       scenario: {
@@ -63,12 +83,8 @@ const ZegoVideoConference: React.FC = () => {
       maxUsers: 2,
       layout: "Auto",
       showLayoutButton: false,
-
-      onLeaveRoom: () => {
-        navigate("/patient-dashboard");
-      }
     });
-  }, []);
+  }, [navigate]);
 
   return (
     <div
@@ -79,4 +95,4 @@ const ZegoVideoConference: React.FC = () => {
   );
 };
 
-export default ZegoVideoConference
+export default ZegoVideoConference;
