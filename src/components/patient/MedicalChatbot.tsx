@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Bot, Send, Mic, MicOff, ArrowRight, Clock, Brain } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -21,7 +21,7 @@ const MedicalChatbot = () => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 1,
-      text: "Hi there! I'm your AI Health Assistant. How can I help you today?",
+      text: "Hi there! Please describe your symptoms.",
       sender: "bot",
       timestamp: new Date(),
       suggestions: [
