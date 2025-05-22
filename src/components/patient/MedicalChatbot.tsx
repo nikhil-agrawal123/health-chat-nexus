@@ -122,6 +122,9 @@ const MedicalChatbot = () => {
     setInput("");
   };
 
+  const currentLanguage = localStorage.getItem("language") || "en";
+  console.log(currentLanguage);
+
   return (
     <div className="flex flex-col h-[calc(100vh-250px)] overflow-hidden rounded-lg shadow-md bg-white">
       <div className="bg-health-600 text-white p-4 flex items-center justify-between">

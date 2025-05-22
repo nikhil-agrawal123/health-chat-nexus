@@ -1,6 +1,6 @@
-
-import React from "react";
+import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+
 import { 
   LayoutDashboard, 
   User, 
@@ -53,13 +53,25 @@ const PatientSidebar: React.FC<PatientSidebarProps> = ({
     "English",
     "Hindi",
     "Punjabi",
-    "Haryanvi",
-    "Bhojpuri",
     "Telugu",
     "Tamil",
     "Gujarati",
-    "Urdu"
+    "Bengali",
   ];
+
+  // On mount, set language from localStorage if available
+  useEffect(() => {
+    const storedLang = localStorage.getItem("language");
+    if (storedLang && storedLang !== language) {
+      setLanguage(storedLang as any);
+    }
+    // eslint-disable-next-line
+  }, []);
+
+  // Whenever language changes, update localStorage
+  useEffect(() => {
+    localStorage.setItem("language", language);
+  }, [language]);
 
   const handleLogout = () => {
     toast({
