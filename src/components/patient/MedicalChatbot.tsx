@@ -55,14 +55,39 @@ const MedicalChatbot = () => {
           }
         };
         mediaRecorder.onstop = async () => {
-          const audioBlob = new Blob(audioChunks.current, { type: "audio/webm" });
-          const url = URL.createObjectURL(audioBlob);
-          setAudioUrl(url);
-          toast({
-            title: "Recording complete",
-            description: "Audio saved. You can download it below."
-          });
-        };
+  const audioBlob = new Blob(audioChunks.current, { type: "audio/webm" });
+
+  // Prepare form data
+  const formData = new FormData();
+  formData.append("audio", audioBlob, "recording.webm");
+
+  try {
+    const response = await fetch("http://localhost:8081/record", {
+      method: "POST",
+      body: formData,
+    });
+
+    if (response.ok) {
+      toast({
+        title: "Upload complete",
+        description: "Audio uploaded to the server.",
+      });
+      setAudioUrl(null); // Optionally clear the download link
+    } else {
+      toast({
+        title: "Upload failed",
+        description: "Could not upload audio to the server.",
+        variant: "destructive",
+      });
+    }
+  } catch (err) {
+    toast({
+      title: "Upload error",
+      description: "An error occurred while uploading.",
+      variant: "destructive",
+    });
+  }
+};
         mediaRecorder.start();
         setIsRecording(true);
         toast({
