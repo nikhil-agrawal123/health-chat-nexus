@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { TestTube, Calendar, Clock, MapPin, Check, AlertCircle, X, ArrowRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useLanguage } from "@/contexts/LanguageContext";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface LabTest {
   id: string;

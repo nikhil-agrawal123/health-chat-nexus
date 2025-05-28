@@ -20,7 +20,7 @@ import {
   ExternalLink,
   Search,
 } from "lucide-react";
-import { useLanguage } from "@/contexts/LanguageContext";
+import { useLanguage } from "@/context/LanguageContext";
 import { Input } from "@/components/ui/input";
 import {
   Dialog,

@@ -2,30 +2,61 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Lock, User, ArrowLeft } from "lucide-react";
+import { Lock, User, ArrowLeft, Mail } from "lucide-react";
 import GlassCard from "@/components/ui/GlassCard";
 import AnimatedButton from "@/components/ui/AnimatedButton";
 import { useToast } from "@/hooks/use-toast";
+import ApiService from "../services/api";
 
 const PatientLogin = () => {
-  const [id, setId] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Authentication logic would go here
-    console.log("Patient login attempt with:", { id, password });
     
-    // Show success toast and navigate to dashboard
-    toast({
-      title: "Login Successful",
-      description: "Welcome to your patient dashboard.",
-    });
-    
-    // Navigate to patient dashboard
-    navigate("/patient-dashboard");
+    try {
+      setIsLoading(true);
+
+      console.log("Submitting login form:", { email });
+      
+      // Call the API service with email instead of id
+      const data = await ApiService.loginPatient({ 
+        email,
+        password 
+      });
+      
+      if (data.success) {
+        // LocalStorage is just a backup, the real auth is in the cookie
+        localStorage.setItem('userId', data.user?.id || data._id || data.userId || '');
+        localStorage.setItem('userName', data.user?.name || email);
+        localStorage.setItem('userRole', 'patient');
+        
+        toast({
+          title: "Login Successful",
+          description: "Welcome to your health dashboard",
+        });
+        
+        // Give a slight delay to ensure cookie is properly set
+        setTimeout(() => {
+          navigate("/patient-dashboard");
+        }, 100);
+      } else {
+        throw new Error("Login failed");
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      toast({
+        title: "Login Failed",
+        description: error instanceof Error ? error.message : "Invalid email or password",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -52,20 +83,20 @@ const PatientLogin = () => {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <label htmlFor="id" className="text-sm font-medium">
-              User ID
+            <label htmlFor="email" className="text-sm font-medium">
+              Email Address
             </label>
             <div className="relative">
               <Input
-                id="id"
-                type="text"
-                placeholder="HOS1234456"
-                value={id}
-                onChange={(e) => setId(e.target.value)}
+                id="email"
+                type="email"
+                placeholder="your.email@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 className="pl-10"
                 required
               />
-              <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             </div>
           </div>
 
@@ -103,16 +134,14 @@ const PatientLogin = () => {
             </a>
           </div>
 
-          <AnimatedButton type="submit" className="w-full">
-            Sign In
+          <AnimatedButton type="submit" className="w-full" disabled={isLoading}>
+            {isLoading ? "Signing In..." : "Sign In"}
           </AnimatedButton>
 
           <div className="text-center text-sm text-muted-foreground mt-6">
             Don't have an account?{" "}
             <a href="#" className="text-health-600 hover:underline">
-              <button
-                onClick={() => navigate("/patient-signup")}
-              >
+              <button type="button" onClick={() => navigate("/patient-signup")}>
                 Create one now
               </button>
             </a>
