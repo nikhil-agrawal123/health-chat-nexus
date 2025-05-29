@@ -1,5 +1,4 @@
-//import ZegoVideoConference from "@/pages/VideoConference";
-import React, { useState, useEffect } from "react";
+import  { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,7 +8,6 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Calendar, Clock, Video, Phone, UserCircle, Search, Star, Check, Clock4 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import ApiService from '../../services/api.js'
 
 interface Doctor {
   id: string;
@@ -34,23 +32,6 @@ interface Appointment {
   photo: string;
 }
 
-// Define specialties based on the Doctor model
-const specialties = [
-  'General Medicine',
-  'Cardiology',
-  'Dermatology',
-  'Pediatrics',
-  'Orthopedics',
-  'Neurology',
-  'Psychiatry',
-  'Gynecology',
-  'ENT',
-  'Ophthalmology',
-  'Dentistry',
-  'Emergency Medicine'
-];
-
-
 const DoctorConsultation = () => {
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
@@ -66,14 +47,6 @@ const DoctorConsultation = () => {
   const [newAppointmentTime, setNewAppointmentTime] = useState<string | null>(null);
   const [id, setId] = useState<string | null>(null);
   const navigate = useNavigate();
-  // Add this after your state declarations (around line 63)
-  const [doctors, setDoctors] = useState<Doctor[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  // Add this with your other state variables
-  const [selectedDate, setSelectedDate] = useState<string>(
-    new Date(Date.now() + 86400000).toISOString().split('T')[0] // Tomorrow by default
-  );
-
 
   // Load appointments from localStorage on component mount
   useEffect(() => {
@@ -92,117 +65,90 @@ const DoctorConsultation = () => {
     }
   }, []);
 
-  // Update the saveAppointment function
   async function saveAppointment(appointment: Appointment) {
-    try {
-      // First save to the Node.js backend
-      const nodeResponse = await fetch("http://localhost:5000/api/appointments", {
-        method: "POST",
-        headers: { 
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({
-          doctorId: appointment.doctorId,
-          appointmentDate: appointment.date,
-          timeSlot: appointment.time,
-          status: "scheduled"
-        }),
-      });
-      
-      if (!nodeResponse.ok) {
-        throw new Error('Failed to book appointment');
-      }
-      
-      const nodeData = await nodeResponse.json();
-      
-      // Then save to the Python backend for any ML processing needs
-      const pythonResponse = await fetch("http://localhost:8081/meeting", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...appointment,
-          id: nodeData.appointmentId || appointment.id,
-        }),
-      });
-      
-      const pythonData = await pythonResponse.json();
-      
-      return {
-        ...nodeData,
-        ...pythonData
-      };
-    } catch (error) {
-      console.error("Error saving appointment:", error);
-      throw error;
-    }
+    const response = await fetch("http://localhost:8081/meeting", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(appointment),
+    });
+    const data = await response.json();
+    return data;
   }
 
-  // Replace the useEffect block for fetching doctors with this:
+  // Save appointments to localStorage whenever they change
   useEffect(() => {
-    const fetchDoctors = async () => {
-      try {
-        setIsLoading(true);
-        
-        // Fetch all doctors
-        const response = await ApiService.getAllDoctors();
-        
-        if (response.success && response.doctors) {
-          setDoctors(response.doctors.map(doctor => ({
-            id: doctor._id,
-            name: doctor.name,
-            specialty: doctor.specialization,
-            language: doctor.languages || ["English"],
-            experience: doctor.experience || 0,
-            rating: doctor.rating || 4.5,
-            availability: doctor.availability?.timeSlots || [],
-            photo: doctor.profileImage || "/placeholder.svg",
-            price: doctor.consultationFee || 100
-          })));
-        }
-        
-        // Fetch patient's appointments
-        const appointmentsResponse = await ApiService.getPatientAppointments();
-        
-        if (appointmentsResponse.success && appointmentsResponse.appointments) {
-          const formattedAppointments = appointmentsResponse.appointments.map(apt => ({
-            id: apt._id,
-            doctorId: apt.doctorId._id,
-            doctorName: apt.doctorId.name,
-            specialty: apt.doctorId.specialization,
-            date: new Date(apt.appointmentDate).toLocaleDateString(),
-            time: apt.timeSlot,
-            status: apt.status,
-            photo: apt.doctorId.profileImage || "/placeholder.svg"
-          }));
-          
-          setAppointments(formattedAppointments);
-          
-          // Set current appointment if there's an active one
-          const active = formattedAppointments.find(apt => 
-            apt.status === 'scheduled' || apt.status === 'confirmed'
-          );
-          
-          if (active) {
-            setCurrentAppointment(active);
-            setBookingComplete(true);
-          }
-        }
-      } catch (error) {
-        console.error("Error fetching doctors or appointments:", error);
-        toast({
-          title: "Error",
-          description: "Failed to load doctors or appointments",
-          variant: "destructive"
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
+    if (appointments.length > 0) {
+      localStorage.setItem('appointments', JSON.stringify(appointments));
+    }
+  }, [appointments]);
 
-    fetchDoctors();
-  }, []);
+  // Sample data for doctors
+  const doctors: Doctor[] = [
+    {
+      id: "1",
+      name: "Dr. Sarah Johnson",
+      specialty: "Cardiology",
+      language: ["English", "Spanish"],
+      experience: 12,
+      rating: 4.8,
+      availability: ["10:00 AM", "2:00 PM", "4:30 PM"],
+      photo: "/placeholder.svg",
+      price: 150
+    },
+    {
+      id: "2",
+      name: "Dr. Michael Chen",
+      specialty: "Dermatology",
+      language: ["English", "Mandarin"],
+      experience: 8,
+      rating: 4.6,
+      availability: ["9:30 AM", "1:30 PM", "5:00 PM"],
+      photo: "/placeholder.svg",
+      price: 140
+    },
+    {
+      id: "3",
+      name: "Dr. Emily Rodriguez",
+      specialty: "Pediatrics",
+      language: ["English", "Spanish"],
+      experience: 15,
+      rating: 4.9,
+      availability: ["11:00 AM", "3:00 PM", "4:00 PM"],
+      photo: "/placeholder.svg",
+      price: 130
+    },
+    {
+      id: "4",
+      name: "Dr. David Kim",
+      specialty: "Orthopedics",
+      language: ["English", "Korean"],
+      experience: 10,
+      rating: 4.7,
+      availability: ["8:30 AM", "12:30 PM", "3:30 PM"],
+      photo: "/placeholder.svg",
+      price: 160
+    },
+    {
+      id: "5",
+      name: "Dr. Lisa Patel",
+      specialty: "Neurology",
+      language: ["English", "Hindi", "Gujarati"],
+      experience: 14,
+      rating: 4.9,
+      availability: ["9:00 AM", "1:00 PM", "4:00 PM"],
+      photo: "/placeholder.svg",
+      price: 170
+    }
+  ];
 
+  const specialties = [...new Set(doctors.map(doctor => doctor.specialty))];
+
+  const filteredDoctors = doctors.filter(doctor => {
+    const matchesSearch = doctor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         doctor.specialty.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSpecialty = selectedSpecialty ? doctor.specialty === selectedSpecialty : true;
+    return matchesSearch && matchesSpecialty;
+  });
 
   const handleDoctorSelect = (doctor: Doctor) => {
     setSelectedDoctor(doctor);
@@ -219,58 +165,31 @@ const DoctorConsultation = () => {
     }
   };
 
-  // Replace the confirmBooking function with this:
-  const confirmBooking = async () => {
+  const confirmBooking = () => {
     if (selectedDoctor && appointmentTime) {
-      try {
-        setIsLoading(true);
-        
-        // Format the date as YYYY-MM-DD
-        const today = new Date().toISOString().split('T')[0];
-        
-        const response = await ApiService.createAppointment({
-          doctorId: selectedDoctor.id,
-          appointmentDate: selectedDate, // Use selected date instead of today
-          timeSlot: appointmentTime,
-          consultationType: 'video',
-          symptoms: ""
-        });
-        
-        if (response.success && response.appointment) {
-          // Format the new appointment for the UI
-          const newAppointment = {
-            id: response.appointment._id,
-            doctorId: selectedDoctor.id,
-            doctorName: selectedDoctor.name,
-            specialty: selectedDoctor.specialty,
-            date: new Date(response.appointment.appointmentDate).toLocaleDateString(),
-            time: appointmentTime,
-            status: response.appointment.status,
-            photo: selectedDoctor.photo
-          };
-          
-          setAppointments(prev => [...prev, newAppointment]);
-          setCurrentAppointment(newAppointment);
-          setBookingComplete(true);
-          setShowDialog(false);
-          
-          toast({
-            title: "Appointment Booked",
-            description: `Your appointment with ${selectedDoctor.name} at ${appointmentTime} has been confirmed.`,
-          });
-        } else {
-          throw new Error(response.message || "Failed to book appointment");
-        }
-      } catch (error) {
-        console.error("Error booking appointment:", error);
-        toast({
-          title: "Booking Failed",
-          description: error instanceof Error ? error.message : "Failed to book appointment",
-          variant: "destructive"
-        });
-      } finally {
-        setIsLoading(false);
-      }
+      const newAppointment = {
+        id: Date.now().toString(),
+        doctorId: selectedDoctor.id,
+        doctorName: selectedDoctor.name,
+        specialty: selectedDoctor.specialty,
+        date: 'Today',
+        time: appointmentTime,
+        status: 'scheduled' as const,
+        photo: selectedDoctor.photo
+      };
+
+      saveAppointment(newAppointment)
+      
+      // Update the appointments list and current appointment
+      setAppointments(prev => [...prev, newAppointment]);
+      setCurrentAppointment(newAppointment);
+      setBookingComplete(true);
+      setShowDialog(false);
+      
+      toast({
+        title: "Appointment Booked",
+        description: `Your appointment with ${selectedDoctor.name} at ${appointmentTime} has been confirmed.`,
+      });
     }
   };
 
@@ -279,7 +198,7 @@ const DoctorConsultation = () => {
   };
 
   async function cancelAppointment(appointmentId: string) {
-    const response = await fetch(`http://localhost:5000/meeting/${appointmentId}`, {
+    const response = await fetch(`http://localhost:8081/meeting/${appointmentId}`, {
       method: "DELETE",
     });
     const data = await response.json();
@@ -341,30 +260,19 @@ const DoctorConsultation = () => {
     }
   };
 
-  // Update the startConsultation function
   const startConsultation = () => {
-    if (currentAppointment) {
-      toast({
-        title: "Joining Consultation",
-        description: "Connecting to your doctor...",
-      });
-      
-      // Navigate to the video conference with the appointment ID
-      navigate(`/video-conference/${currentAppointment.id}`);
-    }
+    toast({
+      title: "Joining Consultation",
+      description: "Connecting to your doctor...",
+    });
+
+    confirmCancelAppointment();
+
+    navigate("/video-conference/" + currentAppointment?.id);
+    const meetingId = localStorage.getItem("meeting_id");
+    // In a real app, this would initiate the video call
   };
 
-  // Add this computed property before the return statement (around line 339)
-  const filteredDoctors = doctors.filter(doctor => {
-    const matchesSearch = searchTerm === "" || 
-      doctor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      doctor.specialty.toLowerCase().includes(searchTerm.toLowerCase());
-      
-    const matchesSpecialty = selectedSpecialty === null || 
-      doctor.specialty === selectedSpecialty;
-      
-    return matchesSearch && matchesSpecialty;
-  });
 
   return (
     <div className="space-y-6">
@@ -587,17 +495,6 @@ const DoctorConsultation = () => {
         </Tabs>
       )}
       
-      <div className="flex justify-between items-center">
-        <span className="font-medium">Date:</span>
-        <Input
-          type="date"
-          value={selectedDate}
-          onChange={(e) => setSelectedDate(e.target.value)}
-          min={new Date().toISOString().split('T')[0]} // Can't select dates in the past
-          className="w-40"
-        />
-      </div>
-      
       {/* Booking Dialog */}
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
         <DialogContent>
@@ -619,7 +516,7 @@ const DoctorConsultation = () => {
             </div>
             <div className="flex justify-between items-center">
               <span className="font-medium">Date:</span>
-              <span>{new Date(selectedDate).toLocaleDateString()}</span>
+              <span>Today</span>
             </div>
             <div className="flex justify-between items-center">
               <span className="font-medium">Time:</span>

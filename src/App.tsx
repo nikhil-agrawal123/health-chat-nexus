@@ -12,7 +12,7 @@ import PatientDashboard from "./pages/PatientDashboard";
 import DoctorDashboard from "./pages/DoctorDashboard";
 import NotFound from "./pages/NotFound";
 import PatientSignup from "./pages/PatientSignUp";
-import VideoConference from './pages/VideoConference';
+import VideoConference from './pages/video-confernce';
 
 import { AuthProvider } from './context/AuthContext';
 
@@ -67,7 +67,7 @@ const App = () => (
                         <Route 
                             path="/video-conference/:appointmentId" 
                             element={
-                                <ProtectedRoute>
+                                <ProtectedRoute requiredRole="patient">
                                     <VideoConference />
                                 </ProtectedRoute>
                             } 
