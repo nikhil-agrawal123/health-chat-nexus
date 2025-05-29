@@ -72,6 +72,8 @@ const MedicalChatbot = () => {
         title: "Upload complete",
         description: "Audio uploaded to the server.",
       });
+      const data = await response.json();
+      console.log("Transcript:", data.transcription);
       setAudioUrl(null); // Optionally clear the download link
     } else {
       toast({
