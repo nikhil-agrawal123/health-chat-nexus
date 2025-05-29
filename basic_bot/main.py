@@ -9,10 +9,10 @@ lemmatizer = WordNetLemmatizer()
 nltk.download('punkt')
 
 # Load intents and model data
-intents = json.loads(open('C:/Users/Nikhil/PycharmProjects/AIproject/basic_bot/intents.json').read())
-words = pickle.load(open('C:/Users/Nikhil/PycharmProjects/AIproject/basic_bot/words.pkl', 'rb'))
-classes = pickle.load(open('C:/Users/Nikhil/PycharmProjects/AIproject/basic_bot/classes.pkl', 'rb'))
-model = tf.keras.models.load_model('C:/Users/Nikhil/PycharmProjects/AIproject/basic_bot/chatbot_model.h5')
+intents = json.loads(open('C:\Users/Nikhil/Desktop/health-chat-nexus/basic_bot/intents.json').read())
+words = pickle.load(open('C:/Users/Nikhil/Desktop/health-chat-nexus/basic_bot/words.pkl', 'rb'))
+classes = pickle.load(open('C:/Users/Nikhil/Desktop/health-chat-nexus/basic_bot/classes.pkl', 'rb'))
+model = tf.keras.models.load_model('C:/Users/Nikhil/Desktop/health-chat-nexus/basic_bot/chatbot_model.h5')
 
 def clean_up_sentence(sentence):
     sentence_words = nltk.word_tokenize(sentence)

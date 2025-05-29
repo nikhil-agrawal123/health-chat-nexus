@@ -2,6 +2,7 @@ import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Bot, Send, Mic, MicOff, ArrowRight, Clock, Brain } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import {multiLingual} from "@/utils/translation"; // Removed: module not found
 
 interface Message {
   id: number;
@@ -57,6 +58,7 @@ const MedicalChatbot = () => {
         mediaRecorder.onstop = async () => {
   const audioBlob = new Blob(audioChunks.current, { type: "audio/webm" });
 
+
   // Prepare form data
   const formData = new FormData();
   formData.append("audio", audioBlob, "recording.webm");
@@ -68,20 +70,32 @@ const MedicalChatbot = () => {
     });
 
     if (response.ok) {
-      toast({
-        title: "Upload complete",
-        description: "Audio uploaded to the server.",
-      });
-      const data = await response.json();
-      console.log("Transcript:", data.transcription);
-      setAudioUrl(null); // Optionally clear the download link
-    } else {
-      toast({
-        title: "Upload failed",
-        description: "Could not upload audio to the server.",
-        variant: "destructive",
-      });
-    }
+  toast({
+    title: "Upload complete",
+    description: "Audio uploaded to the server.",
+  });
+  const data = await response.json();
+  localStorage.setItem("transcription", data.transcription);
+  console.log("Transcript:", data.transcription);
+
+  // Set transcript as input, but do NOT send automatically
+  let tramslation = multiLingual( localStorage.getItem("language") || "English", data.transcription);
+  tramslation.then((translatedText) => {
+    setInput(translatedText);
+    toast({
+      title: "Translation complete",
+      description: "Your message has been translated.",
+    });
+  })
+
+  setAudioUrl(null);
+} else {
+  toast({
+    title: "Upload failed",
+    description: "Could not upload audio to the server.",
+    variant: "destructive",
+  });
+}
   } catch (err) {
     toast({
       title: "Upload error",
@@ -110,23 +124,21 @@ const MedicalChatbot = () => {
     }
   };
 
-  const handleSendMessage = () => {
-    if (input.trim() === "") return;
+  const handleSendMessage = (msg?: string) => {
+  const messageToSend = (msg !== undefined ? msg : input).trim();
+  if (messageToSend === "") return;
 
-    const newMessage: Message = {
-      id: messages.length + 1,
-      text: input,
-      sender: "user",
-      timestamp: new Date()
-    };
-
-    setMessages(prev => [...prev, newMessage]);
-    setInput("");
+  const newMessage: Message = {
+    id: messages.length + 1,
+    text: messageToSend,
+    sender: "user",
+    timestamp: new Date()
   };
 
-  const currentLanguage = localStorage.getItem("language") || "en";
-  console.log(currentLanguage);
-
+  setMessages(prev => [...prev, newMessage]);
+  
+  setInput("");
+};
   return (
     <div className="flex flex-col h-[calc(100vh-250px)] overflow-hidden rounded-lg shadow-md bg-white">
       <div className="bg-health-600 text-white p-4 flex items-center justify-between">
@@ -197,7 +209,7 @@ const MedicalChatbot = () => {
           <Button 
             size="sm"
             className="rounded-full"
-            onClick={handleSendMessage}
+            onClick={() => handleSendMessage()}
             disabled={loading || input.trim() === ''}
           >
             <Send className="h-4 w-4" />
