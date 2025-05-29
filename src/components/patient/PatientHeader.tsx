@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Menu } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { useLanguage } from "@/contexts/LanguageContext";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface PatientHeaderProps {
   activeTab: string;

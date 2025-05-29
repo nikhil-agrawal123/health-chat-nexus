@@ -5,7 +5,7 @@ import {
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { useLanguage } from "@/contexts/LanguageContext";
+import { useLanguage } from "@/context/LanguageContext";
 
 type ButtonVariant = "default" | "outline" | "link" | "destructive" | "secondary" | "ghost";
 

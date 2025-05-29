@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import {
   Tabs,
@@ -135,12 +134,26 @@ const DoctorDashboard = () => {
     navigate("/");
   };
 
-  const handleStartConsultation = (patientId: string) => {
-    setSelectedPatient(patientId);
-    toast({
-      title: "Starting consultation",
-      description: "Connecting to video call...",
-    });
+  // Update the handleStartConsultation function
+  const handleStartConsultation = (consultationId: string) => {
+    // Find the consultation to get details
+    const consultation = consultations.find(c => c.id === consultationId);
+    
+    if (consultation) {
+      toast({
+        title: "Starting consultation",
+        description: "Connecting to video call...",
+      });
+      
+      // Navigate to the video conference with the appointment ID
+      navigate(`/video-conference/${consultationId}`);
+    } else {
+      toast({
+        title: "Error",
+        description: "Consultation not found",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleUploadPrescription = (patientId: string) => {
@@ -338,7 +351,7 @@ const DoctorDashboard = () => {
                         <Button 
                           variant="outline" 
                           size="sm"
-                          onClick={() => handleStartConsultation(consultation.patientId)}
+                          onClick={() => handleStartConsultation(consultation.id)}
                         >
                           Join
                         </Button>

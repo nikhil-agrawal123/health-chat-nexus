@@ -1,4 +1,4 @@
-
+import { useNavigate } from "react-router-dom";
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,6 +6,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Calendar, Clock, Video } from "lucide-react";
 
 const VirtualConsultation = () => {
+  
+  const navigate = useNavigate();
   const [consultations] = useState([
     {
       id: 1,
@@ -80,8 +82,13 @@ const VirtualConsultation = () => {
                 </div>
               </div>
             </CardContent>
+            // Update the Join Consultation button
             <CardFooter className="pt-2">
-              <Button className="w-full" variant="outline">
+              <Button 
+                className="w-full" 
+                variant="outline"
+                onClick={() => navigate(`/video-conference/${consultation.id}`)}
+              >
                 <Video className="h-4 w-4 mr-2" />
                 Join Consultation
               </Button>

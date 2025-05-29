@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { 
   User, 
   Mail, 
@@ -17,49 +17,235 @@ import {
   Award,
   Stethoscope,
   GraduationCap,
-  Clock
+  Clock,
+  Loader2
 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import ApiService from "@/services/api";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const DoctorProfile = () => {
   const [activeTab, setActiveTab] = useState("personal");
   const [editMode, setEditMode] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
+  const { toast } = useToast();
   
-  // Mock doctor data
+  // Initialize with fields that match the Doctor schema
   const [doctorData, setDoctorData] = useState({
-    firstName: "Aditya",
-    lastName: "Sharma",
-    email: "dr.aditya.sharma@example.com",
-    phone: "+91 98765 43210",
-    alternatePhone: "+91 87654 32109",
-    dob: "1980-06-22",
-    gender: "Male",
-    specialization: "Cardiology",
-    qualification: "MD, DM Cardiology",
-    experience: "15",
-    imaNumber: "IMA-MH-12345",
-    registrationNumber: "MCI-98765",
-    consultationFee: "1000",
-    availableSlots: "Mon-Fri, 10:00 AM - 6:00 PM",
-    languages: "English, Hindi, Marathi",
-    address: "456 Healthcare Avenue, Andheri East",
-    city: "Mumbai",
-    state: "Maharashtra",
-    pincode: "400069",
-    hospitalAffiliation: "City General Hospital",
-    bio: "Dr. Aditya Sharma is a renowned cardiologist with over 15 years of experience in treating cardiovascular diseases. He specializes in interventional cardiology and has performed over 1000 successful procedures."
+    name: "",
+    email: "",
+    phone: "",
+    specialization: "",
+    experience: "",
+    qualifications: [],
+    age: "",
+    gender: "",
+    consultationFee: "",
+    availability: {
+      days: [],
+      timeSlots: []
+    },
+    profileImage: "",
+    // Additional fields that might be added in the future
+    address: "",
+    city: "",
+    state: "",
+    pincode: "",
+    bio: "",
+    languages: []
   });
 
-  const handleSave = () => {
-    setEditMode(false);
-    // In a real app, you would save the data to the backend here
+  // List of available specializations from the schema
+  const specializations = [
+    'General Medicine',
+    'Cardiology',
+    'Dermatology',
+    'Pediatrics',
+    'Orthopedics',
+    'Neurology',
+    'Psychiatry',
+    'Gynecology',
+    'ENT',
+    'Ophthalmology',
+    'Dentistry',
+    'Emergency Medicine'
+  ];
+
+  // Days of the week for availability
+  const daysOfWeek = [
+    'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'
+  ];
+
+  // Fetch doctor profile data on component mount
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        setIsLoading(true);
+        const response = await ApiService.getDoctorProfile();
+        
+        console.log("Doctor profile response:", response);
+        
+        if (response.success && response.doctor) {
+          const doctor = response.doctor;
+          
+          setDoctorData({
+            name: doctor.name || "",
+            email: doctor.email || "",
+            phone: doctor.phone || "",
+            specialization: doctor.specialization || "",
+            experience: doctor.experience?.toString() || "",
+            qualifications: doctor.qualifications || [],
+            age: doctor.age?.toString() || "",
+            gender: doctor.gender || "",
+            consultationFee: doctor.consultationFee?.toString() || "",
+            availability: doctor.availability || { days: [], timeSlots: [] },
+            profileImage: doctor.profileImage || "",
+            // Additional fields that might be present
+            address: doctor.address || "",
+            city: doctor.city || "",
+            state: doctor.state || "",
+            pincode: doctor.pincode || "",
+            bio: doctor.bio || "",
+            languages: doctor.languages || []
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching profile:", error);
+        setError("Failed to load profile data");
+        toast({
+          title: "Error",
+          description: "Failed to load profile data",
+          variant: "destructive"
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, []);
+
+  const handleSave = async () => {
+    try {
+      setIsLoading(true);
+      
+      // Prepare data for the API, including only fields in the schema
+      const profileData = {
+        name: doctorData.name,
+        phone: doctorData.phone,
+        specialization: doctorData.specialization,
+        experience: parseInt(doctorData.experience) || 0,
+        qualifications: doctorData.qualifications,
+        age: parseInt(doctorData.age) || 25,
+        gender: doctorData.gender,
+        consultationFee: parseInt(doctorData.consultationFee) || 0,
+        availability: doctorData.availability,
+        // Include additional fields if the backend supports them
+        ...(doctorData.address && { address: doctorData.address }),
+        ...(doctorData.city && { city: doctorData.city }),
+        ...(doctorData.state && { state: doctorData.state }),
+        ...(doctorData.pincode && { pincode: doctorData.pincode }),
+        ...(doctorData.bio && { bio: doctorData.bio }),
+        ...(doctorData.languages.length > 0 && { languages: doctorData.languages })
+      };
+      
+      // Update profile
+      const response = await ApiService.updateDoctorProfile(profileData);
+      
+      if (response.success) {
+        toast({
+          title: "Profile Updated",
+          description: "Your profile has been updated successfully",
+        });
+        setEditMode(false);
+      } else {
+        throw new Error(response.message || "Failed to update profile");
+      }
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      toast({
+        title: "Update Failed",
+        description: error instanceof Error ? error.message : "Failed to update profile",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleInputChange = (field: string, value: string) => {
+  const handleInputChange = (field, value) => {
     setDoctorData(prev => ({
       ...prev,
       [field]: value
     }));
   };
+
+  const handleAvailabilityChange = (type, value) => {
+    setDoctorData(prev => ({
+      ...prev,
+      availability: {
+        ...prev.availability,
+        [type]: value
+      }
+    }));
+  };
+
+  const addTimeSlot = () => {
+    if (!doctorData.newTimeSlot) return;
+    
+    setDoctorData(prev => ({
+      ...prev,
+      availability: {
+        ...prev.availability,
+        timeSlots: [...prev.availability.timeSlots, prev.newTimeSlot]
+      },
+      newTimeSlot: ""
+    }));
+  };
+
+  const removeTimeSlot = (index) => {
+    setDoctorData(prev => ({
+      ...prev,
+      availability: {
+        ...prev.availability,
+        timeSlots: prev.availability.timeSlots.filter((_, i) => i !== index)
+      }
+    }));
+  };
+
+  const handleDayToggle = (day) => {
+    const currentDays = doctorData.availability.days || [];
+    const newDays = currentDays.includes(day)
+      ? currentDays.filter(d => d !== day)
+      : [...currentDays, day];
+    
+    handleAvailabilityChange('days', newDays);
+  };
+
+  const getInitials = () => {
+    if (!doctorData.name) return "DR";
+    return doctorData.name.split(" ").map(n => n[0]).join("");
+  };
+
+  if (isLoading && !editMode) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <Loader2 className="h-8 w-8 animate-spin text-health-600" />
+        <span className="ml-2">Loading profile data...</span>
+      </div>
+    );
+  }
+
+  if (error && !doctorData.email) {
+    return (
+      <div className="p-6 text-center">
+        <AlertCircle className="h-10 w-10 text-red-500 mx-auto mb-4" />
+        <h3 className="text-xl font-semibold">{error}</h3>
+        <p className="text-gray-500 mt-2">Please try refreshing the page</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -68,9 +254,13 @@ const DoctorProfile = () => {
           <div className="flex flex-col md:flex-row items-center gap-6">
             <div className="relative">
               <Avatar className="h-24 w-24 border-4 border-health-100">
-                <AvatarFallback className="bg-health-500 text-white text-2xl">
-                  {doctorData.firstName.charAt(0)}{doctorData.lastName.charAt(0)}
-                </AvatarFallback>
+                {doctorData.profileImage ? (
+                  <AvatarImage src={doctorData.profileImage} alt={doctorData.name} />
+                ) : (
+                  <AvatarFallback className="bg-health-500 text-white text-2xl">
+                    {getInitials()}
+                  </AvatarFallback>
+                )}
               </Avatar>
               {!editMode && (
                 <Button 
@@ -85,7 +275,7 @@ const DoctorProfile = () => {
             </div>
             
             <div className="flex-1 text-center md:text-left">
-              <h2 className="text-2xl font-bold">Dr. {doctorData.firstName} {doctorData.lastName}</h2>
+              <h2 className="text-2xl font-bold">Dr. {doctorData.name}</h2>
               <p className="text-health-600 font-medium">{doctorData.specialization}</p>
               <div className="flex flex-col md:flex-row md:items-center gap-1 md:gap-4 text-muted-foreground mt-1">
                 <div className="flex items-center gap-1">
@@ -101,11 +291,25 @@ const DoctorProfile = () => {
             
             {editMode ? (
               <div className="flex gap-2">
-                <Button variant="outline" onClick={() => setEditMode(false)}>
+                <Button 
+                  variant="outline" 
+                  onClick={() => setEditMode(false)}
+                  disabled={isLoading}
+                >
                   Cancel
                 </Button>
-                <Button onClick={handleSave}>
-                  Save
+                <Button 
+                  onClick={handleSave}
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    "Save"
+                  )}
                 </Button>
               </div>
             ) : (
@@ -118,7 +322,7 @@ const DoctorProfile = () => {
       </Card>
       
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="grid grid-cols-4 md:w-[500px] mx-auto">
+        <TabsList className="grid grid-cols-3 md:w-[500px] mx-auto">
           <TabsTrigger value="personal">
             <User className="h-4 w-4 mr-2" />
             <span>Personal Info</span>
@@ -127,13 +331,9 @@ const DoctorProfile = () => {
             <Stethoscope className="h-4 w-4 mr-2" />
             <span>Professional Info</span>
           </TabsTrigger>
-          <TabsTrigger value="practice">
+          <TabsTrigger value="availability">
             <Clock className="h-4 w-4 mr-2" />
-            <span>Practice Info</span>
-          </TabsTrigger>
-          <TabsTrigger value="settings">
-            <Shield className="h-4 w-4 mr-2" />
-            <span>Security</span>
+            <span>Availability</span>
           </TabsTrigger>
         </TabsList>
         
@@ -151,27 +351,18 @@ const DoctorProfile = () => {
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">First Name</label>
+                  <label className="text-sm font-medium">Full Name</label>
                   <Input 
-                    value={doctorData.firstName} 
+                    value={doctorData.name} 
                     disabled={!editMode}
-                    onChange={(e) => handleInputChange("firstName", e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Last Name</label>
-                  <Input 
-                    value={doctorData.lastName} 
-                    disabled={!editMode}
-                    onChange={(e) => handleInputChange("lastName", e.target.value)}
+                    onChange={(e) => handleInputChange("name", e.target.value)}
                   />
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Email</label>
                   <Input 
                     value={doctorData.email} 
-                    disabled={!editMode}
-                    onChange={(e) => handleInputChange("email", e.target.value)}
+                    disabled={true} // Email shouldn't be editable
                   />
                 </div>
                 <div className="space-y-2">
@@ -183,89 +374,37 @@ const DoctorProfile = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Alternate Phone</label>
+                  <label className="text-sm font-medium">Age</label>
                   <Input 
-                    value={doctorData.alternatePhone} 
+                    type="number"
+                    value={doctorData.age} 
                     disabled={!editMode}
-                    onChange={(e) => handleInputChange("alternatePhone", e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Date of Birth</label>
-                  <Input 
-                    type="date" 
-                    value={doctorData.dob} 
-                    disabled={!editMode}
-                    onChange={(e) => handleInputChange("dob", e.target.value)}
+                    onChange={(e) => handleInputChange("age", e.target.value)}
                   />
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Gender</label>
-                  <Input 
-                    value={doctorData.gender} 
+                  <Select
+                    value={doctorData.gender}
+                    onValueChange={(value) => handleInputChange("gender", value)}
                     disabled={!editMode}
-                    onChange={(e) => handleInputChange("gender", e.target.value)}
-                  />
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select gender" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Male">Male</SelectItem>
+                      <SelectItem value="Female">Female</SelectItem>
+                      <SelectItem value="Other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Languages</label>
-                  <Input 
-                    value={doctorData.languages} 
-                    disabled={!editMode}
-                    onChange={(e) => handleInputChange("languages", e.target.value)}
-                  />
-                </div>
+                
               </div>
             </CardContent>
           </Card>
           
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <MapPin className="h-5 w-5 text-health-600" />
-                Contact Details
-              </CardTitle>
-              <CardDescription>
-                Your Contact Information
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Address</label>
-                  <Input 
-                    value={doctorData.address} 
-                    disabled={!editMode}
-                    onChange={(e) => handleInputChange("address", e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">City</label>
-                  <Input 
-                    value={doctorData.city} 
-                    disabled={!editMode}
-                    onChange={(e) => handleInputChange("city", e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">State</label>
-                  <Input 
-                    value={doctorData.state} 
-                    disabled={!editMode}
-                    onChange={(e) => handleInputChange("state", e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Pincode</label>
-                  <Input 
-                    value={doctorData.pincode} 
-                    disabled={!editMode}
-                    onChange={(e) => handleInputChange("pincode", e.target.value)}
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          
         </TabsContent>
         
         <TabsContent value="professional" className="space-y-4">
@@ -273,215 +412,169 @@ const DoctorProfile = () => {
             <CardContent className="p-6">
               <div className="flex items-center gap-2 mb-1">
                 <GraduationCap className="h-5 w-5 text-blue-500" />
-                <h3 className="text-xl font-bold">Qualifications And Certifications</h3>
+                <h3 className="text-xl font-bold">Qualifications And Specialization</h3>
               </div>
               <p className="text-sm text-muted-foreground mb-4">Your Professional Qualifications</p>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Qualification</label>
-                  <Input 
-                    value={doctorData.qualification} 
-                    disabled={!editMode}
-                    onChange={(e) => handleInputChange("qualification", e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
                   <label className="text-sm font-medium">Specialization</label>
-                  <Input 
-                    value={doctorData.specialization} 
+                  <Select
+                    value={doctorData.specialization}
+                    onValueChange={(value) => handleInputChange("specialization", value)}
                     disabled={!editMode}
-                    onChange={(e) => handleInputChange("specialization", e.target.value)}
-                  />
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select specialization" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {specializations.map((spec) => (
+                        <SelectItem key={spec} value={spec}>
+                          {spec}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Experience (Years)</label>
                   <Input 
+                    type="number"
                     value={doctorData.experience} 
                     disabled={!editMode}
                     onChange={(e) => handleInputChange("experience", e.target.value)}
                   />
                 </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Hospital Affiliation</label>
-                  <Input 
-                    value={doctorData.hospitalAffiliation} 
-                    disabled={!editMode}
-                    onChange={(e) => handleInputChange("hospitalAffiliation", e.target.value)}
-                  />
+                <div className="space-y-2 md:col-span-2">
+                  <label className="text-sm font-medium">Qualifications</label>
+                  <div className="flex flex-wrap gap-2 mb-2">
+                    {doctorData.qualifications.map((qual, index) => (
+                      <div key={index} className="bg-gray-100 px-3 py-1 rounded-full flex items-center">
+                        <span>{qual}</span>
+                        {editMode && (
+                          <button 
+                            className="ml-2 text-gray-500 hover:text-red-500"
+                            onClick={() => {
+                              const newQuals = [...doctorData.qualifications];
+                              newQuals.splice(index, 1);
+                              handleInputChange("qualifications", newQuals);
+                            }}
+                          >
+                            ×
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                  {editMode && (
+                    <div className="flex gap-2">
+                      <Input 
+                        value={doctorData.newQualification || ''} 
+                        onChange={(e) => handleInputChange("newQualification", e.target.value)}
+                        placeholder="Add a qualification (e.g., MBBS, MD)"
+                      />
+                      <Button 
+                        variant="outline"
+                        onClick={() => {
+                          if (doctorData.newQualification) {
+                            handleInputChange("qualifications", [
+                              ...doctorData.qualifications, 
+                              doctorData.newQualification
+                            ]);
+                            handleInputChange("newQualification", "");
+                          }
+                        }}
+                      >
+                        Add
+                      </Button>
+                    </div>
+                  )}
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center gap-2 mb-1">
-                <Award className="h-5 w-5 text-blue-500" />
-                <h3 className="text-xl font-bold">Registration Details</h3>
-              </div>
-              <p className="text-sm text-muted-foreground mb-4">Your Medical Registration</p>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">IMA Number</label>
-                  <Input 
-                    value={doctorData.imaNumber} 
-                    disabled={!editMode}
-                    onChange={(e) => handleInputChange("imaNumber", e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Registration Number</label>
-                  <Input 
-                    value={doctorData.registrationNumber} 
-                    disabled={!editMode}
-                    onChange={(e) => handleInputChange("registrationNumber", e.target.value)}
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center gap-2 mb-1">
-                <AlertCircle className="h-5 w-5 text-blue-500" />
-                <h3 className="text-xl font-bold">Professional Bio</h3>
-              </div>
-              <p className="text-sm text-muted-foreground mb-4">Your Professional Summary</p>
-
-              <div className="grid grid-cols-1 gap-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Bio</label>
-                  <textarea 
-                    className="w-full min-h-[100px] p-2 border rounded-md"
-                    value={doctorData.bio} 
-                    disabled={!editMode}
-                    onChange={(e) => handleInputChange("bio", e.target.value)}
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="practice" className="space-y-4">
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center gap-2 mb-1">
-                <Clock className="h-5 w-5 text-blue-500" />
-                <h3 className="text-xl font-bold">Practice Details</h3>
-              </div>
-              <p className="text-sm text-muted-foreground mb-4">Your Practice Information</p>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Consultation Fee (₹)</label>
                   <Input 
+                    type="number"
                     value={doctorData.consultationFee} 
                     disabled={!editMode}
                     onChange={(e) => handleInputChange("consultationFee", e.target.value)}
                   />
                 </div>
-                <div className="space-y-2 md:col-span-2">
-                  <label className="text-sm font-medium">Available Slots</label>
-                  <Input 
-                    value={doctorData.availableSlots} 
-                    disabled={!editMode}
-                    onChange={(e) => handleInputChange("availableSlots", e.target.value)}
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="settings" className="space-y-4">
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center gap-2 mb-1">
-                <Shield className="h-5 w-5 text-blue-500" />
-                <h3 className="text-xl font-bold">Account Security</h3>
-              </div>
-              <p className="text-sm text-muted-foreground mb-4">Manage Password</p>
-
-              <div className="grid grid-cols-1 gap-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Current Password</label>
-                  <Input type="password" disabled={!editMode} placeholder="********" />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">New Password</label>
-                  <Input type="password" disabled={!editMode} />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Confirm Password</label>
-                  <Input type="password" disabled={!editMode} />
-                </div>
-              </div>
-              
-              <div className="mt-6">
-                <Button variant="outline" disabled={!editMode}>
-                  Change Password
-                </Button>
               </div>
             </CardContent>
           </Card>
           
+          
+        </TabsContent>
+        
+        <TabsContent value="availability" className="space-y-4">
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center gap-2 mb-1">
-                <Bell className="h-5 w-5 text-blue-500" />
-                <h3 className="text-xl font-bold">Notifications</h3>
+                <Clock className="h-5 w-5 text-blue-500" />
+                <h3 className="text-xl font-bold">Availability</h3>
               </div>
-              <p className="text-sm text-muted-foreground mb-4">Manage Notifications</p>
+              <p className="text-sm text-muted-foreground mb-4">Your Available Days and Time Slots</p>
 
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h4 className="font-medium">Email Notifications</h4>
-                    <p className="text-sm text-muted-foreground">Receive Email Notifications</p>
-                  </div>
-                  <div>
-                    <input
-                      type="checkbox"
-                      id="emailNotifications"
-                      className="h-4 w-4"
-                      disabled={!editMode}
-                      defaultChecked
-                    />
-                  </div>
-                </div>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h4 className="font-medium">SMS Notifications</h4>
-                    <p className="text-sm text-muted-foreground">Receive SMS Notifications</p>
-                  </div>
-                  <div>
-                    <input
-                      type="checkbox"
-                      id="smsNotifications"
-                      className="h-4 w-4"
-                      disabled={!editMode}
-                      defaultChecked
-                    />
+              <div className="space-y-6">
+                <div>
+                  <label className="text-sm font-medium block mb-2">Available Days</label>
+                  <div className="flex flex-wrap gap-2">
+                    {daysOfWeek.map((day) => (
+                      <Button
+                        key={day}
+                        type="button"
+                        variant={doctorData.availability.days?.includes(day) ? "default" : "outline"}
+                        onClick={() => editMode && handleDayToggle(day)}
+                        disabled={!editMode}
+                        className="min-w-[100px]"
+                      >
+                        {day}
+                      </Button>
+                    ))}
                   </div>
                 </div>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h4 className="font-medium">Appointment Reminders</h4>
-                    <p className="text-sm text-muted-foreground">Receive Appointment Reminders</p>
+                
+                <div>
+                  <label className="text-sm font-medium block mb-2">Time Slots</label>
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {doctorData.availability.timeSlots?.map((slot, index) => (
+                      <div key={index} className="bg-gray-100 px-3 py-1 rounded-full flex items-center">
+                        <span>{slot}</span>
+                        {editMode && (
+                          <button 
+                            className="ml-2 text-gray-500 hover:text-red-500"
+                            onClick={() => removeTimeSlot(index)}
+                          >
+                            ×
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                    {(!doctorData.availability.timeSlots || doctorData.availability.timeSlots.length === 0) && (
+                      <p className="text-gray-500">No time slots added yet</p>
+                    )}
                   </div>
-                  <div>
-                    <input
-                      type="checkbox"
-                      id="appointmentReminders"
-                      className="h-4 w-4"
-                      disabled={!editMode}
-                      defaultChecked
-                    />
-                  </div>
+                  
+                  {editMode && (
+                    <div className="flex gap-2">
+                      <Input 
+                        value={doctorData.newTimeSlot || ''} 
+                        onChange={(e) => handleInputChange("newTimeSlot", e.target.value)}
+                        placeholder="Add a time slot (e.g., 09:00-10:00)"
+                      />
+                      <Button 
+                        variant="outline"
+                        onClick={addTimeSlot}
+                      >
+                        Add
+                      </Button>
+                    </div>
+                  )}
+                  {editMode && (
+                    <p className="text-xs text-gray-500 mt-2">
+                      Format: HH:MM-HH:MM (24-hour format), e.g., 09:00-10:00
+                    </p>
+                  )}
                 </div>
               </div>
             </CardContent>

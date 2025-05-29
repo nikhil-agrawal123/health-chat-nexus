@@ -26,7 +26,7 @@ import {
   SidebarGroupLabel,
 } from "@/components/ui/sidebar";
 import { useToast } from "@/hooks/use-toast";
-import { useLanguage } from "@/contexts/LanguageContext";
+import { useLanguage } from "@/context/LanguageContext";
 import {
   DropdownMenu,
   DropdownMenuContent,

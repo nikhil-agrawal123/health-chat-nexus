@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { FileText, Upload, Download, Eye, Calendar, Clock, Plus, Pill } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import Prescriptions from "./Prescriptions";
-import { useLanguage } from "@/contexts/LanguageContext";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface Record {
   id: string;
