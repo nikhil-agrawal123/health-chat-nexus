@@ -45,25 +45,53 @@ const VideoConference = () => {
           userInfo: {
             displayName: userRole === 'doctor' ? 'Dr. Healthcare Provider' : 'Patient',
             email: '',
+            // Make the doctor always a moderator
+            moderator: userRole === 'doctor'
           },
           configOverwrite: {
             prejoinPageEnabled: false,
             disableDeepLinking: true,
             startWithAudioMuted: false,
             startWithVideoMuted: false,
+            // Add these new settings
+            enableLobby: false,               // Disable waiting room
+            enableClosePage: false,           // Don't show close page
+            disableModeratorIndicator: true,  // Hide moderator status icon
+            enableWelcomePage: false,         // Skip welcome page
+            requireDisplayName: false,        // Don't ask for name/login
+            resolution: 720,                  // Set standard resolution
+            constraints: {
+              video: {
+                height: {
+                  ideal: 720,
+                  max: 720,
+                  min: 240
+                }
+              }
+            },
+            // Disable lobby and waiting features
+            lobby: {
+              enabled: false,
+              autoKnock: true
+            },
+            // Skip pre-join screen
+            prejoinConfig: {
+              enabled: false
+            }
           },
           interfaceConfigOverwrite: {
+            // Your existing interface config
             TOOLBAR_BUTTONS: [
               'microphone', 'camera', 'closedcaptions', 'desktop', 'fullscreen',
-              'fodeviceselection', 'hangup', 'profile', 'chat', 'recording',
-              'livestreaming', 'etherpad', 'sharedvideo', 'settings', 'raisehand',
+              'fodeviceselection', 'hangup', 'chat', 'settings', 'raisehand',
               'videoquality', 'filmstrip', 'feedback', 'stats', 'shortcuts',
-              'tileview', 'videobackgroundblur', 'download', 'help', 'mute-everyone'
+              'tileview', 'videobackgroundblur', 'download', 'help'
             ],
             SHOW_JITSI_WATERMARK: false,
             SHOW_WATERMARK_FOR_GUESTS: false,
             DEFAULT_BACKGROUND: '#f0f2f5',
-          },
+            DISABLE_JOIN_LEAVE_NOTIFICATIONS: true
+          }
         };
 
         // Create the Jitsi Meeting
@@ -132,6 +160,13 @@ const VideoConference = () => {
   };
 
   const handleVideoConferenceLeft = async () => {
+    // Only proceed if the call wasn't manually ended
+    if (sessionStorage.getItem('manuallyEndedCall') === 'true') {
+      // Clear the flag but don't navigate again
+      sessionStorage.removeItem('manuallyEndedCall');
+      return;
+    }
+    
     // Record meeting end in your backend
     try {
       await ApiService.updateMeetingStatus(appointmentId, 'completed', {
@@ -146,11 +181,26 @@ const VideoConference = () => {
   };
 
   const endMeeting = () => {
+    // Set a flag to prevent double navigation
+    sessionStorage.setItem('manuallyEndedCall', 'true');
+    
     if (apiRef.current) {
       apiRef.current.executeCommand('hangup');
     }
+    
+    // Update meeting status directly here instead of in the event handler
+    try {
+      ApiService.updateMeetingStatus(appointmentId, 'completed', {
+        meetingEnded: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error("Error updating appointment status:", error);
+    }
+    
+    // Navigate directly without waiting for the event
     handleClose();
   };
+
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">

@@ -16,6 +16,9 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { useNavigate } from "react-router-dom";
+import ApiService from "@/services/api";
+import { useToast } from "@/hooks/use-toast";
 
 const SIDEBAR_COOKIE_NAME = "sidebar:state"
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7
@@ -173,7 +176,42 @@ const Sidebar = React.forwardRef<
     },
     ref
   ) => {
+    const navigate = useNavigate();
+    const { toast } = useToast();
     const { isMobile, state, openMobile, setOpenMobile } = useSidebar()
+
+        
+    const handleLogout = async () => {
+      try {
+        // Call the logout API
+        const response = await ApiService.logout();
+        
+        if (response.success) {
+          // Clear local storage
+          localStorage.removeItem('userId');
+          localStorage.removeItem('userName');
+          localStorage.removeItem('userRole');
+          
+          // Show success message
+          toast({
+            title: "Logged Out",
+            description: "You have been successfully logged out",
+          });
+          
+          // Redirect to home page
+          navigate("/");
+        } else {
+          throw new Error("Logout failed");
+        }
+      } catch (error) {
+        console.error("Logout error:", error);
+        toast({
+          title: "Logout Failed",
+          description: "There was a problem logging out. Please try again.",
+          variant: "destructive",
+        });
+      }
+    };
 
     if (collapsible === "none") {
       return (
