@@ -8,17 +8,16 @@ import os
 from dotenv import load_dotenv
 from fastapi.responses import StreamingResponse
 from bson import ObjectId
-
-# For local audio transcription
 import speech_recognition as sr
 from pydub import AudioSegment
 import tempfile
+from google import genai
 
 app = FastAPI()
-
 load_dotenv()
 
-# Allow frontend to call backend
+client = genai.Client(api_key = os.getenv("VITE_GOOGLE_GENAI_API_KEY"))
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # Or specify your frontend URL
@@ -118,3 +117,11 @@ async def record_voice(audio: UploadFile = File(...)):
 async def get_audio(file_id: str):
     file = fs.get(ObjectId(file_id))
     return StreamingResponse(file, media_type=file.content_type)
+
+@app.get("/gemini")
+async def generate_response(prompt: str):
+    response = client.models.generate_content(
+    model="gemini-2.0-flash",
+    contents="you are a professonal doctor, conversing with a patient. initially the patient tells you thier symptoms you have to follow up with question regarding duration and severity of the symptoms. ask a few follow up question to have a basic idea of the disease and dont ask for past history or any personal information. behave professionally and at the end generate a small report covering the symptoms duration severity and possible disease the patiet is suffering from" + prompt,
+)
+    return {"response": response.text}

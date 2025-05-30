@@ -2,7 +2,9 @@ import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Bot, Send, Mic, MicOff, ArrowRight, Clock, Brain } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import {multiLingual} from "@/utils/translation"; // Removed: module not found
+import { multiLingual } from "@/utils/translation";
+import { streamAudio } from "@/utils/tts";
+import { GoogleGenAI } from "@google/genai";
 
 interface Message {
   id: number;
@@ -15,6 +17,17 @@ interface Message {
     condition: string;
     specialtyNeeded: string;
   };
+}
+
+async function Chat(prompt: string){
+  const response = fetch("http://localhost:8081/gemini", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ prompt }),
+  });
+  return (await response).text
 }
 
 const MedicalChatbot = () => {
@@ -215,14 +228,6 @@ const MedicalChatbot = () => {
             <Send className="h-4 w-4" />
           </Button>
         </div>
-        {/* Show download link for webm if available */}
-        {audioUrl && (
-          <div className="mt-2 px-2 text-xs text-gray-500">
-            <a href={audioUrl} download="recording.webm" className="text-blue-600 underline">
-              Download your recording (webm)
-            </a>
-          </div>
-        )}
         <div className="mt-2 px-2">
           <p className="text-xs text-gray-400 flex items-center">
             <Brain className="h-3 w-3 mr-1" />
