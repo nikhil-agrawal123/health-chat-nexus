@@ -17,13 +17,13 @@ interface Message {
   };
 }
 
-async function Chat(prompt: string) {
+async function Chat(prompt: string){
   const response = await fetch("http://localhost:8081/gemini", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ prompt }),
+    body: JSON.stringify({ prompt, history }),
   });
   if (!response.ok) throw new Error("Failed to get response from AI");
   const data = await response.json();
@@ -95,6 +95,8 @@ const MedicalChatbot = () => {
     }
     translateUI();
   }, [language]);
+
+  let userData = ""
 
   const handleMicClick = async () => {
     if (!isRecording) {
@@ -185,7 +187,7 @@ const MedicalChatbot = () => {
     setIsTyping(true);
 
     try {
-      const aiText = await Chat(messageToSend);
+      const aiText = await Chat(messageToSend + " " + userData);
       const translatedAiText = await multiLingual(language, aiText);
       const aiMessage: Message = {
         id: userMessage.id + 1,
@@ -290,6 +292,7 @@ const MedicalChatbot = () => {
             className="rounded-full"
             type="submit"
             disabled={isTyping || input.trim() === ''}
+            onClick={() => { userData += input; }}
           >
             <Send className="h-4 w-4" />
           </Button>

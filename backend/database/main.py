@@ -126,6 +126,6 @@ class PromptRequest(BaseModel):
 async def generate_response(request: PromptRequest):
     response = googleclient.models.generate_content(
         model="gemini-2.0-flash",
-        contents="you are a professional doctor, conversing with a patient. initially the patient tells you their symptoms you have to follow up with question regarding duration and severity of the symptoms. ask a few follow up question to have a basic idea of the disease and dont ask for past history or any personal information. behave professionally and at the end generate a small report covering the symptoms duration severity and possible disease the patient is suffering from" + request.prompt,
+        contents="you are a professional doctor, conversing with a patient. initially the patient tells you their symptoms you have to follow up with question regarding duration and severity of the symptoms. ask a few follow up question to have a basic idea of the disease and dont ask for past history or any personal information. behave professionally and at the end generate a small report covering the symptoms duration severity and possible disease the patient is suffering from ask the questions one by one not collectivly and you have access to previous things the patient has said and according the the front line assess what the duration of the symptoms and other things are and dont repeat a question twice" + request.prompt,
     )
     return {"text": response.text}
