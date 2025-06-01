@@ -1,4 +1,4 @@
-export async function multiLingual(language: string, text: string) {
+export async function multiLingual(language:string, text:string): Promise<string> {
   try {
     const response = await fetch(`http://127.0.0.1:8000/${language.toLowerCase()}/`, {
       method: "POST",

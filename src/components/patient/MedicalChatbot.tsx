@@ -1,9 +1,8 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Bot, Send, Mic, MicOff, Brain } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { multiLingual } from "@/utils/translation";
-// import { streamAudio } from "@/utils/tts";
 
 interface Message {
   id: number;
@@ -18,7 +17,6 @@ interface Message {
   };
 }
 
-// REST API call to your backend Gemini endpoint
 async function Chat(prompt: string) {
   const response = await fetch("http://localhost:8081/gemini", {
     method: "POST",
@@ -32,31 +30,72 @@ async function Chat(prompt: string) {
   return data.text;
 }
 
+const defaultTexts = {
+  welcome: "Hi there! Please describe your symptoms.",
+  placeholder: "Describe your symptoms...",
+  powered: "Powered by Medical AI",
+  aiLabel: "AI Health Assistant",
+  info: "AI assistant provides general information only. Always consult with a healthcare provider for medical advice.",
+  suggestions: [
+    "I have a headache",
+    "My throat is sore",
+    "I have a fever",
+    "My skin has a rash"
+  ]
+};
+
 const MedicalChatbot = () => {
   const { toast } = useToast();
+  const [language, setLanguage] = useState(localStorage.getItem("language") || "English");
+  const [uiTexts, setUiTexts] = useState(defaultTexts);
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 1,
-      text: "Hi there! Please describe your symptoms.",
+      text: defaultTexts.welcome,
       sender: "bot",
       timestamp: new Date(),
-      suggestions: [
-        "I have a headache",
-        "My throat is sore",
-        "I have a fever",
-        "My skin has a rash"
-      ]
+      suggestions: defaultTexts.suggestions
     }
   ]);
   const [input, setInput] = useState("");
-  const [loading, setLoading] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunks = useRef<Blob[]>([]);
 
-  // Start/stop audio recording
+  // Translate all UI texts when language changes
+  useEffect(() => {
+    async function translateUI() {
+      const translatedWelcome = await multiLingual(language, defaultTexts.welcome);
+      const translatedPlaceholder = await multiLingual(language, defaultTexts.placeholder);
+      const translatedPowered = await multiLingual(language, defaultTexts.powered);
+      const translatedAiLabel = await multiLingual(language, defaultTexts.aiLabel);
+      const translatedInfo = await multiLingual(language, defaultTexts.info);
+      const translatedSuggestions = await Promise.all(
+        defaultTexts.suggestions.map(s => multiLingual(language, s))
+      );
+      setUiTexts({
+        welcome: translatedWelcome,
+        placeholder: translatedPlaceholder,
+        powered: translatedPowered,
+        aiLabel: translatedAiLabel,
+        info: translatedInfo,
+        suggestions: translatedSuggestions
+      });
+      // Update the welcome message in messages
+      setMessages((prev) => [
+        {
+          ...prev[0],
+          text: translatedWelcome,
+          suggestions: translatedSuggestions
+        },
+        ...prev.slice(1)
+      ]);
+    }
+    translateUI();
+  }, [language]);
+
   const handleMicClick = async () => {
     if (!isRecording) {
       setAudioUrl(null);
@@ -87,19 +126,13 @@ const MedicalChatbot = () => {
                 description: "Audio uploaded to the server.",
               });
               const data = await response.json();
-              localStorage.setItem("transcription", data.transcription);
-              console.log("Transcript:", data.transcription);
-
-              // Set transcript as input, but do NOT send automatically
-              let translation = multiLingual(localStorage.getItem("language") || "English", data.transcription);
-              translation.then((translatedText) => {
-                setInput(translatedText);
-                toast({
-                  title: "Translation complete",
-                  description: "Your message has been translated.",
-                });
+              // Optionally translate the transcript
+              let translated = await multiLingual(language, data.transcription);
+              setInput(translated);
+              toast({
+                title: "Transcription complete",
+                description: "You can edit the text before sending.",
               });
-
               setAudioUrl(null);
             } else {
               toast({
@@ -135,7 +168,6 @@ const MedicalChatbot = () => {
     }
   };
 
-  // Send message and get AI response
   const handleSendMessage = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     const messageToSend = input.trim();
@@ -152,17 +184,17 @@ const MedicalChatbot = () => {
     setInput("");
     setIsTyping(true);
 
-    // Get AI response and add to chat
     try {
       const aiText = await Chat(messageToSend);
+      const translatedAiText = await multiLingual(language, aiText);
       const aiMessage: Message = {
         id: userMessage.id + 1,
-        text: aiText,
+        text: translatedAiText,
         sender: "bot",
         timestamp: new Date()
       };
       setMessages(prev => [...prev, aiMessage]);
-      // streamAudio(aiText); // Optional: play AI response
+      // streamAudio(translatedAiText); // Optional: play AI response
     } catch (err) {
       toast({
         title: "AI Error",
@@ -179,10 +211,10 @@ const MedicalChatbot = () => {
       <div className="bg-health-600 text-white p-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Bot className="h-5 w-5" />
-          <h2 className="font-semibold">AI Health Assistant</h2>
+          <h2 className="font-semibold">{uiTexts.aiLabel}</h2>
         </div>
         <div className="text-xs bg-health-500 px-2 py-1 rounded-full">
-          Powered by Medical AI
+          {uiTexts.powered}
         </div>
       </div>
       
@@ -208,7 +240,7 @@ const MedicalChatbot = () => {
                   <div className="flex-1">
                     <div className="flex justify-between items-start">
                       <div className="text-sm font-medium">
-                        {message.sender === "user" ? "You" : "AI Assistant"}
+                        {message.sender === "user" ? "You" : uiTexts.aiLabel}
                       </div>
                       <div className="text-xs text-gray-400 ml-2">
                         {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -249,7 +281,7 @@ const MedicalChatbot = () => {
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Describe your symptoms..."
+            placeholder={uiTexts.placeholder}
             className="flex-1 bg-gray-100 rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-health-500"
             disabled={isTyping}
           />
@@ -265,7 +297,7 @@ const MedicalChatbot = () => {
         <div className="mt-2 px-2">
           <p className="text-xs text-gray-400 flex items-center">
             <Brain className="h-3 w-3 mr-1" />
-            AI assistant provides general information only. Always consult with a healthcare provider for medical advice.
+            {uiTexts.info}
           </p>
         </div>
       </form>
