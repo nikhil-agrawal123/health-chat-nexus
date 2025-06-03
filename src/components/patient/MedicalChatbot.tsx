@@ -17,13 +17,39 @@ interface Message {
   };
 }
 
-async function Chat(prompt: string){
+const languageCodeMap: Record<string, string> = {
+  English: "en",
+  Hindi: "hi",
+  Punjabi: "pa",
+  Telugu: "te",
+  Tamil: "ta",
+  Gujarati: "gu",
+  Bengali: "bn",
+};
+
+// Example: Play TTS in a specific language
+async function playTTS(text:string, language:string) {
+  const res = await fetch("http://localhost:8081/tts", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ text, language }), // send both
+  });
+  const { file_id } = await res.json();
+
+  const audioRes = await fetch(`http://localhost:8081/tts/${file_id}`);
+  const audioBlob = await audioRes.blob();
+  const audioUrl = URL.createObjectURL(audioBlob);
+  const audio = new Audio(audioUrl);
+  audio.play();
+}
+
+async function Chat(prompt: string) {
   const response = await fetch("http://localhost:8081/gemini", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ prompt, history }),
+    body: JSON.stringify({ prompt }),
   });
   if (!response.ok) throw new Error("Failed to get response from AI");
   const data = await response.json();
@@ -63,6 +89,7 @@ const MedicalChatbot = () => {
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunks = useRef<Blob[]>([]);
+  let userData = "";
 
   // Translate all UI texts when language changes
   useEffect(() => {
@@ -96,7 +123,18 @@ const MedicalChatbot = () => {
     translateUI();
   }, [language]);
 
-  let userData = ""
+  // Speech Synthesis for AI responses
+  useEffect(() => {
+    if (messages.length > 1) {
+      const lastMsg = messages[messages.length - 1];
+      if (lastMsg.sender === "bot" && lastMsg.text) {
+        const utterance = new window.SpeechSynthesisUtterance(lastMsg.text);
+        utterance.lang = language === "English" ? "en-US" : undefined;
+        window.speechSynthesis.cancel(); // Stop any previous speech
+        window.speechSynthesis.speak(utterance);
+      }
+    }
+  }, [messages, language]);
 
   const handleMicClick = async () => {
     if (!isRecording) {
@@ -171,42 +209,42 @@ const MedicalChatbot = () => {
   };
 
   const handleSendMessage = async (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    const messageToSend = input.trim();
-    if (messageToSend === "") return;
+  if (e) e.preventDefault();
+  const messageToSend = input.trim();
+  if (messageToSend === "") return;
 
-    // Add user message
-    const userMessage: Message = {
-      id: messages.length + 1,
-      text: messageToSend,
-      sender: "user",
-      timestamp: new Date()
-    };
-    setMessages(prev => [...prev, userMessage]);
-    setInput("");
-    setIsTyping(true);
+  // Add user message
+  const userMessage: Message = {
+    id: messages.length + 1,
+    text: messageToSend,
+    sender: "user",
+    timestamp: new Date()
+  };
+  setMessages(prev => [...prev, userMessage]);
+  setInput("");
+  setIsTyping(true);
 
     try {
-      const aiText = await Chat(messageToSend + " " + userData);
-      const translatedAiText = await multiLingual(language, aiText);
-      const aiMessage: Message = {
-        id: userMessage.id + 1,
-        text: translatedAiText,
-        sender: "bot",
-        timestamp: new Date()
-      };
-      setMessages(prev => [...prev, aiMessage]);
-      // streamAudio(translatedAiText); // Optional: play AI response
-    } catch (err) {
-      toast({
-        title: "AI Error",
-        description: "Failed to get a response from the AI.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsTyping(false);
-    }
-  };
+    const aiText = await Chat(messageToSend + " " + userData);
+    const translatedAiText = await multiLingual(language, aiText);
+    const aiMessage: Message = {
+      id: userMessage.id + 1,
+      text: translatedAiText,
+      sender: "bot",
+      timestamp: new Date()
+    };
+    setMessages(prev => [...prev, aiMessage]);
+    await playTTS(translatedAiText, languageCodeMap[language] || "en"); // <-- Use language code
+  } catch (err) {
+    toast({
+      title: "AI Error",
+      description: "Failed to get a response from the AI.",
+      variant: "destructive"
+    });
+  } finally {
+    setIsTyping(false);
+  }
+};
 
   return (
     <div className="flex flex-col h-[calc(100vh-250px)] overflow-hidden rounded-lg shadow-md bg-white">

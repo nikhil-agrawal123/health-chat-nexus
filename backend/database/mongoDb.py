@@ -20,6 +20,7 @@ doctors_collection = db["doctors"]
 patients_collection = db["patients"]
 meetings_collection = db["meetings"]
 voice_collection = db["voice"]
+
 def save_voice(voice_data):
     result = voice_collection.insert_one(voice_data)
     return result.inserted_id
