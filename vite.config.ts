@@ -8,6 +8,13 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8080,
+    proxy:{
+      '/api': {
+        target: 'https://backendnode-j51t.onrender.com',
+        changeOrigin: true,
+        secure: false,
+      }
+    }
   },
   plugins: [
     react(),
