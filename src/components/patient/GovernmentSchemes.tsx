@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { multiLingual } from "@/utils/translation";
 import {
   Card,
   CardContent,
@@ -29,14 +30,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 
 interface Scheme {
   id: string;
@@ -55,8 +48,8 @@ const GovernmentSchemes = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedScheme, setSelectedScheme] = useState<Scheme | null>(null);
   const [showDetails, setShowDetails] = useState(false);
+  const language = localStorage.getItem("language") || "en";
 
-  // Sample data for government health schemes
   const schemes: Scheme[] = [
     {
       id: "1",
