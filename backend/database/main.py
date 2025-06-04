@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from mongoDb import save_doctor, save_patient, voice_collection
 from mongoDb import get_patient_by_id, get_doctor_by_id, save_meeting, save_voice
 from pymongo import MongoClient
+from fastapi.responses import JSONResponse
 import gridfs
 import os
 from dotenv import load_dotenv
@@ -15,9 +16,12 @@ from google import genai
 from pydantic import BaseModel
 from gtts import gTTS
 import io
+from googletrans import Translator
 
 app = FastAPI()
 load_dotenv()
+translator = Translator()
+
 
 googleclient = genai.Client(api_key = os.getenv("VITE_GOOGLE_GENAI_API_KEY"))
 
@@ -152,3 +156,45 @@ async def get_tts_audio(file_id: str):
     if not doc:
         return {"error": "File not found"}
     return StreamingResponse(io.BytesIO(doc["audio"]), media_type=doc["content_type"])
+
+class Text(BaseModel):
+    text: str
+    class Config:
+        from_attributes = True
+
+translator = Translator()
+
+@app.post("/english/")
+async def english(text: Text):
+    translation = await translator.translate(text.text, dest='en')
+    return JSONResponse(content={"Translation": translation.text})
+
+@app.post("/hindi/")
+async def hindi(text: Text):
+    translation = await translator.translate(text.text, src="en", dest='hi')
+    return JSONResponse(content={"Translation": translation.text})
+
+@app.post("/punjabi/")
+async def punjabi(text: Text):
+    translation = await translator.translate(text.text, dest='pa')
+    return JSONResponse(content={"Translation": translation.text})
+
+@app.post("/gujarati/")
+async def gujarati(text: Text):
+    translation = await translator.translate(text.text, dest='gu')
+    return JSONResponse(content={"Translation": translation.text})
+
+@app.post("/bengali/")
+async def bengali(text: Text):
+    translation = await translator.translate(text.text, dest='bn')
+    return JSONResponse(content={"Translation": translation.text})
+
+@app.post("/tamil/")
+async def tamil(text: Text):
+    translation = await translator.translate(text.text, dest='ta')
+    return JSONResponse(content={"Translation": translation.text})
+
+@app.post("/telugu/")
+async def telugu(text: Text):
+    translation = await translator.translate(text.text, dest='te')
+    return JSONResponse(content={"Translation": translation.text})
