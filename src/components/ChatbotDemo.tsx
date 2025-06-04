@@ -46,7 +46,7 @@ async function Chat(question: string): Promise<string> {
 
 async function multiLingual(language: string, text: string) {
   try {
-    const response = await fetch(`http://127.0.0.1:8000/${language.toLowerCase()}/`, {
+    const response = await fetch(`http://127.0.0.1:8081/${language.toLowerCase()}/`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
