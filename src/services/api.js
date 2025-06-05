@@ -1,14 +1,14 @@
-const API_BASE = 'api';
+const API_BASE = 'https://backendnode-j51t.onrender.com/api';
 
 class ApiService {
     constructor() {
-        this.baseURL = 'api';
+        this.baseURL = API_BASE;
     }
 
     async request(url, options = {}) {
         try {
           // Get the full URL
-          const fullUrl = `api${url}`;
+          const fullUrl = `${this.baseURL}${url}`;
           console.log("Making request to:", fullUrl);
           
           // Include credentials to send cookies
