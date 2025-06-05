@@ -268,7 +268,7 @@ const DoctorConsultation = () => {
 
     confirmCancelAppointment();
 
-    navigate("/video-conference/" + currentAppointment?.id);
+    navigate("/video-conference/");
     const meetingId = localStorage.getItem("meeting_id");
     // In a real app, this would initiate the video call
   };
