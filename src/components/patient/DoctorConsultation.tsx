@@ -76,12 +76,21 @@ const DoctorConsultation = () => {
     return data;
   }
 
-  async function getAllDoctors() {
-    const response = await fetch("https://backendnode-j51t.onrender.com/api/doctors");
-    const data = await response.json();
-    console.log(data);
-    return data;
-  }
+  async function getAllDoctors(): Promise<Doctor[]> {
+  const response = await fetch("https://backendnode-j51t.onrender.com/api/doctors");
+  const data = await response.json();
+  return data.doctors.map((doc: any) => ({
+    id: doc._id,
+    name: doc.name,
+    specialty: doc.specialization,
+    language: doc.language || [],
+    experience: doc.experience,
+    rating: doc.rating,
+    availability: doc.availability?.timeSlots || [],
+    photo: doc.profileImage || "/placeholder.svg",
+    price: doc.consultationFee,
+  }));
+}
 
   // Save appointments to localStorage whenever they change
   useEffect(() => {
@@ -91,63 +100,11 @@ const DoctorConsultation = () => {
   }, [appointments]);
 
   // Sample data for doctors
-  const doctors: Doctor[] = [
-    {
-      id: "1",
-      name: "Dr. Sarah Johnson",
-      specialty: "Cardiology",
-      language: ["English", "Spanish"],
-      experience: 12,
-      rating: 4.8,
-      availability: ["10:00 AM", "2:00 PM", "4:30 PM"],
-      photo: "/placeholder.svg",
-      price: 150
-    },
-    {
-      id: "2",
-      name: "Dr. Michael Chen",
-      specialty: "Dermatology",
-      language: ["English", "Mandarin"],
-      experience: 8,
-      rating: 4.6,
-      availability: ["9:30 AM", "1:30 PM", "5:00 PM"],
-      photo: "/placeholder.svg",
-      price: 140
-    },
-    {
-      id: "3",
-      name: "Dr. Emily Rodriguez",
-      specialty: "Pediatrics",
-      language: ["English", "Spanish"],
-      experience: 15,
-      rating: 4.9,
-      availability: ["11:00 AM", "3:00 PM", "4:00 PM"],
-      photo: "/placeholder.svg",
-      price: 130
-    },
-    {
-      id: "4",
-      name: "Dr. David Kim",
-      specialty: "Orthopedics",
-      language: ["English", "Korean"],
-      experience: 10,
-      rating: 4.7,
-      availability: ["8:30 AM", "12:30 PM", "3:30 PM"],
-      photo: "/placeholder.svg",
-      price: 160
-    },
-    {
-      id: "5",
-      name: "Dr. Lisa Patel",
-      specialty: "Neurology",
-      language: ["English", "Hindi", "Gujarati"],
-      experience: 14,
-      rating: 4.9,
-      availability: ["9:00 AM", "1:00 PM", "4:00 PM"],
-      photo: "/placeholder.svg",
-      price: 170
-    }
-  ];
+const [doctors, setDoctors] = useState<Doctor[]>([]);
+
+useEffect(() => {
+  getAllDoctors().then(setDoctors);
+}, []);
   const specialties = [...new Set(doctors.map(doctor => doctor.specialty))];
 
   const filteredDoctors = doctors.filter(doctor => {
