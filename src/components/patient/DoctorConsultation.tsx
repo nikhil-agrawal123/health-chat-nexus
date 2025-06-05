@@ -8,6 +8,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Calendar, Clock, Video, Phone, UserCircle, Search, Star, Check, Clock4 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { get } from "http";
 
 interface Doctor {
   id: string;
@@ -73,6 +74,12 @@ const DoctorConsultation = () => {
     });
     const data = await response.json();
     return data;
+  }
+
+  async function getAllDoctors() {
+    const response = await fetch("https://backendnode-j51t.onrender.com/api/doctors");
+    const data = await response.json();
+    console.log(data);
   }
 
   // Save appointments to localStorage whenever they change
@@ -179,6 +186,7 @@ const DoctorConsultation = () => {
       };
 
       saveAppointment(newAppointment)
+      getAllDoctors();
       
       // Update the appointments list and current appointment
       setAppointments(prev => [...prev, newAppointment]);
