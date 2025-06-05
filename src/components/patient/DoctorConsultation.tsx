@@ -90,12 +90,63 @@ const DoctorConsultation = () => {
   }, [appointments]);
 
   // Sample data for doctors
-  const [doctors, setDoctors] = useState<Doctor[]>([]);
-
-  useEffect(() => {
-    getAllDoctors().then((data) => setDoctors(data));
-  }, []);
-
+  const doctors: Doctor[] = [
+    {
+      id: "1",
+      name: "Dr. Sarah Johnson",
+      specialty: "Cardiology",
+      language: ["English", "Spanish"],
+      experience: 12,
+      rating: 4.8,
+      availability: ["10:00 AM", "2:00 PM", "4:30 PM"],
+      photo: "/placeholder.svg",
+      price: 150
+    },
+    {
+      id: "2",
+      name: "Dr. Michael Chen",
+      specialty: "Dermatology",
+      language: ["English", "Mandarin"],
+      experience: 8,
+      rating: 4.6,
+      availability: ["9:30 AM", "1:30 PM", "5:00 PM"],
+      photo: "/placeholder.svg",
+      price: 140
+    },
+    {
+      id: "3",
+      name: "Dr. Emily Rodriguez",
+      specialty: "Pediatrics",
+      language: ["English", "Spanish"],
+      experience: 15,
+      rating: 4.9,
+      availability: ["11:00 AM", "3:00 PM", "4:00 PM"],
+      photo: "/placeholder.svg",
+      price: 130
+    },
+    {
+      id: "4",
+      name: "Dr. David Kim",
+      specialty: "Orthopedics",
+      language: ["English", "Korean"],
+      experience: 10,
+      rating: 4.7,
+      availability: ["8:30 AM", "12:30 PM", "3:30 PM"],
+      photo: "/placeholder.svg",
+      price: 160
+    },
+    {
+      id: "5",
+      name: "Dr. Lisa Patel",
+      specialty: "Neurology",
+      language: ["English", "Hindi", "Gujarati"],
+      experience: 14,
+      rating: 4.9,
+      availability: ["9:00 AM", "1:00 PM", "4:00 PM"],
+      photo: "/placeholder.svg",
+      price: 170
+    }
+  ];
   const specialties = [...new Set(doctors.map(doctor => doctor.specialty))];
 
   const filteredDoctors = doctors.filter(doctor => {
