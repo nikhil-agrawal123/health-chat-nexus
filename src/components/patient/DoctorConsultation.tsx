@@ -79,6 +79,7 @@ const DoctorConsultation = () => {
   async function getAllDoctors() {
     const response = await fetch("https://backendnode-j51t.onrender.com/api/doctors");
     const data = await response.json();
+    console.log(data);
     return data;
   }
 
