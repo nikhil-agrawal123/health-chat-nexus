@@ -161,6 +161,8 @@ const DoctorConsultation = () => {
   const handleDoctorSelect = (doctor: Doctor) => {
     setSelectedDoctor(doctor);
     setAppointmentTime(null);
+      getAllDoctors();
+
   };
 
   const handleTimeSelect = (time: string) => {
@@ -187,7 +189,6 @@ const DoctorConsultation = () => {
       };
 
       saveAppointment(newAppointment)
-      getAllDoctors();
       
       // Update the appointments list and current appointment
       setAppointments(prev => [...prev, newAppointment]);
