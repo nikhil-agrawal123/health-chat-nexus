@@ -66,7 +66,7 @@ const DoctorConsultation = () => {
   }, []);
 
   async function saveAppointment(appointment: Appointment) {
-    const response = await fetch("http://localhost:8081/meeting", {
+    const response = await fetch("https://database-tval.onrender.com/meeting", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(appointment),
@@ -198,7 +198,7 @@ const DoctorConsultation = () => {
   };
 
   async function cancelAppointment(appointmentId: string) {
-    const response = await fetch(`http://localhost:8081/meeting/${appointmentId}`, {
+    const response = await fetch(`https://database-tval.onrender.com/meeting/${appointmentId}`, {
       method: "DELETE",
     });
     const data = await response.json();
