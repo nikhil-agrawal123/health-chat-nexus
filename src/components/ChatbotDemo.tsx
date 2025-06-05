@@ -46,7 +46,7 @@ async function Chat(question: string): Promise<string> {
 
 async function multiLingual(language: string, text: string) {
   try {
-    const response = await fetch(`http://127.0.0.1:8081/${language.toLowerCase()}/`, {
+    const response = await fetch(`https://database-tval.onrender.com/${language.toLowerCase()}/`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -54,6 +54,7 @@ async function multiLingual(language: string, text: string) {
       body: JSON.stringify({ text: text }),
     });
     const data = await response.json();
+    console.log(data);
     return data["Translation"];
   } catch (error) {
     console.error("Translation error:", error);

@@ -1,6 +1,6 @@
 export async function multiLingual(language:string, text:string): Promise<string> {
   try {
-    const response = await fetch(`http://127.0.0.1:8081/${language.toLowerCase()}/`, {
+    const response = await fetch(`https://database-tval.onrender.com/${language.toLowerCase()}/`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
