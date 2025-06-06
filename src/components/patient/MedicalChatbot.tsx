@@ -56,6 +56,19 @@ async function Chat(prompt: string) {
   return data.text;
 }
 
+async function getIntent(prompt:string) {
+  const response = await fetch("https://database-tval.onrender.com/detect_intent", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ prompt }),
+  });
+  if (!response.ok) throw new Error("Failed to get response from AI");
+  const data = await response.json();
+  return data.intent;
+}
+
 const defaultTexts = {
   welcome: "Hi there! Please describe your symptoms.",
   placeholder: "Describe your symptoms...",
@@ -212,16 +225,19 @@ const MedicalChatbot = () => {
     setIsTyping(true);
 
     try {
-      const aiText = await Chat(messageToSend + " " + userData);
-      const translatedAiText = await multiLingual(language, aiText);
-      const aiMessage: Message = {
-        id: userMessage.id + 1,
-        text: translatedAiText,
-        sender: "bot",
-        timestamp: new Date()
-      };
-      setMessages(prev => [...prev, aiMessage]);
-      await playTTS(translatedAiText, languageCodeMap[language] || "en"); // Use language code
+      const intent = await getIntent(messageToSend);
+      if (intent === "medical_diagnosis"){
+        const aiText = await Chat(messageToSend + " " + userData);
+        const translatedAiText = await multiLingual(language, aiText);
+        const aiMessage: Message = {
+          id: userMessage.id + 1,
+          text: translatedAiText,
+          sender: "bot",
+          timestamp: new Date()
+        };
+        setMessages(prev => [...prev, aiMessage]);
+        await playTTS(translatedAiText, languageCodeMap[language] || "en"); // Use language code
+      }
     } catch (err) {
       toast({
         title: "AI Error",
