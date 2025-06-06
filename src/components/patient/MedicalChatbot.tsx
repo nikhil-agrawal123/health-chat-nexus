@@ -66,6 +66,7 @@ async function getIntent(text:string) {
   });
   if (!response.ok) throw new Error("Failed to get response from AI");
   const data = await response.json();
+  console.log(data);
   return data.intent;
 }
 
