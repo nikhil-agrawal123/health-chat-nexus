@@ -6,9 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Calendar, Clock, Video, Phone, UserCircle, Search, Star, Check, Clock4 } from "lucide-react";
+import { Calendar, Clock, Video, UserCircle, Search, Star, Check, Clock4 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { get } from "http";
 
 interface Doctor {
   id: string;
@@ -33,6 +32,23 @@ interface Appointment {
   photo: string;
 }
 
+const specialties = [
+  'General Medicine',
+  'Cardiology',
+  'Dermatology',
+  'Pediatrics',
+  'Orthopedics',
+  'Neurology',
+  'Psychiatry',
+  'Gynecology',
+  'ENT',
+  'Ophthalmology',
+  'Dentistry',
+  'Emergency Medicine'
+];
+
+const API_BASE = "https://backendnode-j51t.onrender.com/api";
+
 const DoctorConsultation = () => {
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
@@ -47,6 +63,11 @@ const DoctorConsultation = () => {
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [newAppointmentTime, setNewAppointmentTime] = useState<string | null>(null);
   const [id, setId] = useState<string | null>(null);
+  const [doctors, setDoctors] = useState<Doctor[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<string>(
+    new Date(Date.now() + 86400000).toISOString().split('T')[0] // Tomorrow by default
+  );
   const navigate = useNavigate();
 
   // Load appointments from localStorage on component mount
@@ -54,8 +75,6 @@ const DoctorConsultation = () => {
     const savedAppointments = localStorage.getItem('appointments');
     if (savedAppointments) {
       setAppointments(JSON.parse(savedAppointments));
-      
-      // Find active appointment
       const active = JSON.parse(savedAppointments).find(
         (apt: Appointment) => apt.status === 'scheduled'
       );
@@ -66,32 +85,6 @@ const DoctorConsultation = () => {
     }
   }, []);
 
-  async function saveAppointment(appointment: Appointment) {
-    const response = await fetch("https://database-tval.onrender.com/meeting", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(appointment),
-    });
-    const data = await response.json();
-    return data;
-  }
-
-  async function getAllDoctors(): Promise<Doctor[]> {
-  const response = await fetch("https://backendnode-j51t.onrender.com/api/doctors");
-  const data = await response.json();
-  return data.doctors.map((doc: any) => ({
-    id: doc._id,
-    name: doc.name,
-    specialty: doc.specialization,
-    language: doc.language || [],
-    experience: doc.experience,
-    rating: doc.rating,
-    availability: doc.availability?.timeSlots || [],
-    photo: doc.profileImage || "/placeholder.svg",
-    price: doc.consultationFee,
-  }));
-}
-
   // Save appointments to localStorage whenever they change
   useEffect(() => {
     if (appointments.length > 0) {
@@ -99,13 +92,26 @@ const DoctorConsultation = () => {
     }
   }, [appointments]);
 
-  // Sample data for doctors
-const [doctors, setDoctors] = useState<Doctor[]>([]);
+  // Fetch doctors from backendNode
+  async function getAllDoctors(): Promise<Doctor[]> {
+    const response = await fetch(`${API_BASE}/doctors`);
+    const data = await response.json();
+    return data.doctors.map((doc: any) => ({
+      id: doc._id,
+      name: doc.name,
+      specialty: doc.specialization,
+      language: doc.language || [],
+      experience: doc.experience,
+      rating: doc.rating,
+      availability: doc.availability?.timeSlots || [],
+      photo: doc.profileImage || "/placeholder.svg",
+      price: doc.consultationFee,
+    }));
+  }
 
-useEffect(() => {
-  getAllDoctors().then(setDoctors);
-}, []);
-  const specialties = [...new Set(doctors.map(doctor => doctor.specialty))];
+  useEffect(() => {
+    getAllDoctors().then(setDoctors);
+  }, []);
 
   const filteredDoctors = doctors.filter(doctor => {
     const matchesSearch = doctor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -117,8 +123,6 @@ useEffect(() => {
   const handleDoctorSelect = (doctor: Doctor) => {
     setSelectedDoctor(doctor);
     setAppointmentTime(null);
-      getAllDoctors();
-
   };
 
   const handleTimeSelect = (time: string) => {
@@ -131,50 +135,72 @@ useEffect(() => {
     }
   };
 
-  const confirmBooking = () => {
+  // Book appointment using backendNode API
+  const confirmBooking = async () => {
     if (selectedDoctor && appointmentTime) {
-      const newAppointment = {
-        id: Date.now().toString(),
-        doctorId: selectedDoctor.id,
-        doctorName: selectedDoctor.name,
-        specialty: selectedDoctor.specialty,
-        date: 'Today',
-        time: appointmentTime,
-        status: 'scheduled' as const,
-        photo: selectedDoctor.photo
-      };
-
-      saveAppointment(newAppointment)
-      
-      // Update the appointments list and current appointment
-      setAppointments(prev => [...prev, newAppointment]);
-      setCurrentAppointment(newAppointment);
-      setBookingComplete(true);
-      setShowDialog(false);
-      
-      toast({
-        title: "Appointment Booked",
-        description: `Your appointment with ${selectedDoctor.name} at ${appointmentTime} has been confirmed.`,
-      });
+      try {
+        setIsLoading(true);
+        // Format the date as YYYY-MM-DD
+        const appointmentDate = selectedDate;
+        const appointmentPayload = {
+          doctorId: selectedDoctor.id,
+          appointmentDate,
+          timeSlot: appointmentTime,
+          symptoms: "",
+          consultationType: "video"
+        };
+        const response = await fetch(`${API_BASE}/appointments`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(appointmentPayload),
+        });
+        const data = await response.json();
+        if (!response.ok || !data.appointment) {
+          throw new Error(data.message || "Failed to book appointment");
+        }
+        // Format for UI
+        const newAppointment: Appointment = {
+          id: data.appointment._id,
+          doctorId: selectedDoctor.id,
+          doctorName: selectedDoctor.name,
+          specialty: selectedDoctor.specialty,
+          date: new Date(data.appointment.appointmentDate).toLocaleDateString(),
+          time: appointmentTime,
+          status: data.appointment.status || "scheduled",
+          photo: selectedDoctor.photo
+        };
+        setAppointments(prev => [...prev, newAppointment]);
+        setCurrentAppointment(newAppointment);
+        setBookingComplete(true);
+        setShowDialog(false);
+        toast({
+          title: "Appointment Booked",
+          description: `Your appointment with ${selectedDoctor.name} at ${appointmentTime} has been confirmed.`,
+        });
+      } catch (error: any) {
+        toast({
+          title: "Booking Failed",
+          description: error.message || "Failed to book appointment",
+          variant: "destructive"
+        });
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
-  const handleCancelAppointment = () => {
-    setShowCancelDialog(true);
-  };
-
+  // Cancel appointment using backendNode API
   async function cancelAppointment(appointmentId: string) {
-    const response = await fetch(`https://database-tval.onrender.com/meeting/${appointmentId}`, {
+    const response = await fetch(`${API_BASE}/appointments/${appointmentId}`, {
       method: "DELETE",
     });
     const data = await response.json();
     return data;
   }
 
-  const confirmCancelAppointment = () => {
+  const confirmCancelAppointment = async () => {
     if (currentAppointment) {
-      // Update the appointment status to canceled
-      cancelAppointment(currentAppointment.id);
+      await cancelAppointment(currentAppointment.id);
       setAppointments(prev => 
         prev.map(apt => 
           apt.id === currentAppointment.id 
@@ -182,12 +208,9 @@ useEffect(() => {
             : apt
         )
       );
-      
-      // Reset the current view
       setCurrentAppointment(null);
       setBookingComplete(false);
       setShowCancelDialog(false);
-      
       toast({
         title: "Appointment Canceled",
         description: "Your appointment has been successfully canceled.",
@@ -195,35 +218,56 @@ useEffect(() => {
     }
   };
 
-  const handleRescheduleAppointment = () => {
-    setShowRescheduleDialog(true);
+  // Reschedule appointment using backendNode API
+  const confirmRescheduleAppointment = async () => {
+    if (currentAppointment && newAppointmentTime) {
+      try {
+        setIsLoading(true);
+        const response = await fetch(`${API_BASE}/appointments/${currentAppointment.id}/reschedule`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ timeSlot: newAppointmentTime }),
+        });
+        const data = await response.json();
+        if (!response.ok || !data.success) {
+          throw new Error(data.message || "Failed to reschedule appointment");
+        }
+        const updatedAppointment = {
+          ...currentAppointment,
+          time: newAppointmentTime
+        };
+        setAppointments(prev => 
+          prev.map(apt => 
+            apt.id === currentAppointment.id 
+              ? updatedAppointment
+              : apt
+          )
+        );
+        setCurrentAppointment(updatedAppointment);
+        setShowRescheduleDialog(false);
+        setNewAppointmentTime(null);
+        toast({
+          title: "Appointment Rescheduled",
+          description: `Your appointment has been rescheduled to ${newAppointmentTime}.`,
+        });
+      } catch (error: any) {
+        toast({
+          title: "Reschedule Failed",
+          description: error.message || "Failed to reschedule appointment",
+          variant: "destructive"
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    }
   };
 
-  const confirmRescheduleAppointment = () => {
-    if (currentAppointment && newAppointmentTime) {
-      // Update the appointment time
-      const updatedAppointment = {
-        ...currentAppointment,
-        time: newAppointmentTime
-      };
-      
-      setAppointments(prev => 
-        prev.map(apt => 
-          apt.id === currentAppointment.id 
-            ? updatedAppointment
-            : apt
-        )
-      );
-      
-      setCurrentAppointment(updatedAppointment);
-      setShowRescheduleDialog(false);
-      setNewAppointmentTime(null);
-      
-      toast({
-        title: "Appointment Rescheduled",
-        description: `Your appointment has been rescheduled to ${newAppointmentTime}.`,
-      });
-    }
+  const handleCancelAppointment = () => {
+    setShowCancelDialog(true);
+  };
+
+  const handleRescheduleAppointment = () => {
+    setShowRescheduleDialog(true);
   };
 
   const startConsultation = () => {
@@ -231,14 +275,8 @@ useEffect(() => {
       title: "Joining Consultation",
       description: "Connecting to your doctor...",
     });
-
-    confirmCancelAppointment();
-
     navigate("/video-conference/" + currentAppointment?.id);
-    const meetingId = localStorage.getItem("meeting_id");
-    // In a real app, this would initiate the video call
   };
-
 
   return (
     <div className="space-y-6">
@@ -247,7 +285,6 @@ useEffect(() => {
           <h2 className="text-2xl font-bold">Video/Audio Consultations</h2>
           <p className="text-gray-500">Connect with healthcare providers remotely</p>
         </div>
-        
         {bookingComplete && (
           <Button onClick={startConsultation} className="flex items-center gap-2">
             <Video className="h-4 w-4" />
@@ -255,7 +292,6 @@ useEffect(() => {
           </Button>
         )}
       </div>
-      
       {bookingComplete && currentAppointment ? (
         <Card>
           <CardHeader>
@@ -307,7 +343,6 @@ useEffect(() => {
             <TabsTrigger value="find">Find Doctors</TabsTrigger>
             <TabsTrigger value="recommended">Recommended for You</TabsTrigger>
           </TabsList>
-          
           <TabsContent value="find" className="space-y-4">
             <div className="flex flex-col md:flex-row gap-4 mt-4">
               <div className="relative flex-grow">
@@ -319,7 +354,6 @@ useEffect(() => {
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
-              
               <div className="flex-shrink-0 w-full md:w-auto">
                 <select 
                   className="w-full h-10 px-3 border rounded-md"
@@ -333,7 +367,6 @@ useEffect(() => {
                 </select>
               </div>
             </div>
-            
             <div className="grid grid-cols-1 gap-4 mt-6">
               {filteredDoctors.map((doctor) => (
                 <Card key={doctor.id} className={`cursor-pointer transition-all ${selectedDoctor?.id === doctor.id ? 'ring-2 ring-health-500' : ''}`}>
@@ -355,7 +388,6 @@ useEffect(() => {
                             <span className="ml-1 text-sm font-medium">{doctor.rating}</span>
                           </div>
                         </div>
-                        
                         <div className="flex flex-wrap gap-2">
                           <span className="text-xs bg-gray-100 px-2 py-1 rounded">
                             {doctor.experience} years exp.
@@ -366,7 +398,6 @@ useEffect(() => {
                             </span>
                           ))}
                         </div>
-                        
                         <div className="pt-2">
                           <p className="text-sm text-gray-500 mb-2">Available today:</p>
                           <div className="flex flex-wrap gap-2">
@@ -403,7 +434,6 @@ useEffect(() => {
                   </CardFooter>
                 </Card>
               ))}
-              
               {filteredDoctors.length === 0 && (
                 <div className="text-center p-8 border rounded-lg">
                   <UserCircle className="h-12 w-12 mx-auto text-gray-300" />
@@ -411,7 +441,6 @@ useEffect(() => {
                 </div>
               )}
             </div>
-            
             {selectedDoctor && appointmentTime && (
               <div className="sticky bottom-0 bg-white p-4 border-t mt-6 -mx-6">
                 <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
@@ -424,12 +453,10 @@ useEffect(() => {
               </div>
             )}
           </TabsContent>
-          
           <TabsContent value="recommended">
             <div className="p-8 text-center border rounded-lg">
               <p className="text-gray-500 mb-2">Based on your past visits and current symptoms</p>
               <h3 className="text-lg font-semibold mb-6">Recommended Specialists</h3>
-              
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {doctors.slice(0, 2).map((doctor) => (
                   <Card key={doctor.id} className="cursor-pointer hover:shadow-md transition-shadow">
@@ -460,7 +487,16 @@ useEffect(() => {
           </TabsContent>
         </Tabs>
       )}
-      
+      <div className="flex justify-between items-center">
+        <span className="font-medium">Date:</span>
+        <Input
+          type="date"
+          value={selectedDate}
+          onChange={(e) => setSelectedDate(e.target.value)}
+          min={new Date().toISOString().split('T')[0]}
+          className="w-40"
+        />
+      </div>
       {/* Booking Dialog */}
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
         <DialogContent>
@@ -470,7 +506,6 @@ useEffect(() => {
               You're about to book a video consultation with {selectedDoctor?.name}.
             </DialogDescription>
           </DialogHeader>
-          
           <div className="space-y-4 py-4">
             <div className="flex justify-between items-center">
               <span className="font-medium">Doctor:</span>
@@ -482,7 +517,7 @@ useEffect(() => {
             </div>
             <div className="flex justify-between items-center">
               <span className="font-medium">Date:</span>
-              <span>Today</span>
+              <span>{selectedDate}</span>
             </div>
             <div className="flex justify-between items-center">
               <span className="font-medium">Time:</span>
@@ -492,7 +527,6 @@ useEffect(() => {
               <span className="font-medium">Fee:</span>
               <span>${selectedDoctor?.price}</span>
             </div>
-            
             <div className="pt-4">
               <Label htmlFor="reminders">Send reminders via:</Label>
               <div className="flex gap-4 mt-2">
@@ -511,14 +545,12 @@ useEffect(() => {
               </div>
             </div>
           </div>
-          
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowDialog(false)}>Cancel</Button>
             <Button onClick={confirmBooking}>Confirm Booking</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      
       {/* Reschedule Dialog */}
       <Dialog open={showRescheduleDialog} onOpenChange={setShowRescheduleDialog}>
         <DialogContent>
@@ -528,13 +560,11 @@ useEffect(() => {
               Select a new time for your appointment with {currentAppointment?.doctorName}.
             </DialogDescription>
           </DialogHeader>
-          
           <div className="space-y-4 py-4">
             <div className="flex justify-between items-center">
               <span className="font-medium">Current time:</span>
               <span>{currentAppointment?.time}</span>
             </div>
-            
             <div>
               <Label htmlFor="new-time">New appointment time:</Label>
               <div className="flex flex-wrap gap-2 mt-2">
@@ -551,7 +581,6 @@ useEffect(() => {
               </div>
             </div>
           </div>
-          
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowRescheduleDialog(false)}>Cancel</Button>
             <Button 
@@ -563,7 +592,6 @@ useEffect(() => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      
       {/* Cancel Dialog */}
       <Dialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
         <DialogContent>
@@ -573,14 +601,12 @@ useEffect(() => {
               Are you sure you want to cancel your appointment with {currentAppointment?.doctorName}?
             </DialogDescription>
           </DialogHeader>
-          
           <div className="space-y-4 py-4">
             <p className="text-gray-500">
               Cancellation is free if done 2 hours before the appointment. 
               Last-minute cancellations may incur a fee.
             </p>
           </div>
-          
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowCancelDialog(false)}>Keep Appointment</Button>
             <Button 

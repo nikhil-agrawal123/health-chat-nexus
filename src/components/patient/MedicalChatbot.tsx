@@ -59,7 +59,7 @@ async function Chat(prompt: string) {
 const defaultTexts = {
   welcome: "Hi there! Please describe your symptoms.",
   placeholder: "Describe your symptoms...",
-  powered: "Powered by Medical AI",
+  powered: "Powered by Google Gemini",
   aiLabel: "AI Health Assistant",
   info: "AI assistant provides general information only. Always consult with a healthcare provider for medical advice.",
   suggestions: [
