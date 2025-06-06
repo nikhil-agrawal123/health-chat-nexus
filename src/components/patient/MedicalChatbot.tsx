@@ -227,7 +227,7 @@ const MedicalChatbot = () => {
 
     try {
       const intent = await getIntent(messageToSend);
-      if (intent === "medical_diagnosis"){
+      if (intent === "diagnosis"){
         const aiText = await Chat(messageToSend + " " + userData);
         const translatedAiText = await multiLingual(language, aiText);
         const aiMessage: Message = {
