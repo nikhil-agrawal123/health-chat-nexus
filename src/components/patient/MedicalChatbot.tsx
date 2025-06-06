@@ -56,13 +56,13 @@ async function Chat(prompt: string) {
   return data.text;
 }
 
-async function getIntent(prompt:string) {
-  const response = await fetch("https://database-tval.onrender.com/detect_intent", {
+async function getIntent(text:string) {
+  const response = await fetch("https://database-tval.onrender.com/detect_intent/", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ prompt }),
+    body: JSON.stringify({ text }),
   });
   if (!response.ok) throw new Error("Failed to get response from AI");
   const data = await response.json();
