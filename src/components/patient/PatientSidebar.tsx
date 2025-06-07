@@ -11,7 +11,8 @@ import {
   Globe,
   LogOut,
   Pill,
-  Shield
+  Shield,
+  ScanText
 } from "lucide-react";
 import {
   Sidebar,
@@ -33,6 +34,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import ApiService from "../../services/api.js"
 
 interface PatientSidebarProps {
   activeTab: string;
@@ -73,12 +75,32 @@ const PatientSidebar: React.FC<PatientSidebarProps> = ({
     localStorage.setItem("language", language);
   }, [language]);
 
-  const handleLogout = () => {
-    toast({
-      title: translate("logout"),
-      description: translate("You have been successfully logged out.")
-    });
-    navigate("/");
+  const handleLogout = async () => {
+    try {
+      const response = await ApiService.logout();
+      
+      if (response.success) {
+        localStorage.removeItem('userId');
+        localStorage.removeItem('userName');
+        localStorage.removeItem('userRole');
+        
+        toast({
+          title: translate("logout"),
+          description: translate("You have been successfully logged out.")
+        });
+        
+        navigate("/");
+      } else {
+        throw new Error("Logout failed");
+      }
+    } catch (error) {
+      console.error("Logout error:", error);
+      toast({
+        title: translate("logoutFailed"),
+        description: translate("There was a problem logging out. Please try again."),
+        variant: "destructive"
+      });
+    }
   };
 
   const menuItems = [
@@ -121,7 +143,12 @@ const PatientSidebar: React.FC<PatientSidebarProps> = ({
       icon: Shield,
       label: translate("governmentSchemes"),
       value: "schemes"
-    }
+    },
+    {
+      icon: ScanText, // Import this from lucide-react at the top
+      label: translate("prescriptionScanner"),
+      value: "scanner" // This will be the tab ID
+    },
   ];
 
   return (
