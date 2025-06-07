@@ -158,6 +158,9 @@ const MedicalChatbot = () => {
           try {
             const response = await fetch("https://database-tval.onrender.com/record", {
               method: "POST",
+              headers: {
+                "Accept": "application/json",
+              },
               body: formData,
             });
 
