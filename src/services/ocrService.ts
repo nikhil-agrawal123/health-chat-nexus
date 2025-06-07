@@ -4,7 +4,7 @@ export const OCRService = {
   // Check if the service is online
   async checkHealth(): Promise<boolean> {
     try {
-      const response = await fetch('http://localhost:8000/health');
+      const response = await fetch('https://database-tval.onrender.com/health');
       return response.ok;
     } catch (error) {
       console.error('Service health check failed:', error);
@@ -18,7 +18,7 @@ export const OCRService = {
       const formData = new FormData();
       formData.append('file', file);
 
-      const response = await fetch('http://localhost:8000/extract-text', {
+      const response = await fetch('https://database-tval.onrender.com/extract-text', {
         method: 'POST',
         body: formData,
       });

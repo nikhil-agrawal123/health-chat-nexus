@@ -109,7 +109,7 @@ export const PrescriptionScanner: React.FC = () => {
         <Alert className="border-red-200 bg-red-50">
           <AlertCircle className="h-4 w-4 text-red-600" />
           <AlertDescription className="text-red-700">
-            The OCR service is currently offline. Please ensure the Python backend is running on localhost:8000.
+            The OCR service is currently offline.
           </AlertDescription>
         </Alert>
       )}
@@ -137,8 +137,6 @@ export const PrescriptionScanner: React.FC = () => {
         <ul className="text-sm text-blue-800 space-y-1">
           <li>• Upload a clear image of your prescription</li>
           <li>• Supported formats: PNG, JPG, JPEG (max 10MB)</li>
-          <li>• The extracted text will be stored temporarily in your browser</li>
-          <li>• Uploading a new prescription will replace the previous one</li>
         </ul>
       </div>
     </div>
