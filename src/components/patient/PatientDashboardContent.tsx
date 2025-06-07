@@ -6,6 +6,8 @@ import {
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useLanguage } from "@/context/LanguageContext";
+import {PrescriptionScanner} from "../prescription/PrescriptionScanner";
+import { TabsContent } from "@/components/ui/tabs";
 
 type ButtonVariant = "default" | "outline" | "link" | "destructive" | "secondary" | "ghost";
 
@@ -127,6 +129,10 @@ const PatientDashboardContent = ({ setActiveTab }) => {
           </Card>
         ))}
       </div>
+
+      <TabsContent value="scanner">
+        <PrescriptionScanner />
+      </TabsContent>
     </div>
   );
 };
