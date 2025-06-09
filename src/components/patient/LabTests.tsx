@@ -21,7 +21,7 @@ interface LabTest {
 }
 
 async function fetchData() {
-  const response = await fetch("http://localhost:8082/test", {
+  const response = await fetch("https://database-tval.onrender.com/test", {
     method: "GET",
     headers: {
       "Content-Type": "application/json"
@@ -36,7 +36,7 @@ async function fetchData() {
 
 async function bookTest(booking: any) {
   const userId = localStorage.getItem("userId");
-  const response = await fetch("http://localhost:8082/test/book", {
+  const response = await fetch("https://database-tval.onrender.com/test/book", {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
@@ -79,7 +79,7 @@ const timeSlots = [
 ];
 
 async function fetchBookedTests() {
-  const response = await fetch("http://localhost:8082/test/booked", {
+  const response = await fetch("https://database-tval.onrender.com/test/booked", {
     method: "GET",
     headers: {
       "Content-Type": "application/json"
@@ -242,7 +242,7 @@ const LabTests = () => {
     if (selectedBooking) {
       // Delete from backend
       try {
-        await fetch(`http://localhost:8082/test/book/${selectedBooking.id}`, {
+        await fetch(`https://database-tval.onrender.com/test/book/${selectedBooking.id}`, {
           method: "DELETE",
         });
       } catch (err) {
