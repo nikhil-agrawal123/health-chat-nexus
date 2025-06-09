@@ -132,7 +132,8 @@ class ApiService {
         
         // Include it in the request
         return this.request('/doctors/profile', {
-            method: 'GET',        
+            method: 'GET',  
+            credentials: 'include', // Ensure cookies are sent      
         });
     }
 
