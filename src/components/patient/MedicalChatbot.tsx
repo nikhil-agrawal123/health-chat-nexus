@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Bot, Send, Mic, MicOff, Brain } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { multiLingual } from "@/utils/translation";
+import testdata from "./testdata.json"
 
 interface Message {
   id: number;
@@ -16,6 +17,8 @@ interface Message {
     specialtyNeeded: string;
   };
 }
+
+type BookingStep = null | "date" | "time" | "address"
 
 const languageCodeMap: Record<string, string> = {
   English: "en",
@@ -97,6 +100,12 @@ const MedicalChatbot = () => {
       suggestions: defaultTexts.suggestions
     }
   ]);
+
+  const [selectableTests, setSelectableTests] = useState<any[]>([]);
+  const [pendingTest, setPendingTest] = useState<any | null>(null);
+  const [bookingStep, setBookingStep] = useState<BookingStep>(null);
+  const [bookingInfo, setBookingInfo] = useState<{ date?: string; time?: string; address?: string }>({});
+
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
@@ -217,6 +226,117 @@ const MedicalChatbot = () => {
     const messageToSend = input.trim();
     if (messageToSend === "") return;
 
+    if (pendingTest && bookingStep) {
+  // Add user's input as a message first
+  setMessages(prev => [
+    ...prev,
+    {
+      id: Date.now() + Math.random(),
+      text: input,
+      sender: "user",
+      timestamp: new Date()
+    }
+  ]);
+
+  if (bookingStep === "date") {
+    setBookingInfo(prev => ({ ...prev, date: input }));
+    setBookingStep("time");
+    setTimeout(() => {
+      setMessages(prev => [
+        ...prev,
+        {
+          id: Date.now() + Math.random(),
+          text: "Please enter your preferred time (e.g., 10:00 AM):",
+          sender: "bot",
+          timestamp: new Date()
+        }
+      ]);
+    }, 100);
+    setInput("");
+    return;
+  }
+  if (bookingStep === "time") {
+    setBookingInfo(prev => ({ ...prev, time: input }));
+    setBookingStep("address");
+    setTimeout(() => {
+      setMessages(prev => [
+        ...prev,
+        {
+          id: Date.now() + Math.random(),
+          text: "Please enter your address for sample pickup:",
+          sender: "bot",
+          timestamp: new Date()
+        }
+      ]);
+    }, 100);
+    setInput("");
+    return;
+  }
+  if (bookingStep === "address") {
+    const finalBooking = {
+      date: bookingInfo.date,
+      time: bookingInfo.time,
+      address: input
+    };
+    setBookingInfo({});
+    setBookingStep(null);
+
+    setTimeout(() => {
+      setMessages(prev => [
+        ...prev,
+        {
+          id: Date.now() + Math.random(),
+          text: "Thank you! Booking your test...",
+          sender: "bot",
+          timestamp: new Date()
+        }
+      ]);
+    }, 100);
+
+    // POST to backend (as before)
+    fetch("https://database-tval.onrender.com/test/book", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        test_id: pendingTest.id || pendingTest._id || "",
+        user_id: localStorage.getItem("userId") || "demo-user",
+        date: finalBooking.date,
+        time: finalBooking.time,
+        address: finalBooking.address,
+        status: "sheduled",
+      })
+    }).then(() => {
+      setTimeout(() => {
+        setMessages(prev => [
+          ...prev,
+          {
+            id: Date.now() + Math.random(),
+            text: `Your test "${pendingTest.name}" has been booked for ${finalBooking.date} at ${finalBooking.time}.`,
+            sender: "bot",
+            timestamp: new Date()
+          }
+        ]);
+        setPendingTest(null);
+      }, 100);
+    }).catch(() => {
+      setTimeout(() => {
+        setMessages(prev => [
+          ...prev,
+          {
+            id: Date.now() + Math.random(),
+            text: "Sorry, there was an error booking your test. Please try again.",
+            sender: "bot",
+            timestamp: new Date()
+          }
+        ]);
+        setPendingTest(null);
+      }, 100);
+    });
+    setInput("");
+    return;
+  }
+}
+
     // Add user message
     const userMessage: Message = {
       id: messages.length + 1,
@@ -241,6 +361,32 @@ const MedicalChatbot = () => {
         };
         setMessages(prev => [...prev, aiMessage]);
         await playTTS(translatedAiText, languageCodeMap[language] || "en"); // Use language code
+      } if (intent == "test"){
+        let foundTests: any[] = [];
+    testdata["all data"].forEach((item: any) => {
+      Object.keys(item).forEach((key) => {
+        if (input.toLowerCase().includes(key.toLowerCase())) {
+          item[key].forEach((test: any) => {
+            foundTests.push({ ...test, category: key });
+          });
+        }
+      });
+    });
+
+    if (foundTests.length > 0) {
+      setSelectableTests(foundTests);
+      setMessages(prev => [
+        ...prev,
+        {
+          id: Date.now() + Math.random(),
+          text: "Please select the test you want to book:",
+          sender: "bot",
+          timestamp: new Date()
+        }
+      ]);
+      setInput("");
+      return;
+    }
       }
     } catch (err) {
       toast({
@@ -252,6 +398,36 @@ const MedicalChatbot = () => {
       setIsTyping(false);
     }
   };
+
+  const renderTestSelection = () => (
+    selectableTests.length > 0 && (
+      <div className="mb-4 flex flex-wrap gap-2">
+        {selectableTests.map((test, idx) => (
+          <Button
+            key={idx}
+            variant="outline"
+            onClick={() => {
+              setPendingTest(test);
+              setSelectableTests([]);
+              setBookingStep("date");
+              setMessages(prev => [
+                ...prev,
+                {
+                  id: Date.now() + Math.random(),
+                  text:
+                    `You selected "${test.name}".\nDescription: ${test.description || "N/A"}\nPrice: ${test.cost || test.price || "N/A"}\n\nPlease enter your preferred date (YYYY-MM-DD):`,
+                  sender: "bot",
+                  timestamp: new Date()
+                }
+              ]);
+            }}
+          >
+            {test.name}
+          </Button>
+        ))}
+      </div>
+    )
+  );
 
   return (
     <div className="flex flex-col h-[calc(100vh-250px)] overflow-hidden rounded-lg shadow-md bg-white">
@@ -310,6 +486,7 @@ const MedicalChatbot = () => {
               </div>
             </div>
           )}
+          {renderTestSelection()}
         </div>
       </div>
       
