@@ -47,7 +47,7 @@ async function bookTest(booking: any) {
       date: booking.date,
       time: booking.timeSlot,
       address: booking.address,
-      status: "booked"
+      status: "scheduled"
     })
   });
   const data = await response.json();
