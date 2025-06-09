@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,15 +8,53 @@ import { Label } from "@/components/ui/label";
 import { TestTube, Calendar, Clock, MapPin, Check, AlertCircle, X, ArrowRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/context/LanguageContext";
+// import testdata from "./testdata.json"; // Uncomment if you want to use local test data
 
 interface LabTest {
   id: string;
   name: string;
   description: string;
-  price: number;
+  price: string;
   preparationInstructions: string;
   processingTime: string;
-  category: "blood" | "urine" | "imaging" | "other";
+  category: string;
+}
+
+async function fetchData() {
+  const response = await fetch("http://localhost:8082/test", {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json"
+    }
+  });
+  const data = await response.json();
+  if (!response.ok) {
+    console.error("Failed to fetch data:", data);
+  }
+  return data.data;
+}
+
+async function bookTest(booking: any) {
+  const userId = localStorage.getItem("userId");
+  const response = await fetch("http://localhost:8082/test/book", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      test_id: booking.id,
+      user_id: userId,
+      date: booking.date,
+      time: booking.timeSlot,
+      address: booking.address,
+      status: "booked"
+    })
+  });
+  const data = await response.json();
+  if (!response.ok) {
+    console.error("Failed to create booking:", data);
+  }
+  return data;
 }
 
 interface LabTestBooking {
@@ -41,6 +78,21 @@ const timeSlots = [
   "6:00 PM - 7:00 PM",
 ];
 
+async function fetchBookedTests() {
+  const response = await fetch("http://localhost:8082/test/booked", {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json"
+    }
+  });
+  const data = await response.json();
+  if (!response.ok) {
+    console.error("Failed to fetch booked tests:", data);
+    return [];
+  }
+  return data.data || [];
+}
+
 const LabTests = () => {
   const { toast } = useToast();
   const { translate } = useLanguage();
@@ -52,88 +104,64 @@ const LabTests = () => {
   const [showDetailsDialog, setShowDetailsDialog] = useState(false);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState<LabTestBooking | null>(null);
-  
+
   // Booking form states
   const [bookingDate, setBookingDate] = useState("");
   const [bookingTimeSlot, setBookingTimeSlot] = useState("");
   const [bookingAddress, setBookingAddress] = useState("");
-  
-  // Sample data for lab tests
+
+  // Fetch lab tests and booked tests from backend
   useEffect(() => {
-    const sampleTests: LabTest[] = [
-      {
-        id: "1",
-        name: translate("completeBloodCount"),
-        description: translate("Measures red blood cells, white blood cells, and platelets in your blood."),
-        price: 25,
-        preparationInstructions: translate("No special preparation required. Fasting not necessary."),
-        processingTime: translate("24 hours"),
-        category: "blood"
-      },
-      {
-        id: "2",
-        name: translate("lipidProfile"),
-        description: translate("Measures cholesterol levels including HDL, LDL, and triglycerides."),
-        price: 35,
-        preparationInstructions: translate("Fast for 9-12 hours before the test. Water is allowed."),
-        processingTime: translate("24 hours"),
-        category: "blood"
-      },
-      {
-        id: "3",
-        name: translate("glucoseTest"),
-        description: translate("Measures the amount of glucose in your blood to screen for diabetes."),
-        price: 20,
-        preparationInstructions: translate("For fasting test, do not eat or drink for 8 hours before the test."),
-        processingTime: translate("24 hours"),
-        category: "blood"
-      },
-      {
-        id: "4",
-        name: translate("urineAnalysis"),
-        description: translate("Analyzes the contents of your urine for signs of infection or disease."),
-        price: 15,
-        preparationInstructions: translate("Collect a clean mid-stream sample in the provided container."),
-        processingTime: translate("24 hours"),
-        category: "urine"
-      },
-      {
-        id: "5",
-        name: translate("thyroidProfile"),
-        description: translate("Measures thyroid hormone levels to check thyroid function."),
-        price: 45,
-        preparationInstructions: translate("No special preparation required."),
-        processingTime: translate("48 hours"),
-        category: "blood"
-      }
-    ];
-    
-    setLabTests(sampleTests);
-    
-    // Load bookings from localStorage
-    const savedBookings = localStorage.getItem('labTestBookings');
-    if (savedBookings) {
-      setBookings(JSON.parse(savedBookings));
-    }
+    // Fetch available lab tests
+    const allTests: LabTest[] = [];
+    fetchData().then((data) => {
+      data.forEach((item: any) => {
+        allTests.push({
+          id: item._id,
+          name: item.name,
+          description: item.description,
+          price: item.cost,
+          preparationInstructions: item.preparationInstructions || "",
+          processingTime: item.time || "24 hours",
+          category: item.category
+        });
+      });
+      setLabTests(allTests);
+    });
+
+    // Fetch booked tests from backend
+    fetchBookedTests().then((booked) => {
+      // Map backend data to LabTestBooking[]
+      const mapped = booked.map((item: any) => ({
+        id: item._id,
+        tests: Array.isArray(item.tests) ? item.tests : [item.test], // adjust as per your backend
+        date: item.date,
+        timeSlot: item.time,
+        address: item.address,
+        status: item.status,
+        totalPrice: item.totalPrice || 0
+      }));
+      setBookings(mapped);
+    });
   }, [translate]);
-  
+
   // Save bookings to localStorage whenever they change
   useEffect(() => {
     if (bookings.length > 0) {
       localStorage.setItem('labTestBookings', JSON.stringify(bookings));
     }
   }, [bookings]);
-  
+
   const handleTestSelection = (test: LabTest) => {
     const isAlreadySelected = selectedTests.some(t => t.id === test.id);
-    
+
     if (isAlreadySelected) {
       setSelectedTests(selectedTests.filter(t => t.id !== test.id));
     } else {
       setSelectedTests([...selectedTests, test]);
     }
   };
-  
+
   const handleBookNow = () => {
     if (selectedTests.length === 0) {
       toast({
@@ -143,15 +171,16 @@ const LabTests = () => {
       });
       return;
     }
-    
+
     setShowBookingDialog(true);
   };
-  
+
   const calculateTotal = () => {
-    return selectedTests.reduce((sum, test) => sum + test.price, 0);
+    return selectedTests.reduce((sum, test) => sum + Number(test.price.replace(/[^\d]/g, "")), 0);
   };
-  
-  const handleConfirmBooking = () => {
+
+  // Book each selected test individually to the backend and refresh bookings from backend
+  const handleConfirmBooking = async () => {
     if (!bookingDate || !bookingTimeSlot || !bookingAddress) {
       toast({
         title: translate("incompleteInformation"),
@@ -160,60 +189,93 @@ const LabTests = () => {
       });
       return;
     }
-    
-    const newBooking: LabTestBooking = {
-      id: Date.now().toString(),
-      tests: selectedTests,
-      date: bookingDate,
-      timeSlot: bookingTimeSlot,
-      address: bookingAddress,
-      status: "scheduled",
-      totalPrice: calculateTotal()
-    };
-    
-    setBookings([...bookings, newBooking]);
+
+    // Book each selected test individually
+    for (const test of selectedTests) {
+      await bookTest({
+        id: test.id,
+        date: bookingDate,
+        timeSlot: bookingTimeSlot,
+        address: bookingAddress
+      });
+    }
+
+    // Refresh bookings from backend
+    fetchBookedTests().then((booked) => {
+      const mapped = booked.map((item: any) => ({
+        id: item._id,
+        tests: Array.isArray(item.tests) ? item.tests : [item.test],
+        date: item.date,
+        timeSlot: item.time,
+        address: item.address,
+        status: item.status,
+        totalPrice: item.totalPrice || 0
+      }));
+      setBookings(mapped);
+    });
+
     setShowBookingDialog(false);
     setSelectedTests([]);
     setBookingDate("");
     setBookingTimeSlot("");
     setBookingAddress("");
-    
+
     toast({
       title: translate("bookingConfirmed"),
       description: translate("Your lab tests have been scheduled for") + ` ${bookingDate} at ${bookingTimeSlot}.`,
     });
-    
+
     setActiveTab("bookings");
   };
-  
+
   const handleViewDetails = (booking: LabTestBooking) => {
     setSelectedBooking(booking);
     setShowDetailsDialog(true);
   };
-  
+
   const handleCancelBooking = (booking: LabTestBooking) => {
     setSelectedBooking(booking);
     setShowCancelDialog(true);
   };
-  
-  const confirmCancelBooking = () => {
+
+  const confirmCancelBooking = async () => {
     if (selectedBooking) {
-      // Update booking status to canceled
-      setBookings(bookings.map(booking => 
-        booking.id === selectedBooking.id 
-          ? {...booking, status: "canceled" as const} 
-          : booking
-      ));
-      
+      // Delete from backend
+      try {
+        await fetch(`http://localhost:8082/test/book/${selectedBooking.id}`, {
+          method: "DELETE",
+        });
+      } catch (err) {
+        toast({
+          title: translate("Error"),
+          description: translate("Failed to cancel booking in backend."),
+          variant: "destructive"
+        });
+      }
+
+      // Refresh bookings from backend
+      fetchBookedTests().then((booked) => {
+        const mapped = booked.map((item: any) => ({
+          id: item._id,
+          tests: Array.isArray(item.tests) ? item.tests : [item.test],
+          date: item.date,
+          timeSlot: item.time,
+          address: item.address,
+          status: item.status,
+          totalPrice: item.totalPrice || 0
+        }));
+        setBookings(mapped);
+      });
+
       setShowCancelDialog(false);
-      
+
       toast({
         title: translate("Booking Canceled"),
         description: translate("Your lab test booking has been canceled successfully."),
       });
     }
   };
-  
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -222,22 +284,22 @@ const LabTests = () => {
           <p className="text-gray-500">{translate("scheduleCollection")}</p>
         </div>
       </div>
-      
+
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="available">{translate("availableLabTests")}</TabsTrigger>
           <TabsTrigger value="bookings">{translate("Your Bookings")}</TabsTrigger>
         </TabsList>
-        
+
         <TabsContent value="available" className="space-y-4 mt-4">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="md:w-3/4 space-y-4">
               {labTests.map((test) => (
-                <Card 
-                  key={test.id} 
+                <Card
+                  key={test.id}
                   className={`cursor-pointer hover:shadow-md transition-shadow ${
-                    selectedTests.some(t => t.id === test.id) 
-                      ? 'border-2 border-health-500' 
+                    selectedTests.some(t => t.id === test.id)
+                      ? 'border-2 border-health-500'
                       : ''
                   }`}
                   onClick={() => handleTestSelection(test)}
@@ -254,11 +316,11 @@ const LabTests = () => {
                             <Check className="h-3 w-3 text-white" />
                           )}
                         </div>
-                        
+
                         <div>
                           <h3 className="font-semibold">{test.name}</h3>
                           <p className="text-sm text-gray-500 mt-1">{test.description}</p>
-                          
+
                           <div className="flex flex-wrap gap-2 mt-2">
                             <span className="inline-flex items-center px-2 py-1 rounded text-xs bg-gray-100 text-gray-800">
                               <Clock className="h-3 w-3 mr-1" />
@@ -271,16 +333,16 @@ const LabTests = () => {
                           </div>
                         </div>
                       </div>
-                      
+
                       <div className="text-right">
-                        <span className="font-semibold text-health-700">${test.price}</span>
+                        <span className="font-semibold text-health-700">{test.price}</span>
                       </div>
                     </div>
                   </CardContent>
                 </Card>
               ))}
             </div>
-            
+
             <div className="md:w-1/4">
               <div className="sticky top-4">
                 <Card>
@@ -299,14 +361,14 @@ const LabTests = () => {
                               <TestTube className="h-4 w-4 text-health-600" />
                               <span className="text-sm">{test.name}</span>
                             </div>
-                            <span className="text-sm font-medium">${test.price}</span>
+                            <span className="text-sm font-medium">{test.price}</span>
                           </div>
                         ))}
-                        
+
                         <div className="pt-2 mt-2 border-t">
                           <div className="flex justify-between items-center font-semibold">
                             <span>{translate("Total")}:</span>
-                            <span>${calculateTotal()}</span>
+                            <span>₹{calculateTotal()}</span>
                           </div>
                         </div>
                       </div>
@@ -315,8 +377,8 @@ const LabTests = () => {
                     )}
                   </CardContent>
                   <CardFooter>
-                    <Button 
-                      className="w-full" 
+                    <Button
+                      className="w-full"
                       disabled={selectedTests.length === 0}
                       onClick={handleBookNow}
                     >
@@ -328,7 +390,7 @@ const LabTests = () => {
             </div>
           </div>
         </TabsContent>
-        
+
         <TabsContent value="bookings" className="mt-4">
           {bookings.length > 0 ? (
             <div className="space-y-4">
@@ -357,7 +419,7 @@ const LabTests = () => {
                             {booking.tests.length} {translate(booking.tests.length !== 1 ? 'Tests' : 'Test')} {translate("Booked")}
                           </h3>
                         </div>
-                        
+
                         <div className="space-y-1">
                           <div className="flex items-center gap-1 text-sm text-gray-500">
                             <Calendar className="h-4 w-4" />
@@ -373,23 +435,23 @@ const LabTests = () => {
                           </div>
                         </div>
                       </div>
-                      
+
                       <div className="flex flex-col gap-2 w-full md:w-auto">
                         <div className="text-right mb-2">
-                          <span className="font-semibold text-health-700">{translate("Total")}: ${booking.totalPrice}</span>
+                          <span className="font-semibold text-health-700">{translate("Total")}: ₹{booking.totalPrice}</span>
                         </div>
                         <div className="flex flex-wrap gap-2 justify-end">
                           {booking.status === "scheduled" && (
                             <>
-                              <Button 
-                                variant="outline" 
+                              <Button
+                                variant="outline"
                                 size="sm"
                                 onClick={() => handleCancelBooking(booking)}
                               >
                                 <X className="h-4 w-4 mr-1" />
                                 {translate("cancel")}
                               </Button>
-                              <Button 
+                              <Button
                                 size="sm"
                                 onClick={() => handleViewDetails(booking)}
                               >
@@ -398,8 +460,8 @@ const LabTests = () => {
                             </>
                           )}
                           {(booking.status === "completed" || booking.status === "canceled") && (
-                            <Button 
-                              variant="outline" 
+                            <Button
+                              variant="outline"
                               size="sm"
                               onClick={() => handleViewDetails(booking)}
                             >
@@ -417,8 +479,8 @@ const LabTests = () => {
             <div className="text-center p-8 border rounded-lg">
               <TestTube className="h-12 w-12 mx-auto text-gray-300" />
               <p className="mt-2 text-gray-500">{translate("No lab test bookings found")}</p>
-              <Button 
-                className="mt-4" 
+              <Button
+                className="mt-4"
                 onClick={() => setActiveTab("available")}
               >
                 {translate("Book Your First Test")}
@@ -427,7 +489,7 @@ const LabTests = () => {
           )}
         </TabsContent>
       </Tabs>
-      
+
       {/* Booking Dialog */}
       <Dialog open={showBookingDialog} onOpenChange={setShowBookingDialog}>
         <DialogContent>
@@ -437,23 +499,23 @@ const LabTests = () => {
               {translate("Select your preferred date, time, and collection address.")}
             </DialogDescription>
           </DialogHeader>
-          
+
           <div className="space-y-4 py-4">
             <div className="space-y-2">
               <Label htmlFor="date">{translate("collectionDate")}</Label>
-              <Input 
-                id="date" 
-                type="date" 
-                value={bookingDate} 
+              <Input
+                id="date"
+                type="date"
+                value={bookingDate}
                 onChange={(e) => setBookingDate(e.target.value)}
                 min={new Date().toISOString().split('T')[0]}
               />
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="time">{translate("collectionTime")}</Label>
-              <select 
-                id="time" 
+              <select
+                id="time"
                 className="w-full p-2 border rounded-md"
                 value={bookingTimeSlot}
                 onChange={(e) => setBookingTimeSlot(e.target.value)}
@@ -464,44 +526,44 @@ const LabTests = () => {
                 ))}
               </select>
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="address">{translate("collectionAddress")}</Label>
-              <Input 
-                id="address" 
-                value={bookingAddress} 
-                onChange={(e) => setBookingAddress(e.target.value)} 
+              <Input
+                id="address"
+                value={bookingAddress}
+                onChange={(e) => setBookingAddress(e.target.value)}
                 placeholder={translate("Enter your full address")}
               />
             </div>
-            
+
             <div className="border rounded-lg p-4 mt-4">
               <h4 className="font-medium mb-2">{translate("Selected Tests")}:</h4>
               <div className="space-y-2">
                 {selectedTests.map((test) => (
                   <div key={test.id} className="flex justify-between items-center">
                     <span>{test.name}</span>
-                    <span>${test.price}</span>
+                    <span>{test.price}</span>
                   </div>
                 ))}
                 <div className="pt-2 mt-2 border-t font-semibold">
                   <div className="flex justify-between items-center">
                     <span>{translate("Total")}:</span>
-                    <span>${calculateTotal()}</span>
+                    <span>₹{calculateTotal()}</span>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-          
+
           <DialogFooter>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={() => setShowBookingDialog(false)}
             >
               {translate("cancel")}
             </Button>
-            <Button 
+            <Button
               onClick={handleConfirmBooking}
               disabled={!bookingDate || !bookingTimeSlot || !bookingAddress}
             >
@@ -510,14 +572,14 @@ const LabTests = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      
+
       {/* Booking Details Dialog */}
       <Dialog open={showDetailsDialog} onOpenChange={setShowDetailsDialog}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{translate("Booking Details")}</DialogTitle>
           </DialogHeader>
-          
+
           {selectedBooking && (
             <div className="space-y-4 py-4">
               <div className="flex items-center gap-2">
@@ -539,7 +601,7 @@ const LabTests = () => {
                   </span>
                 )}
               </div>
-              
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-sm text-gray-500">{translate("collectionDate")}</p>
@@ -554,7 +616,7 @@ const LabTests = () => {
                   <p className="font-medium">{selectedBooking.address}</p>
                 </div>
               </div>
-              
+
               <div className="mt-4">
                 <h4 className="font-medium mb-2">{translate("tests")}:</h4>
                 <div className="border rounded-lg divide-y">
@@ -564,18 +626,18 @@ const LabTests = () => {
                         <p className="font-medium">{test.name}</p>
                         <p className="text-xs text-gray-500">{translate("Results in")} {test.processingTime}</p>
                       </div>
-                      <span>${test.price}</span>
+                      <span>{test.price}</span>
                     </div>
                   ))}
                   <div className="p-3 bg-gray-50 font-semibold">
                     <div className="flex justify-between items-center">
                       <span>{translate("Total")}:</span>
-                      <span>${selectedBooking.totalPrice}</span>
+                      <span>₹{selectedBooking.totalPrice}</span>
                     </div>
                   </div>
                 </div>
               </div>
-              
+
               <div className="bg-gray-50 p-4 rounded-lg">
                 <h4 className="font-medium flex items-center gap-1 mb-2">
                   <AlertCircle className="h-4 w-4 text-health-600" />
@@ -598,11 +660,11 @@ const LabTests = () => {
               </div>
             </div>
           )}
-          
+
           <DialogFooter>
             {selectedBooking?.status === "scheduled" && (
-              <Button 
-                variant="destructive" 
+              <Button
+                variant="destructive"
                 onClick={() => {
                   setShowDetailsDialog(false);
                   handleCancelBooking(selectedBooking);
@@ -611,8 +673,8 @@ const LabTests = () => {
                 {translate("Cancel Booking")}
               </Button>
             )}
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={() => setShowDetailsDialog(false)}
             >
               {translate("close")}
@@ -620,7 +682,7 @@ const LabTests = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      
+
       {/* Cancel Dialog */}
       <Dialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
         <DialogContent>
@@ -630,22 +692,22 @@ const LabTests = () => {
               {translate("Are you sure you want to cancel this lab test booking?")}
             </DialogDescription>
           </DialogHeader>
-          
+
           <div className="space-y-4 py-4">
             <p className="text-gray-500">
               {translate("Cancellation is free if done 12 hours before the scheduled time. You can book again at any time.")}
             </p>
           </div>
-          
+
           <DialogFooter>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={() => setShowCancelDialog(false)}
             >
               {translate("Keep Booking")}
             </Button>
-            <Button 
-              variant="destructive" 
+            <Button
+              variant="destructive"
               onClick={confirmCancelBooking}
             >
               {translate("Yes, Cancel Booking")}
