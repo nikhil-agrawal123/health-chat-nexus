@@ -192,7 +192,7 @@ const MedicalChatbot = () => {
             date: finalBooking.date,
             time: finalBooking.time,
             address: finalBooking.address,
-            status: "booked"
+            status: "scheduled"
           })
         }).then(() => {
           setTimeout(() => {
