@@ -151,6 +151,7 @@ const DoctorConsultation = () => {
         };
         const response = await fetch(`${API_BASE}/appointments`, {
           method: "POST",
+          credentials: "include",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(appointmentPayload),
         });
@@ -193,6 +194,7 @@ const DoctorConsultation = () => {
   async function cancelAppointment(appointmentId: string) {
     const response = await fetch(`${API_BASE}/appointments/${appointmentId}`, {
       method: "DELETE",
+      credentials: "include",
     });
     const data = await response.json();
     return data;
@@ -227,6 +229,7 @@ const DoctorConsultation = () => {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ timeSlot: newAppointmentTime }),
+          credentials: "include",
         });
         const data = await response.json();
         if (!response.ok || !data.success) {
