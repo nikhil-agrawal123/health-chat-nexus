@@ -56,6 +56,7 @@ class ApiService {
         const response = await this.request('/auth/patient/login', {
           method: 'POST',
           body: JSON.stringify(credentials),
+          credentials: 'include' // Include credentials to send cookies
         });
         console.log("Login response received:", response);
         return response;
@@ -67,6 +68,7 @@ class ApiService {
         return this.request('/auth/patient/register', {
             method: 'POST',
             body: JSON.stringify(userData),
+            credentials: 'include' // Include credentials to send cookies
         });
     }
 
@@ -74,6 +76,7 @@ class ApiService {
         return this.request('/auth/doctor/login', {
             method: 'POST',
             body: JSON.stringify(credentials),
+            credentials: 'include' // Include credentials to send cookies
         });
     }
 
@@ -81,6 +84,7 @@ class ApiService {
         return this.request('/auth/doctor/register', {
             method: 'POST',
             body: JSON.stringify(userData),
+            credentials: 'include' // Include credentials to send cookies
         });
     }
 
@@ -108,6 +112,7 @@ class ApiService {
         return this.request('/patients/profile', {
             method: 'PUT',
             body: JSON.stringify(data),
+            credentials: 'include' // Include credentials to send cookies
         });
     }
 
@@ -132,7 +137,8 @@ class ApiService {
         
         // Include it in the request
         return this.request('/doctors/profile', {
-            method: 'GET',        
+            method: 'GET',      
+            credentials: 'include' // Include credentials to send cookies  
         });
     }
 
@@ -140,6 +146,7 @@ class ApiService {
         return this.request('/doctors/profile', {
             method: 'PUT',
             body: JSON.stringify(data),
+            credentials: 'include' // Include credentials to send cookies
         });
     }
 
@@ -157,6 +164,7 @@ class ApiService {
         return this.request('/appointments', {
             method: 'POST',
             body: JSON.stringify(data),
+            credentials: 'include' // Include credentials to send cookies
         });
     }
 
@@ -168,6 +176,7 @@ class ApiService {
     async cancelAppointment(appointmentId) {
         return this.request(`/appointments/${appointmentId}`, {
             method: 'DELETE',
+            credentials: 'include' // Include credentials to send cookies
         });
     }
 
@@ -175,6 +184,7 @@ class ApiService {
         return this.request(`/appointments/${appointmentId}/rate`, {
             method: 'POST',
             body: JSON.stringify(rating),
+            credentials: 'include' // Include credentials to send cookies
         });
     }
 
@@ -191,6 +201,7 @@ class ApiService {
                 status,
                 ...data
             }),
+            credentials: 'include' // Include credentials to send cookies
         });
     }
     // Add these methods to your ApiService class
@@ -215,7 +226,8 @@ class ApiService {
     async createAppointment(appointmentData) {
         return this.request('/appointments', {
         method: 'POST',
-        body: JSON.stringify(appointmentData)
+        body: JSON.stringify(appointmentData),
+        credentials: 'include' // Include credentials to send cookies
         });
     }
     
@@ -234,7 +246,8 @@ class ApiService {
     async updateAppointmentStatus(appointmentId, status) {
         return this.request(`/appointments/${appointmentId}/status`, {
         method: 'PUT',
-        body: JSON.stringify({ status })
+        body: JSON.stringify({ status }),
+        credentials: 'include' // Include credentials to send cookies
         });
     }
     
@@ -248,6 +261,13 @@ class ApiService {
           })
         });
         }
+    async addPrescription(appointmentId, prescriptionData) {
+    return this.request(`/doctors/appointments/${appointmentId}/prescription`, {
+        method: 'POST',
+        body: JSON.stringify(prescriptionData),
+        credentials: 'include' // Include credentials to send cookies
+    });
+}
 
 };
 

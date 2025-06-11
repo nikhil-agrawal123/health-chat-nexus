@@ -1,21 +1,27 @@
-
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Pill, Calendar, Clock, Download, Plus, ArrowUpRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
+import ApiService from "@/services/api";
+import { Loader2 } from "lucide-react";
 
-interface Prescription {
-  id: string;
-  medication: string;
+interface Medication {
+  name: string;
   dosage: string;
   frequency: string;
   duration: string;
-  doctor: string;
-  prescribedDate: string;
+}
+
+interface Prescription {
+  id: string;
+  medications: Medication[];
   instructions: string;
-  refills: number;
+  doctor: string;
+  doctorId: string;
+  date: string;
+  appointmentId: string;
 }
 
 const Prescriptions = () => {
@@ -23,80 +29,85 @@ const Prescriptions = () => {
   const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
   const [selectedPrescription, setSelectedPrescription] = useState<Prescription | null>(null);
   const [showDetailsDialog, setShowDetailsDialog] = useState(false);
-  const [showRefillDialog, setShowRefillDialog] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   
-  // Sample data
+  // Fetch real prescription data
   useEffect(() => {
-    const samplePrescriptions: Prescription[] = [
-      {
-        id: "1",
-        medication: "Amoxicillin",
-        dosage: "500mg",
-        frequency: "3 times daily",
-        duration: "7 days",
-        doctor: "Dr. Sarah Johnson",
-        prescribedDate: "2023-05-15",
-        instructions: "Take with food. Complete the full course even if you feel better.",
-        refills: 0
-      },
-      {
-        id: "2",
-        medication: "Lisinopril",
-        dosage: "10mg",
-        frequency: "Once daily",
-        duration: "30 days",
-        doctor: "Dr. Michael Chen",
-        prescribedDate: "2023-05-01",
-        instructions: "Take in the morning. Avoid grapefruit juice while on this medication.",
-        refills: 3
-      },
-      {
-        id: "3",
-        medication: "Metformin",
-        dosage: "1000mg",
-        frequency: "Twice daily",
-        duration: "90 days",
-        doctor: "Dr. Lisa Patel",
-        prescribedDate: "2023-04-20",
-        instructions: "Take with meals to reduce stomach upset.",
-        refills: 2
+    const fetchPrescriptions = async () => {
+      try {
+        setIsLoading(true);
+        const response = await ApiService.getPatientAppointments();
+        
+        if (response.success && response.appointments) {
+          // Filter appointments with prescriptions
+          const appointmentsWithPrescriptions = response.appointments.filter(
+            apt => apt.prescription && apt.prescription.medications && apt.prescription.medications.length > 0
+          );
+          
+          // Map to our prescription format
+          const prescriptionsData = appointmentsWithPrescriptions.map(apt => ({
+            id: apt._id,
+            medications: apt.prescription.medications,
+            instructions: apt.prescription.instructions || '',
+            doctor: apt.doctorId.name,
+            doctorId: apt.doctorId._id,
+            date: new Date(apt.appointmentDate).toLocaleDateString(),
+            appointmentId: apt._id
+          }));
+          
+          setPrescriptions(prescriptionsData);
+        }
+      } catch (error) {
+        console.error('Failed to fetch prescriptions:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load your prescriptions",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
       }
-    ];
+    };
     
-    // Load from localStorage or use sample data
-    const savedPrescriptions = localStorage.getItem('prescriptions');
-    if (savedPrescriptions) {
-      setPrescriptions(JSON.parse(savedPrescriptions));
-    } else {
-      setPrescriptions(samplePrescriptions);
-      localStorage.setItem('prescriptions', JSON.stringify(samplePrescriptions));
-    }
-  }, []);
+    fetchPrescriptions();
+  }, [toast]);
   
   const handleViewDetails = (prescription: Prescription) => {
     setSelectedPrescription(prescription);
     setShowDetailsDialog(true);
   };
   
-  const handleRequestRefill = (prescription: Prescription) => {
-    setSelectedPrescription(prescription);
-    setShowRefillDialog(true);
-  };
-  
-  const confirmRefill = () => {
-    if (selectedPrescription) {
-      toast({
-        title: "Refill Requested",
-        description: `Your refill request for ${selectedPrescription.medication} has been submitted.`,
-      });
-      setShowRefillDialog(false);
-    }
-  };
-  
   const handleDownload = (prescription: Prescription) => {
+    // Generate a simple text prescription for download
+    const text = `
+      PRESCRIPTION
+      
+      Date: ${prescription.date}
+      Doctor: ${prescription.doctor}
+      
+      Medications:
+      ${prescription.medications.map(med => 
+        `- ${med.name} ${med.dosage}
+         Take: ${med.frequency}
+         Duration: ${med.duration}`
+      ).join('\n\n')}
+      
+      Instructions: ${prescription.instructions}
+    `;
+    
+    const blob = new Blob([text], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `prescription-${prescription.id}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
     toast({
       title: "Prescription Downloaded",
-      description: `${prescription.medication} prescription has been downloaded.`,
+      description: "Your prescription has been downloaded as a text file.",
     });
   };
   
@@ -105,11 +116,15 @@ const Prescriptions = () => {
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-2xl font-bold">Your Prescriptions</h2>
-          <p className="text-gray-500">Manage your medications and refills</p>
+          <p className="text-gray-500">View your medication history and details</p>
         </div>
       </div>
       
-      {prescriptions.length > 0 ? (
+      {isLoading ? (
+        <div className="flex justify-center py-10">
+          <Loader2 className="h-8 w-8 animate-spin text-health-600" />
+        </div>
+      ) : prescriptions.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {prescriptions.map((prescription) => (
             <Card key={prescription.id} className="shadow-sm hover:shadow-md transition-shadow">
@@ -117,13 +132,10 @@ const Prescriptions = () => {
                 <div className="flex justify-between items-start">
                   <CardTitle className="flex items-center gap-2">
                     <Pill className="h-5 w-5 text-health-600" />
-                    {prescription.medication}
+                    {prescription.medications[0].name}
                   </CardTitle>
-                  <span className="px-2 py-1 rounded-full text-xs bg-health-100 text-health-700">
-                    {prescription.refills} refills left
-                  </span>
                 </div>
-                <CardDescription>{prescription.dosage}, {prescription.frequency}</CardDescription>
+                <CardDescription>{prescription.medications[0].dosage}, {prescription.medications[0].frequency}</CardDescription>
               </CardHeader>
               <CardContent className="pb-3">
                 <div className="flex flex-col gap-2">
@@ -133,9 +145,14 @@ const Prescriptions = () => {
                   </div>
                   <div className="flex items-center text-sm">
                     <Calendar className="h-4 w-4 mr-1 text-gray-400" />
-                    <span className="text-gray-500">Prescribed:</span>
-                    <span className="ml-2">{prescription.prescribedDate}</span>
+                    <span className="text-gray-500">Date:</span>
+                    <span className="ml-2">{prescription.date}</span>
                   </div>
+                  {prescription.medications.length > 1 && (
+                    <div className="text-sm text-gray-500 mt-2">
+                      + {prescription.medications.length - 1} more medication(s)
+                    </div>
+                  )}
                 </div>
               </CardContent>
               <CardFooter className="flex flex-wrap gap-2 pt-2">
@@ -156,15 +173,6 @@ const Prescriptions = () => {
                   <Download className="h-4 w-4 mr-1" />
                   Download
                 </Button>
-                {prescription.refills > 0 && (
-                  <Button 
-                    size="sm" 
-                    className="w-full mt-2"
-                    onClick={() => handleRequestRefill(prescription)}
-                  >
-                    Request Refill
-                  </Button>
-                )}
               </CardFooter>
             </Card>
           ))}
@@ -184,38 +192,53 @@ const Prescriptions = () => {
           </DialogHeader>
           
           {selectedPrescription && (
-            <div className="space-y-4 py-4">
-              <div className="flex items-center gap-2">
-                <Pill className="h-5 w-5 text-health-600" />
-                <h3 className="text-lg font-semibold">{selectedPrescription.medication} {selectedPrescription.dosage}</h3>
+            <div className="space-y-6 py-4">
+              <div>
+                <h3 className="font-semibold mb-2">Medications</h3>
+                <div className="space-y-4">
+                  {selectedPrescription.medications.map((med, index) => (
+                    <div key={index} className="border rounded-md p-3">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Pill className="h-4 w-4 text-health-600" />
+                        <h4 className="font-medium">{med.name} {med.dosage}</h4>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2 text-sm">
+                        <div>
+                          <p className="text-gray-500">Frequency</p>
+                          <p>{med.frequency}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500">Duration</p>
+                          <p>{med.duration}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
               
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm text-gray-500">Frequency</p>
-                  <p className="font-medium">{selectedPrescription.frequency}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Duration</p>
-                  <p className="font-medium">{selectedPrescription.duration}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Prescribed By</p>
-                  <p className="font-medium">{selectedPrescription.doctor}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Prescribed Date</p>
-                  <p className="font-medium">{selectedPrescription.prescribedDate}</p>
-                </div>
-                <div className="col-span-2">
-                  <p className="text-sm text-gray-500">Instructions</p>
-                  <p className="font-medium">{selectedPrescription.instructions}</p>
-                </div>
-                <div className="col-span-2">
-                  <p className="text-sm text-gray-500">Refills Remaining</p>
-                  <p className="font-medium">{selectedPrescription.refills}</p>
+              <div>
+                <h3 className="font-semibold mb-2">Details</h3>
+                <div className="grid grid-cols-2 gap-4 border rounded-md p-3">
+                  <div>
+                    <p className="text-sm text-gray-500">Prescribed By</p>
+                    <p className="font-medium">{selectedPrescription.doctor}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Prescribed Date</p>
+                    <p className="font-medium">{selectedPrescription.date}</p>
+                  </div>
                 </div>
               </div>
+              
+              {selectedPrescription.instructions && (
+                <div>
+                  <h3 className="font-semibold mb-2">Instructions</h3>
+                  <div className="border rounded-md p-3">
+                    <p>{selectedPrescription.instructions}</p>
+                  </div>
+                </div>
+              )}
             </div>
           )}
           
@@ -227,51 +250,10 @@ const Prescriptions = () => {
               Close
             </Button>
             <Button 
-              onClick={() => handleDownload(selectedPrescription!)}
+              onClick={() => selectedPrescription && handleDownload(selectedPrescription)}
             >
               <Download className="h-4 w-4 mr-1" />
               Download
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-      
-      {/* Refill Request Dialog */}
-      <Dialog open={showRefillDialog} onOpenChange={setShowRefillDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Request Prescription Refill</DialogTitle>
-            <DialogDescription>
-              Confirm that you would like to request a refill for your medication.
-            </DialogDescription>
-          </DialogHeader>
-          
-          {selectedPrescription && (
-            <div className="space-y-4 py-4">
-              <div className="border rounded-lg p-4">
-                <h3 className="font-semibold">{selectedPrescription.medication} {selectedPrescription.dosage}</h3>
-                <p className="text-sm text-gray-500">{selectedPrescription.frequency}</p>
-                <p className="text-sm text-gray-500">Prescribed by {selectedPrescription.doctor}</p>
-                <p className="text-sm font-medium mt-2">{selectedPrescription.refills} refills remaining</p>
-              </div>
-              
-              <div className="space-y-2">
-                <p className="text-sm">Your refill will be processed and you will be notified when it's ready for pickup or delivery.</p>
-              </div>
-            </div>
-          )}
-          
-          <DialogFooter>
-            <Button 
-              variant="outline" 
-              onClick={() => setShowRefillDialog(false)}
-            >
-              Cancel
-            </Button>
-            <Button 
-              onClick={confirmRefill}
-            >
-              Confirm Refill Request
             </Button>
           </DialogFooter>
         </DialogContent>
