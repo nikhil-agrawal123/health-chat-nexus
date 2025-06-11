@@ -363,15 +363,17 @@ const MedicalChatbot = () => {
         await playTTS(translatedAiText, languageCodeMap[language] || "en"); // Use language code
       } if (intent == "test"){
         let foundTests: any[] = [];
-    testdata["all data"].forEach((item: any) => {
-      Object.keys(item).forEach((key) => {
-        if (input.toLowerCase().includes(key.toLowerCase())) {
-          item[key].forEach((test: any) => {
-            foundTests.push({ ...test, category: key });
+          testdata["all data"].forEach((item: any) => {
+            Object.keys(item).forEach((key) => {
+              if (input.toLowerCase().includes(key.toLowerCase())) {
+                item[key].forEach((test: any) => {
+                  foundTests.push({ ...test, category: key });
+                });
+              }
+            });
           });
-        }
-      });
-    });
+
+      const translatedText = await multiLingual(language, "Here are the tests I found based on your symptoms:");
 
     if (foundTests.length > 0) {
       setSelectableTests(foundTests);
@@ -379,12 +381,13 @@ const MedicalChatbot = () => {
         ...prev,
         {
           id: Date.now() + Math.random(),
-          text: "Please select the test you want to book:",
+          text: translatedText,
           sender: "bot",
           timestamp: new Date()
         }
       ]);
       setInput("");
+      await playTTS(translatedText, languageCodeMap[language] || "en");
       return;
     }
       }

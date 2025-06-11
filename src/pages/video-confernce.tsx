@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 declare global {
@@ -26,6 +26,82 @@ const ZegoVideoConference: React.FC = () => {
 
   const rootRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+
+  // Live transcript state
+  const [transcript, setTranscript] = useState("");
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunks = useRef<Blob[]>([]);
+  const [isRecording, setIsRecording] = useState(false);
+
+  // Start recording and send audio chunks every few seconds
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+
+    async function startRecording() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const mediaRecorder = new MediaRecorder(stream, { mimeType: "audio/webm" });
+        mediaRecorderRef.current = mediaRecorder;
+        audioChunks.current = [];
+
+        mediaRecorder.ondataavailable = (event) => {
+          if (event.data.size > 0) {
+            audioChunks.current.push(event.data);
+          }
+        };
+
+        mediaRecorder.onstop = async () => {
+          if (audioChunks.current.length === 0) return;
+          const audioBlob = new Blob(audioChunks.current, { type: "audio/webm" });
+          const formData = new FormData();
+          formData.append("audio", audioBlob, "recording.webm");
+
+          try {
+            const response = await fetch("https://database-tval.onrender.com/record", {
+              method: "POST",
+              headers: { "Accept": "application/json" },
+              body: formData,
+            });
+            if (response.ok) {
+              const data = await response.json();
+              if (data.transcription == "Transcription failed") {
+                setTranscript((prev) => prev);
+              } else {
+                setTranscript((prev) => prev + " " + data.transcription);
+              }
+            }
+          } catch (err) {
+            // Optionally handle error
+          }
+        };
+
+        mediaRecorder.start();
+        setIsRecording(true);
+
+        // Send audio every 5 seconds
+        interval = setInterval(() => {
+          if (mediaRecorder.state === "recording") {
+            mediaRecorder.stop();
+            mediaRecorder.start();
+            audioChunks.current = [];
+          }
+        }, 3000);
+      } catch (err) {
+        // Optionally handle error
+      }
+    }
+
+    // Start recording when component mounts
+    startRecording();
+
+    return () => {
+      if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+        mediaRecorderRef.current.stop();
+      }
+      setIsRecording(false);
+      clearInterval(interval);
+    };
+  }, []);
 
   useEffect(() => {
     const roomID =
@@ -87,11 +163,32 @@ const ZegoVideoConference: React.FC = () => {
   }, [navigate]);
 
   return (
-    <div
-      id="root"
-      ref={rootRef}
-      style={{ width: "100vw", height: "100vh" }}
-    ></div>
+    <div style={{ width: "100vw", height: "100vh", position: "relative" }}>
+      <div
+        id="root"
+        ref={rootRef}
+        style={{ width: "100vw", height: "100vh" }}
+      ></div>
+      {/* Transcript Box */}
+      <div
+        style={{
+          position: "absolute",
+          bottom: 20,
+          right: 20,
+          background: "rgba(255,255,255,0.9)",
+          borderRadius: 8,
+          padding: 12,
+          minWidth: 200,
+          maxWidth: 400,
+          boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+          zIndex: 1000,
+          fontSize: 16,
+        }}
+      >
+        <strong>Live Transcript:</strong>
+        <div style={{ marginTop: 8, whiteSpace: "pre-wrap" }}>{transcript}</div>
+      </div>
+    </div>
   );
 };
 
