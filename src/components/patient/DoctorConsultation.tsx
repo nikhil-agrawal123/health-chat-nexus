@@ -50,6 +50,7 @@ const specialties = [
   'Emergency Medicine'
 ];
 
+const API_BASE = "https://backendnode-j51t.onrender.com/api";
 
 const DoctorConsultation = () => {
   const { toast } = useToast();
@@ -96,7 +97,7 @@ const DoctorConsultation = () => {
   async function saveAppointment(appointment: Appointment) {
     try {
       // First save to the Node.js backend
-      const nodeResponse = await fetch("http://localhost:5000/api/appointments", {
+      const nodeResponse = await fetch("https://backendnode-j51t.onrender.com/api/appointments", {
         method: "POST",
         headers: { 
           "Content-Type": "application/json",
@@ -117,7 +118,7 @@ const DoctorConsultation = () => {
       const nodeData = await nodeResponse.json();
       
       // Then save to the Python backend for any ML processing needs
-      const pythonResponse = await fetch("http://localhost:8081/meeting", {
+      const pythonResponse = await fetch("https://database-tval.onrender.com/meeting", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -279,7 +280,7 @@ const DoctorConsultation = () => {
   };
 
   async function cancelAppointment(appointmentId: string) {
-    const response = await fetch(`http://localhost:5000/meeting/${appointmentId}`, {
+    const response = await fetch(`https://backendnode-j51t.onrender.com/meeting/${appointmentId}`, {
       method: "DELETE",
     });
     const data = await response.json();
