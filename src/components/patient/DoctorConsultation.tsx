@@ -1,4 +1,5 @@
-import  { useState, useEffect } from "react";
+//import ZegoVideoConference from "@/pages/VideoConference";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,8 +7,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Calendar, Clock, Video, UserCircle, Search, Star, Check, Clock4 } from "lucide-react";
+import { Calendar, Clock, Video, Phone, UserCircle, Search, Star, Check, Clock4 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import ApiService from '../../services/api.js'
 
 interface Doctor {
   id: string;
@@ -32,6 +34,7 @@ interface Appointment {
   photo: string;
 }
 
+// Define specialties based on the Doctor model
 const specialties = [
   'General Medicine',
   'Cardiology',
@@ -47,7 +50,6 @@ const specialties = [
   'Emergency Medicine'
 ];
 
-const API_BASE = "https://backendnode-j51t.onrender.com/api";
 
 const DoctorConsultation = () => {
   const { toast } = useToast();
@@ -63,18 +65,23 @@ const DoctorConsultation = () => {
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [newAppointmentTime, setNewAppointmentTime] = useState<string | null>(null);
   const [id, setId] = useState<string | null>(null);
+  const navigate = useNavigate();
+  // Add this after your state declarations (around line 63)
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  // Add this with your other state variables
   const [selectedDate, setSelectedDate] = useState<string>(
     new Date(Date.now() + 86400000).toISOString().split('T')[0] // Tomorrow by default
   );
-  const navigate = useNavigate();
+
 
   // Load appointments from localStorage on component mount
   useEffect(() => {
     const savedAppointments = localStorage.getItem('appointments');
     if (savedAppointments) {
       setAppointments(JSON.parse(savedAppointments));
+      
+      // Find active appointment
       const active = JSON.parse(savedAppointments).find(
         (apt: Appointment) => apt.status === 'scheduled'
       );
@@ -85,40 +92,117 @@ const DoctorConsultation = () => {
     }
   }, []);
 
-  // Save appointments to localStorage whenever they change
-  useEffect(() => {
-    if (appointments.length > 0) {
-      localStorage.setItem('appointments', JSON.stringify(appointments));
+  // Update the saveAppointment function
+  async function saveAppointment(appointment: Appointment) {
+    try {
+      // First save to the Node.js backend
+      const nodeResponse = await fetch("http://localhost:5000/api/appointments", {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+          doctorId: appointment.doctorId,
+          appointmentDate: appointment.date,
+          timeSlot: appointment.time,
+          status: "scheduled"
+        }),
+      });
+      
+      if (!nodeResponse.ok) {
+        throw new Error('Failed to book appointment');
+      }
+      
+      const nodeData = await nodeResponse.json();
+      
+      // Then save to the Python backend for any ML processing needs
+      const pythonResponse = await fetch("http://localhost:8081/meeting", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...appointment,
+          id: nodeData.appointmentId || appointment.id,
+        }),
+      });
+      
+      const pythonData = await pythonResponse.json();
+      
+      return {
+        ...nodeData,
+        ...pythonData
+      };
+    } catch (error) {
+      console.error("Error saving appointment:", error);
+      throw error;
     }
-  }, [appointments]);
-
-  // Fetch doctors from backendNode
-  async function getAllDoctors(): Promise<Doctor[]> {
-    const response = await fetch(`${API_BASE}/doctors`);
-    const data = await response.json();
-    return data.doctors.map((doc: any) => ({
-      id: doc._id,
-      name: doc.name,
-      specialty: doc.specialization,
-      language: doc.language || [],
-      experience: doc.experience,
-      rating: doc.rating,
-      availability: doc.availability?.timeSlots || [],
-      photo: doc.profileImage || "/placeholder.svg",
-      price: doc.consultationFee,
-    }));
   }
 
+  // Replace the useEffect block for fetching doctors with this:
   useEffect(() => {
-    getAllDoctors().then(setDoctors);
+    const fetchDoctors = async () => {
+      try {
+        setIsLoading(true);
+        
+        // Fetch all doctors
+        const response = await ApiService.getAllDoctors();
+        
+        if (response.success && response.doctors) {
+          setDoctors(response.doctors.map(doctor => ({
+            id: doctor._id,
+            name: doctor.name,
+            specialty: doctor.specialization,
+            language: doctor.languages || ["English"],
+            experience: doctor.experience || 0,
+            rating: doctor.rating || 4.5,
+            availability: doctor.availability?.timeSlots || [],
+            photo: doctor.profileImage || "/placeholder.svg",
+            price: doctor.consultationFee || 100
+          })));
+        }
+        
+        // Fetch patient's appointments
+        const appointmentsResponse = await ApiService.getPatientAppointments();
+        
+        if (appointmentsResponse.success && appointmentsResponse.appointments) {
+          const formattedAppointments = appointmentsResponse.appointments.map(apt => ({
+            id: apt._id,
+            doctorId: apt.doctorId._id,
+            doctorName: apt.doctorId.name,
+            specialty: apt.doctorId.specialization,
+            date: new Date(apt.appointmentDate).toLocaleDateString(),
+            time: apt.timeSlot,
+            status: apt.status,
+            photo: apt.doctorId.profileImage || "/placeholder.svg"
+          }));
+          
+          setAppointments(formattedAppointments);
+          
+          // Set current appointment if there's an active one
+          const active = formattedAppointments.find(apt => 
+            apt.status === 'scheduled' || apt.status === 'confirmed'
+          );
+          
+          if (active) {
+            setCurrentAppointment(active);
+            setBookingComplete(true);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching doctors or appointments:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load doctors or appointments",
+          variant: "destructive"
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchDoctors();
   }, []);
 
-  const filteredDoctors = doctors.filter(doctor => {
-    const matchesSearch = doctor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         doctor.specialty.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesSpecialty = selectedSpecialty ? doctor.specialty === selectedSpecialty : true;
-    return matchesSearch && matchesSpecialty;
-  });
 
   const handleDoctorSelect = (doctor: Doctor) => {
     setSelectedDoctor(doctor);
@@ -135,128 +219,53 @@ const DoctorConsultation = () => {
     }
   };
 
-  // Book appointment using backendNode API
+  // Replace the confirmBooking function with this:
   const confirmBooking = async () => {
     if (selectedDoctor && appointmentTime) {
       try {
         setIsLoading(true);
+        
         // Format the date as YYYY-MM-DD
-        const appointmentDate = selectedDate;
-        const appointmentPayload = {
+        const today = new Date().toISOString().split('T')[0];
+        
+        const response = await ApiService.createAppointment({
           doctorId: selectedDoctor.id,
-          appointmentDate,
+          appointmentDate: selectedDate, // Use selected date instead of today
           timeSlot: appointmentTime,
-          symptoms: "",
-          consultationType: "video"
-        };
-        const response = await fetch(`${API_BASE}/appointments`, {
-          method: "POST",
-          credentials: "include",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(appointmentPayload),
+          consultationType: 'video',
+          symptoms: ""
         });
-        const data = await response.json();
-        if (!response.ok || !data.appointment) {
-          throw new Error(data.message || "Failed to book appointment");
+        
+        if (response.success && response.appointment) {
+          // Format the new appointment for the UI
+          const newAppointment = {
+            id: response.appointment._id,
+            doctorId: selectedDoctor.id,
+            doctorName: selectedDoctor.name,
+            specialty: selectedDoctor.specialty,
+            date: new Date(response.appointment.appointmentDate).toLocaleDateString(),
+            time: appointmentTime,
+            status: response.appointment.status,
+            photo: selectedDoctor.photo
+          };
+          
+          setAppointments(prev => [...prev, newAppointment]);
+          setCurrentAppointment(newAppointment);
+          setBookingComplete(true);
+          setShowDialog(false);
+          
+          toast({
+            title: "Appointment Booked",
+            description: `Your appointment with ${selectedDoctor.name} at ${appointmentTime} has been confirmed.`,
+          });
+        } else {
+          throw new Error(response.message || "Failed to book appointment");
         }
-        // Format for UI
-        const newAppointment: Appointment = {
-          id: data.appointment._id,
-          doctorId: selectedDoctor.id,
-          doctorName: selectedDoctor.name,
-          specialty: selectedDoctor.specialty,
-          date: new Date(data.appointment.appointmentDate).toLocaleDateString(),
-          time: appointmentTime,
-          status: data.appointment.status || "scheduled",
-          photo: selectedDoctor.photo
-        };
-        setAppointments(prev => [...prev, newAppointment]);
-        setCurrentAppointment(newAppointment);
-        setBookingComplete(true);
-        setShowDialog(false);
-        toast({
-          title: "Appointment Booked",
-          description: `Your appointment with ${selectedDoctor.name} at ${appointmentTime} has been confirmed.`,
-        });
-      } catch (error: any) {
+      } catch (error) {
+        console.error("Error booking appointment:", error);
         toast({
           title: "Booking Failed",
-          description: error.message || "Failed to book appointment",
-          variant: "destructive"
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    }
-  };
-
-  // Cancel appointment using backendNode API
-  async function cancelAppointment(appointmentId: string) {
-    const response = await fetch(`${API_BASE}/appointments/${appointmentId}`, {
-      method: "DELETE",
-      credentials: "include",
-    });
-    const data = await response.json();
-    return data;
-  }
-
-  const confirmCancelAppointment = async () => {
-    if (currentAppointment) {
-      await cancelAppointment(currentAppointment.id);
-      setAppointments(prev => 
-        prev.map(apt => 
-          apt.id === currentAppointment.id 
-            ? {...apt, status: 'canceled' as const} 
-            : apt
-        )
-      );
-      setCurrentAppointment(null);
-      setBookingComplete(false);
-      setShowCancelDialog(false);
-      toast({
-        title: "Appointment Canceled",
-        description: "Your appointment has been successfully canceled.",
-      });
-    }
-  };
-
-  // Reschedule appointment using backendNode API
-  const confirmRescheduleAppointment = async () => {
-    if (currentAppointment && newAppointmentTime) {
-      try {
-        setIsLoading(true);
-        const response = await fetch(`${API_BASE}/appointments/${currentAppointment.id}/reschedule`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ timeSlot: newAppointmentTime }),
-          credentials: "include",
-        });
-        const data = await response.json();
-        if (!response.ok || !data.success) {
-          throw new Error(data.message || "Failed to reschedule appointment");
-        }
-        const updatedAppointment = {
-          ...currentAppointment,
-          time: newAppointmentTime
-        };
-        setAppointments(prev => 
-          prev.map(apt => 
-            apt.id === currentAppointment.id 
-              ? updatedAppointment
-              : apt
-          )
-        );
-        setCurrentAppointment(updatedAppointment);
-        setShowRescheduleDialog(false);
-        setNewAppointmentTime(null);
-        toast({
-          title: "Appointment Rescheduled",
-          description: `Your appointment has been rescheduled to ${newAppointmentTime}.`,
-        });
-      } catch (error: any) {
-        toast({
-          title: "Reschedule Failed",
-          description: error.message || "Failed to reschedule appointment",
+          description: error instanceof Error ? error.message : "Failed to book appointment",
           variant: "destructive"
         });
       } finally {
@@ -269,17 +278,93 @@ const DoctorConsultation = () => {
     setShowCancelDialog(true);
   };
 
+  async function cancelAppointment(appointmentId: string) {
+    const response = await fetch(`http://localhost:5000/meeting/${appointmentId}`, {
+      method: "DELETE",
+    });
+    const data = await response.json();
+    return data;
+  }
+
+  const confirmCancelAppointment = () => {
+    if (currentAppointment) {
+      // Update the appointment status to canceled
+      cancelAppointment(currentAppointment.id);
+      setAppointments(prev => 
+        prev.map(apt => 
+          apt.id === currentAppointment.id 
+            ? {...apt, status: 'canceled' as const} 
+            : apt
+        )
+      );
+      
+      // Reset the current view
+      setCurrentAppointment(null);
+      setBookingComplete(false);
+      setShowCancelDialog(false);
+      
+      toast({
+        title: "Appointment Canceled",
+        description: "Your appointment has been successfully canceled.",
+      });
+    }
+  };
+
   const handleRescheduleAppointment = () => {
     setShowRescheduleDialog(true);
   };
 
-  const startConsultation = () => {
-    toast({
-      title: "Joining Consultation",
-      description: "Connecting to your doctor...",
-    });
-    navigate("/video-conference/" + currentAppointment?.id);
+  const confirmRescheduleAppointment = () => {
+    if (currentAppointment && newAppointmentTime) {
+      // Update the appointment time
+      const updatedAppointment = {
+        ...currentAppointment,
+        time: newAppointmentTime
+      };
+      
+      setAppointments(prev => 
+        prev.map(apt => 
+          apt.id === currentAppointment.id 
+            ? updatedAppointment
+            : apt
+        )
+      );
+      
+      setCurrentAppointment(updatedAppointment);
+      setShowRescheduleDialog(false);
+      setNewAppointmentTime(null);
+      
+      toast({
+        title: "Appointment Rescheduled",
+        description: `Your appointment has been rescheduled to ${newAppointmentTime}.`,
+      });
+    }
   };
+
+  // Update the startConsultation function
+  const startConsultation = () => {
+    if (currentAppointment) {
+      toast({
+        title: "Joining Consultation",
+        description: "Connecting to your doctor...",
+      });
+      
+      // Navigate to the video conference with the appointment ID
+      navigate(`/video-conference/${currentAppointment.id}`);
+    }
+  };
+
+  // Add this computed property before the return statement (around line 339)
+  const filteredDoctors = doctors.filter(doctor => {
+    const matchesSearch = searchTerm === "" || 
+      doctor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      doctor.specialty.toLowerCase().includes(searchTerm.toLowerCase());
+      
+    const matchesSpecialty = selectedSpecialty === null || 
+      doctor.specialty === selectedSpecialty;
+      
+    return matchesSearch && matchesSpecialty;
+  });
 
   return (
     <div className="space-y-6">
@@ -288,6 +373,7 @@ const DoctorConsultation = () => {
           <h2 className="text-2xl font-bold">Video/Audio Consultations</h2>
           <p className="text-gray-500">Connect with healthcare providers remotely</p>
         </div>
+        
         {bookingComplete && (
           <Button onClick={startConsultation} className="flex items-center gap-2">
             <Video className="h-4 w-4" />
@@ -295,6 +381,7 @@ const DoctorConsultation = () => {
           </Button>
         )}
       </div>
+      
       {bookingComplete && currentAppointment ? (
         <Card>
           <CardHeader>
@@ -346,6 +433,7 @@ const DoctorConsultation = () => {
             <TabsTrigger value="find">Find Doctors</TabsTrigger>
             <TabsTrigger value="recommended">Recommended for You</TabsTrigger>
           </TabsList>
+          
           <TabsContent value="find" className="space-y-4">
             <div className="flex flex-col md:flex-row gap-4 mt-4">
               <div className="relative flex-grow">
@@ -357,6 +445,7 @@ const DoctorConsultation = () => {
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
+              
               <div className="flex-shrink-0 w-full md:w-auto">
                 <select 
                   className="w-full h-10 px-3 border rounded-md"
@@ -370,6 +459,7 @@ const DoctorConsultation = () => {
                 </select>
               </div>
             </div>
+            
             <div className="grid grid-cols-1 gap-4 mt-6">
               {filteredDoctors.map((doctor) => (
                 <Card key={doctor.id} className={`cursor-pointer transition-all ${selectedDoctor?.id === doctor.id ? 'ring-2 ring-health-500' : ''}`}>
@@ -391,6 +481,7 @@ const DoctorConsultation = () => {
                             <span className="ml-1 text-sm font-medium">{doctor.rating}</span>
                           </div>
                         </div>
+                        
                         <div className="flex flex-wrap gap-2">
                           <span className="text-xs bg-gray-100 px-2 py-1 rounded">
                             {doctor.experience} years exp.
@@ -401,6 +492,7 @@ const DoctorConsultation = () => {
                             </span>
                           ))}
                         </div>
+                        
                         <div className="pt-2">
                           <p className="text-sm text-gray-500 mb-2">Available today:</p>
                           <div className="flex flex-wrap gap-2">
@@ -437,6 +529,7 @@ const DoctorConsultation = () => {
                   </CardFooter>
                 </Card>
               ))}
+              
               {filteredDoctors.length === 0 && (
                 <div className="text-center p-8 border rounded-lg">
                   <UserCircle className="h-12 w-12 mx-auto text-gray-300" />
@@ -444,6 +537,7 @@ const DoctorConsultation = () => {
                 </div>
               )}
             </div>
+            
             {selectedDoctor && appointmentTime && (
               <div className="sticky bottom-0 bg-white p-4 border-t mt-6 -mx-6">
                 <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
@@ -456,10 +550,12 @@ const DoctorConsultation = () => {
               </div>
             )}
           </TabsContent>
+          
           <TabsContent value="recommended">
             <div className="p-8 text-center border rounded-lg">
               <p className="text-gray-500 mb-2">Based on your past visits and current symptoms</p>
               <h3 className="text-lg font-semibold mb-6">Recommended Specialists</h3>
+              
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {doctors.slice(0, 2).map((doctor) => (
                   <Card key={doctor.id} className="cursor-pointer hover:shadow-md transition-shadow">
@@ -490,16 +586,18 @@ const DoctorConsultation = () => {
           </TabsContent>
         </Tabs>
       )}
+      
       <div className="flex justify-between items-center">
         <span className="font-medium">Date:</span>
         <Input
           type="date"
           value={selectedDate}
           onChange={(e) => setSelectedDate(e.target.value)}
-          min={new Date().toISOString().split('T')[0]}
+          min={new Date().toISOString().split('T')[0]} // Can't select dates in the past
           className="w-40"
         />
       </div>
+      
       {/* Booking Dialog */}
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
         <DialogContent>
@@ -509,6 +607,7 @@ const DoctorConsultation = () => {
               You're about to book a video consultation with {selectedDoctor?.name}.
             </DialogDescription>
           </DialogHeader>
+          
           <div className="space-y-4 py-4">
             <div className="flex justify-between items-center">
               <span className="font-medium">Doctor:</span>
@@ -520,7 +619,7 @@ const DoctorConsultation = () => {
             </div>
             <div className="flex justify-between items-center">
               <span className="font-medium">Date:</span>
-              <span>{selectedDate}</span>
+              <span>{new Date(selectedDate).toLocaleDateString()}</span>
             </div>
             <div className="flex justify-between items-center">
               <span className="font-medium">Time:</span>
@@ -530,6 +629,7 @@ const DoctorConsultation = () => {
               <span className="font-medium">Fee:</span>
               <span>${selectedDoctor?.price}</span>
             </div>
+            
             <div className="pt-4">
               <Label htmlFor="reminders">Send reminders via:</Label>
               <div className="flex gap-4 mt-2">
@@ -548,12 +648,14 @@ const DoctorConsultation = () => {
               </div>
             </div>
           </div>
+          
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowDialog(false)}>Cancel</Button>
             <Button onClick={confirmBooking}>Confirm Booking</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      
       {/* Reschedule Dialog */}
       <Dialog open={showRescheduleDialog} onOpenChange={setShowRescheduleDialog}>
         <DialogContent>
@@ -563,11 +665,13 @@ const DoctorConsultation = () => {
               Select a new time for your appointment with {currentAppointment?.doctorName}.
             </DialogDescription>
           </DialogHeader>
+          
           <div className="space-y-4 py-4">
             <div className="flex justify-between items-center">
               <span className="font-medium">Current time:</span>
               <span>{currentAppointment?.time}</span>
             </div>
+            
             <div>
               <Label htmlFor="new-time">New appointment time:</Label>
               <div className="flex flex-wrap gap-2 mt-2">
@@ -584,6 +688,7 @@ const DoctorConsultation = () => {
               </div>
             </div>
           </div>
+          
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowRescheduleDialog(false)}>Cancel</Button>
             <Button 
@@ -595,6 +700,7 @@ const DoctorConsultation = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      
       {/* Cancel Dialog */}
       <Dialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
         <DialogContent>
@@ -604,12 +710,14 @@ const DoctorConsultation = () => {
               Are you sure you want to cancel your appointment with {currentAppointment?.doctorName}?
             </DialogDescription>
           </DialogHeader>
+          
           <div className="space-y-4 py-4">
             <p className="text-gray-500">
               Cancellation is free if done 2 hours before the appointment. 
               Last-minute cancellations may incur a fee.
             </p>
           </div>
+          
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowCancelDialog(false)}>Keep Appointment</Button>
             <Button 

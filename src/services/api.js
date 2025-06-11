@@ -1,4 +1,4 @@
-const API_BASE = 'https://backendnode-j51t.onrender.com/api';
+const API_BASE = 'http://localhost:5000/api';
 
 class ApiService {
     constructor() {
@@ -248,6 +248,12 @@ class ApiService {
           })
         });
         }
+    async addPrescription(appointmentId, prescriptionData) {
+    return this.request(`/doctors/appointments/${appointmentId}/prescription`, {
+        method: 'POST',
+        body: JSON.stringify(prescriptionData)
+    });
+}
 
 };
 
