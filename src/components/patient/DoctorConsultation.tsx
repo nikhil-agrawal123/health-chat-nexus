@@ -234,7 +234,7 @@ const DoctorConsultation = () => {
           timeSlot: appointmentTime,
           consultationType: 'video',
           symptoms: ""
-        };
+        });
         const response = await fetch(`${API_BASE}/appointments`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
