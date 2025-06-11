@@ -235,12 +235,6 @@ const DoctorConsultation = () => {
           consultationType: 'video',
           symptoms: ""
         });
-        const response = await fetch(`${API_BASE}/appointments`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(appointmentPayload),
-
-        });
         
         if (response.success && response.appointment) {
           // Format the new appointment for the UI
@@ -360,11 +354,6 @@ const DoctorConsultation = () => {
       }
     }
   };
-
-  const handleCancelAppointment = () => {
-    setShowCancelDialog(true);
-  };
-
 
   const handleRescheduleAppointment = () => {
     setShowRescheduleDialog(true);
