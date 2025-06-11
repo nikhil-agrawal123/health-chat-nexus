@@ -310,37 +310,55 @@ const DoctorConsultation = () => {
     }
   };
 
-  const handleRescheduleAppointment = () => {
-    setShowRescheduleDialog(true);
-  };
 
-  const confirmRescheduleAppointment = () => {
+  // Reschedule appointment using backendNode API
+  const confirmRescheduleAppointment = async () => {
     if (currentAppointment && newAppointmentTime) {
-      // Update the appointment time
-      const updatedAppointment = {
-        ...currentAppointment,
-        time: newAppointmentTime
-      };
-      
-      setAppointments(prev => 
-        prev.map(apt => 
-          apt.id === currentAppointment.id 
-            ? updatedAppointment
-            : apt
-        )
-      );
-      
-      setCurrentAppointment(updatedAppointment);
-      setShowRescheduleDialog(false);
-      setNewAppointmentTime(null);
-      
-      toast({
-        title: "Appointment Rescheduled",
-        description: `Your appointment has been rescheduled to ${newAppointmentTime}.`,
-      });
+      try {
+        setIsLoading(true);
+        const response = await fetch(`${API_BASE}/appointments/${currentAppointment.id}/reschedule`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ timeSlot: newAppointmentTime }),
+        });
+        const data = await response.json();
+        if (!response.ok || !data.success) {
+          throw new Error(data.message || "Failed to reschedule appointment");
+        }
+        const updatedAppointment = {
+          ...currentAppointment,
+          time: newAppointmentTime
+        };
+        setAppointments(prev => 
+          prev.map(apt => 
+            apt.id === currentAppointment.id 
+              ? updatedAppointment
+              : apt
+          )
+        );
+        setCurrentAppointment(updatedAppointment);
+        setShowRescheduleDialog(false);
+        setNewAppointmentTime(null);
+        toast({
+          title: "Appointment Rescheduled",
+          description: `Your appointment has been rescheduled to ${newAppointmentTime}.`,
+        });
+      } catch (error: any) {
+        toast({
+          title: "Reschedule Failed",
+          description: error.message || "Failed to reschedule appointment",
+          variant: "destructive"
+        });
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
+  const handleRescheduleAppointment = () => {
+    setShowRescheduleDialog(true);
+  };
+              
   // Update the startConsultation function
   const startConsultation = () => {
     if (currentAppointment) {
