@@ -35,7 +35,7 @@ import ApiService from "../services/api.js";
 import { useLanguage } from "@/context/LanguageContext";
 //import multilingualTranslate from "../utils/translation.ts";
 
-const name = localStorage.getItem("name");
+const name = localStorage.getItem("userName") || "Doctor";
 
 const DoctorDashboard = () => {
   const { translate } = useLanguage();
@@ -100,7 +100,8 @@ const DoctorDashboard = () => {
             status: apt.status,
             patientId: apt.patientId._id,
             symptoms: apt.symptoms || "",
-            prescription: apt.prescription // Make sure this is included
+            prescription: apt.prescription,
+            roomId: apt.roomId
           })));
 
           // Add this line to set consultations based on appointments
@@ -177,27 +178,23 @@ const DoctorDashboard = () => {
 };
 
   // Update the handleStartConsultation function
-  const handleStartConsultation = (consultationId: string) => {
-    // Find the consultation to get details
-    const consultation = consultations.find(c => c.id === consultationId);
-    
-    if (consultation) {
-      toast({
-        title: "Starting consultation",
-        description: "Connecting to video call...",
-      });
-      
-      // Navigate to the video conference with the appointment ID
-      navigate(`/video-conference/${consultationId}`);
-    } else {
-      toast({
-        title: "Error",
-        description: "Consultation not found",
-        variant: "destructive"
-      });
-    }
-  };
-;
+const handleStartConsultation = async (consultationId: string) => {
+  const response = await ApiService.getAppointment(consultationId);
+  if (response && response.appointment && response.appointment.roomId) {
+    toast({
+      title: "Starting consultation",
+      description: "Connecting to video call...",
+    });
+    // Use roomId and pass from=doctor
+    navigate(`/video-conference?roomID=${response.appointment.roomId}&from=doctor`);
+  } else {
+    toast({
+      title: "Error",
+      description: "Consultation or room ID not found",
+      variant: "destructive"
+    });
+  }
+};
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {

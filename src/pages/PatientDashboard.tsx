@@ -26,7 +26,7 @@ import MedicalRecords from "@/components/patient/MedicalRecords";
 import LabTests from "@/components/patient/LabTests";
 import Prescriptions from "@/components/patient/Prescriptions";
 import GovernmentSchemes from "@/components/patient/GovernmentSchemes";
-import {PrescriptionScanner} from "@/components/prescription/PrescriptionScanner";
+// import {PrescriptionScanner} from "@/components/prescription/PrescriptionScanner";
 
 const PatientDashboard = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -130,9 +130,9 @@ const PatientDashboard = () => {
                 <GovernmentSchemes />
               </TabsContent>
 
-              <TabsContent value="scanner">
+              {/* <TabsContent value="scanner">
                 <PrescriptionScanner />
-              </TabsContent>
+              </TabsContent> */}
             </Tabs>
           </main>
         </div>

@@ -144,11 +144,6 @@ const PatientSidebar: React.FC<PatientSidebarProps> = ({
       label: translate("governmentSchemes"),
       value: "schemes"
     },
-    {
-      icon: ScanText, // Import this from lucide-react at the top
-      label: translate("prescriptionScanner"),
-      value: "scanner" // This will be the tab ID
-    },
   ];
 
   return (

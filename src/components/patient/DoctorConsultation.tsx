@@ -369,7 +369,7 @@ const DoctorConsultation = () => {
       });
       
       // Navigate to the video conference with the appointment ID
-      navigate(`/video-conference/${currentAppointment.id}`);
+      navigate(`/video-conference/${currentAppointment.id}&from=patient` );
     }
   };
 
