@@ -64,7 +64,7 @@ const ZegoVideoConference: React.FC = () => {
             });
             if (response.ok) {
               const data = await response.json();
-              if (data.transcription == "Transcription failed") {
+              if (data.transcription == "Transcription failed:") {
                 setTranscript((prev) => prev);
               } else {
                 setTranscript((prev) => prev + " " + data.transcription);
