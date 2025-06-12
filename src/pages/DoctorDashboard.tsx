@@ -177,26 +177,24 @@ const DoctorDashboard = () => {
 };
 
   // Update the handleStartConsultation function
-  const handleStartConsultation = (consultationId: string) => {
-    // Find the consultation to get details
-    const consultation = consultations.find(c => c.id === consultationId);
-    
-    if (consultation) {
-      toast({
-        title: "Starting consultation",
-        description: "Connecting to video call...",
-      });
-      
-      // Navigate to the video conference with the appointment ID
-      navigate(`/video-conference/${consultationId}`);
-    } else {
-      toast({
-        title: "Error",
-        description: "Consultation not found",
-        variant: "destructive"
-      });
-    }
-  };
+  const handleStartConsultation = async (consultationId: string) => {
+  // Fetch the appointment to get the roomId
+  const response = await ApiService.getAppointment(consultationId);
+  if (response && response.appointment && response.appointment.roomId) {
+    toast({
+      title: "Starting consultation",
+      description: "Connecting to video call...",
+    });
+    // Pass the roomId and a "from" param for debugging
+    navigate(`/video-conference?roomID=${response.appointment.roomId}&from=doctor`);
+  } else {
+    toast({
+      title: "Error",
+      description: "Consultation or room ID not found",
+      variant: "destructive"
+    });
+  }
+};
 ;
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
