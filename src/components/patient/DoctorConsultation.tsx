@@ -106,7 +106,6 @@ const DoctorConsultation = () => {
         body: JSON.stringify({
           doctorId: appointment.doctorId,
           appointmentDate: appointment.date,
-          appointmentLink: `https://health-chat-nexus.vercel.app/video-conference/${appointment.id}`,
           timeSlot: appointment.time,
           status: "scheduled"
         }),
@@ -370,7 +369,6 @@ const DoctorConsultation = () => {
       });
       
       // Navigate to the video conference with the appointment ID
-      saveAppointment(currentAppointment)
       navigate(`/video-conference/${currentAppointment.id}`);
     }
   };
