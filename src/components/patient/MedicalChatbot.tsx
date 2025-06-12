@@ -74,7 +74,7 @@ async function getIntent(text:string) {
 }
 
 const defaultTexts = {
-  welcome: "Hi there! Please describe your symptoms.",
+  welcome: "Hi there! Please describe your symptoms or any lab test or doctor appoitments you want to book.",
   placeholder: "Describe your symptoms...",
   powered: "Powered by Google Gemini",
   aiLabel: "AI Health Assistant",
@@ -373,7 +373,7 @@ const MedicalChatbot = () => {
             });
           });
 
-      const translatedText = await multiLingual(language, "Here are the tests I found based on your symptoms:");
+      const translatedText = await multiLingual(language, "Here are the tests I found:");
 
     if (foundTests.length > 0) {
       setSelectableTests(foundTests);

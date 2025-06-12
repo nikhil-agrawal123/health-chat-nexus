@@ -100,7 +100,8 @@ const DoctorDashboard = () => {
             status: apt.status,
             patientId: apt.patientId._id,
             symptoms: apt.symptoms || "",
-            prescription: apt.prescription // Make sure this is included
+            prescription: apt.prescription,
+            roomId: apt.roomId
           })));
 
           // Add this line to set consultations based on appointments
