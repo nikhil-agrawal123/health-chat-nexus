@@ -56,7 +56,7 @@ const Navbar = () => {
               className="text-base font-medium"
               onClick={() => handleNavigation("hero")}
             >
-              Holmes
+              Home
             </Button>
             <Button 
               variant="ghost" 
