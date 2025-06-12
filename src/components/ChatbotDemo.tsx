@@ -35,11 +35,9 @@ async function Chat(question: string): Promise<string> {
   while (!result || !result.text) {
     await new Promise((resolve) => setTimeout(resolve, 100));
   newResponse = result.text;
-  console.log(newResponse);
   }
   newResponse = result.text;
-  console.log(newResponse);
-  return;
+  return newResponse;
 }
 
 
@@ -117,37 +115,38 @@ const ChatbotDemo = () => {
     updateGreeting();
   }, [currentLanguage]);
 
-  const handleSendMessage = (e?: React.FormEvent) => {
-    e?.preventDefault();
-    
-    if (!inputValue.trim()) return;
-    
-    // Add user message
-    const newMessage: Message = {
-      id: messages.length + 1,
-      text: inputValue,
-      sender: "user",
-    };
-    
-    setMessages([...messages, newMessage]);
-    setInputValue("");
-    setIsTyping(true);
-    
-    // Simulate bot response after delay
-    setTimeout(async () => {
-      const responseText = await multiLingual(currentLanguage.toLowerCase(), newResponse);
-      
-      const botMessage: Message = {
-        id: messages.length + 2,
-        text: responseText,
-        sender: "bot",
-        language: currentLanguage
-      };
-      
-      setMessages(prevMessages => [...prevMessages, botMessage]);
-      setIsTyping(false);
-    }, 1500);
+  const handleSendMessage = async (e?: React.FormEvent) => {
+  e?.preventDefault();
+
+  if (!inputValue.trim()) return;
+
+  // Add user message
+  const newMessage: Message = {
+    id: messages.length + 1,
+    text: inputValue,
+    sender: "user",
   };
+
+  setMessages([...messages, newMessage]);
+  setInputValue("");
+  setIsTyping(true);
+
+  // Get AI response
+  const aiResponse = await Chat(inputValue);
+
+  // Translate AI response if needed
+  const responseText = await multiLingual(currentLanguage.toLowerCase(), aiResponse);
+
+  const botMessage: Message = {
+    id: messages.length + 2,
+    text: responseText,
+    sender: "bot",
+    language: currentLanguage
+  };
+
+  setMessages(prevMessages => [...prevMessages, botMessage]);
+  setIsTyping(false);
+};
 
   const changeLanguage = (language: string) => {
     setCurrentLanguage(language);
@@ -235,7 +234,6 @@ const ChatbotDemo = () => {
                   type="submit" 
                   size="icon"
                   disabled={!inputValue.trim()}
-                  onClick={() => Chat(inputValue)}
                 >
                   <Send className="h-4 w-4" />
                 </Button>

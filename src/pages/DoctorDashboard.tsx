@@ -35,7 +35,7 @@ import ApiService from "../services/api.js";
 import { useLanguage } from "@/context/LanguageContext";
 //import multilingualTranslate from "../utils/translation.ts";
 
-const name = localStorage.getItem("userName") || "Doctor";
+ const name = localStorage.getItem("userName");
 
 const DoctorDashboard = () => {
   const { translate } = useLanguage();
@@ -186,7 +186,7 @@ const handleStartConsultation = async (consultationId: string) => {
       description: "Connecting to video call...",
     });
     // Use roomId and pass from=doctor
-    console.log(response);
+    console.log(response.appointment.roomId);
     navigate(`/video-conference/${consultationId}&from=doctor`);
   } else {
     toast({
