@@ -35,7 +35,7 @@ import ApiService from "../services/api.js";
 import { useLanguage } from "@/context/LanguageContext";
 //import multilingualTranslate from "../utils/translation.ts";
 
-const name = localStorage.getItem("name");
+const name = localStorage.getItem("userName");
 
 const DoctorDashboard = () => {
   const { translate } = useLanguage();
