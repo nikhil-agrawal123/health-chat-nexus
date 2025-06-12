@@ -177,15 +177,14 @@ const DoctorDashboard = () => {
 };
 
   // Update the handleStartConsultation function
-  const handleStartConsultation = async (consultationId: string) => {
-  // Fetch the appointment to get the roomId
+const handleStartConsultation = async (consultationId: string) => {
   const response = await ApiService.getAppointment(consultationId);
   if (response && response.appointment && response.appointment.roomId) {
     toast({
       title: "Starting consultation",
       description: "Connecting to video call...",
     });
-    // Pass the roomId and a "from" param for debugging
+    // Use roomId and pass from=doctor
     navigate(`/video-conference?roomID=${response.appointment.roomId}&from=doctor`);
   } else {
     toast({
@@ -195,7 +194,6 @@ const DoctorDashboard = () => {
     });
   }
 };
-;
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {

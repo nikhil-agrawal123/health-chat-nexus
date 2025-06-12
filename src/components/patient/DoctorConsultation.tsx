@@ -32,6 +32,7 @@ interface Appointment {
   time: string;
   status: "scheduled" | "completed" | "canceled";
   photo: string;
+  roomId?: string; // Added roomId property
 }
 
 // Define specialties based on the Doctor model
@@ -222,58 +223,52 @@ const DoctorConsultation = () => {
 
   // Replace the confirmBooking function with this:
   const confirmBooking = async () => {
-    if (selectedDoctor && appointmentTime) {
-      try {
-        setIsLoading(true);
-        
-        // Format the date as YYYY-MM-DD
-        const today = new Date().toISOString().split('T')[0];
-        
-        const response = await ApiService.createAppointment({
+  if (selectedDoctor && appointmentTime) {
+    try {
+      setIsLoading(true);
+
+      // Generate a unique roomId
+      const roomId = `HealthChat-${Date.now()}-${selectedDoctor.id}`;
+
+      const response = await ApiService.createAppointment({
+        doctorId: selectedDoctor.id,
+        appointmentDate: selectedDate,
+        timeSlot: appointmentTime,
+        consultationType: 'video',
+        symptoms: "",
+        roomId // <-- send to backend
+      });
+
+      if (response.success && response.appointment) {
+        const newAppointment = {
+          id: response.appointment._id,
           doctorId: selectedDoctor.id,
-          appointmentDate: selectedDate, // Use selected date instead of today
-          timeSlot: appointmentTime,
-          consultationType: 'video',
-          symptoms: ""
-        });
-        
-        if (response.success && response.appointment) {
-          // Format the new appointment for the UI
-          const newAppointment = {
-            id: response.appointment._id,
-            doctorId: selectedDoctor.id,
-            doctorName: selectedDoctor.name,
-            specialty: selectedDoctor.specialty,
-            date: new Date(response.appointment.appointmentDate).toLocaleDateString(),
-            time: appointmentTime,
-            status: response.appointment.status,
-            photo: selectedDoctor.photo
-          };
-          
-          setAppointments(prev => [...prev, newAppointment]);
-          setCurrentAppointment(newAppointment);
-          setBookingComplete(true);
-          setShowDialog(false);
-          
-          toast({
-            title: "Appointment Booked",
-            description: `Your appointment with ${selectedDoctor.name} at ${appointmentTime} has been confirmed.`,
-          });
-        } else {
-          throw new Error(response.message || "Failed to book appointment");
-        }
-      } catch (error) {
-        console.error("Error booking appointment:", error);
+          doctorName: selectedDoctor.name,
+          specialty: selectedDoctor.specialty,
+          date: new Date(response.appointment.appointmentDate).toLocaleDateString(),
+          time: appointmentTime,
+          status: response.appointment.status,
+          photo: selectedDoctor.photo,
+          roomId: response.appointment.roomId // Save roomId
+        };
+        setAppointments(prev => [...prev, newAppointment]);
+        setCurrentAppointment(newAppointment);
+        setBookingComplete(true);
+        setShowDialog(false);
         toast({
-          title: "Booking Failed",
-          description: error instanceof Error ? error.message : "Failed to book appointment",
-          variant: "destructive"
+          title: "Appointment Booked",
+          description: `Your appointment with ${selectedDoctor.name} at ${appointmentTime} has been confirmed.`,
         });
-      } finally {
-        setIsLoading(false);
+      } else {
+        throw new Error(response.message || "Failed to book appointment");
       }
+    } catch (error) {
+      // ...existing error handling...
+    } finally {
+      setIsLoading(false);
     }
-  };
+  }
+};
 
   const handleCancelAppointment = () => {
     setShowCancelDialog(true);
@@ -362,16 +357,15 @@ const DoctorConsultation = () => {
               
   // Update the startConsultation function
   const startConsultation = () => {
-    if (currentAppointment) {
-      toast({
-        title: "Joining Consultation",
-        description: "Connecting to your doctor...",
-      });
-      
-      // Navigate to the video conference with the appointment ID
-      navigate(`/video-conference/${currentAppointment.id}&from=patient`);
-    }
-  };
+  if (currentAppointment) {
+    toast({
+      title: "Joining Consultation",
+      description: "Connecting to your doctor...",
+    });
+    // Use roomId and pass from=patient
+    navigate(`/video-conference?roomID=${currentAppointment.roomId}&from=patient`);
+  }
+};
 
   // Add this computed property before the return statement (around line 339)
   const filteredDoctors = doctors.filter(doctor => {
