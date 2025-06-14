@@ -123,8 +123,8 @@ const ZegoVideoConference: React.FC = () => {
 
     const userID = Math.floor(Math.random() * 10000).toString();
     const userName = "userName" + userID;
-    const appID = 2003699826;
-    const serverSecret = "ff662413bc1ddfb6b354e744571f7297";
+    const appID = 158654939;
+    const serverSecret = "23f26c9aa0de1a0defdc90161441bbf9";
     const kitToken = window.ZegoUIKitPrebuilt.generateKitTokenForTest(
       appID,
       serverSecret,
